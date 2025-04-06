@@ -1,0 +1,6 @@
+# files
+*.py
+.env
+
+# dirs
+postgres_data/

@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "api/lesson";
+
+package lesson;
+
+service LessonService {
+  rpc CreateLesson(CreateLessonRequest) returns (CreateLessonResponse); // Создание урока
+  rpc GetLesson(GetLessonRequest)       returns (GetLessonResponse);    // Получение урока
+  rpc GetLessons(GetLessonsRequest)     returns (GetLessonsResponse);   // Получение уроков
+  rpc UpdateLesson(UpdateLessonRequest) returns (UpdateLessonResponse); // Редактирование урока
+  rpc DeleteLesson(DeleteLessonRequest) returns (DeleteLessonResponse); // Удаление урока
+}
+
+message Lesson {
+  string lesson_id = 1;                     // ID урока
+  string course_id = 2;                     // ID курса
+  string title = 3;                         // Название урока
+  string description = 4;                   // Описание урока
+  google.protobuf.Timestamp created_at = 5; // Время создания урока
+}
+
+message CreateLessonRequest {
+  string course_id = 1;
+  string title = 2;
+  string description = 3;
+}
+
+message CreateLessonResponse {
+  string lesson_id = 1;
+}
+
+message GetLessonRequest {
+  string lesson_id = 1;
+}
+
+message GetLessonResponse {
+  Lesson lesson = 1;
+}
+
+message GetLessonsRequest {
+  string course_id = 1;
+}
+
+message GetLessonsResponse {
+  repeated Lesson lessons = 1;
+}
+
+message UpdateLessonRequest {
+  string lesson_id = 1;
+  optional string title = 2;
+  optional string description = 3;
+}
+
+message UpdateLessonResponse {
+  bool success = 1;
+}
+
+message DeleteLessonRequest {
+  string lesson_id = 1;
+}
+
+message DeleteLessonResponse {
+  bool success = 1;
+}

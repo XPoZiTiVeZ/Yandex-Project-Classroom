@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "api/task";
+
+package task;
+
+service TasksService {
+  rpc CreateTask(CreateTaskRequest)           returns (CreateTaskResponse);         // Создание задания
+  rpc GetTask(GetTaskRequest)                 returns (GetTaskResponse);            // Получение задания
+  rpc GetTasks(GetTasksRequest)               returns (GetTasksResponse);           // Получение заданий
+  rpc UpdateTask(UpdateTaskRequest)           returns (UpdateTaskResponse);         // Редактирование задания
+  rpc ChangeStatusTask(ChangeStatusTaskRequest) returns (ChangeStatusTaskResponse); // Поменять статус задания
+  rpc DeleteTask(DeleteTaskRequest)           returns (DeleteTaskResponse);         // Удалить задание
+}
+
+message Task {
+  string task_id = 1;                       // ID задания
+  string course_id = 2;                     // ID курса
+  string title = 3;                         // Название задания
+  string description = 4;                   // Описание задания
+  google.protobuf.Timestamp created_at = 5; // Дата создания задания
+}
+
+message CreateTaskRequest {
+  string course_id = 1;
+  string title = 2;
+  string description = 3;
+}
+
+message CreateTaskResponse {
+  string task_id = 1;
+}
+
+message GetTaskRequest {
+  string task_id = 1;
+}
+
+message GetTaskResponse {
+  Task task = 1;
+}
+
+message GetTasksRequest {
+  string course_id = 1;
+}
+
+message GetTasksResponse {
+  repeated Task tasks = 1;
+}
+
+message UpdateTaskRequest {
+  optional string title = 1;
+  optional string description = 2;
+}
+
+message UpdateTaskResponse {
+  bool success = 1;
+}
+
+message ChangeStatusTaskRequest {
+  string task_id = 1;
+}
+
+message ChangeStatusTaskResponse {
+  bool success = 1;
+}
+
+message DeleteTaskRequest {
+  string task_id = 1;
+}
+
+message DeleteTaskResponse {
+  bool success = 1;
+}

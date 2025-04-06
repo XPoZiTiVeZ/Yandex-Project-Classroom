@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "api/course";
+
+package course;
+
+service CourseService {
+    rpc CreateCourse(CreateCourseRequest) returns (CreateCourseResponse); // Создание курса
+    rpc GetCourse(GetCourseRequest)       returns (GetCourseResponse);    // Получение данных курса
+    rpc GetCourses(GetCoursesRequest)     returns (GetCoursesResponse);   // Получение курсов пользователя
+    rpc UpdateCourse(UpdateCourseRequest) returns (UpdateCourseResponse); // Изменение информации курса
+    rpc DeleteCourse(DeleteCourseRequest) returns (DeleteCourseResponse); // Удаление курса
+    rpc EnrollUser(EnrollUserRequest)     returns (EnrollUserResponse);   // Зачислить пользователя на курс
+}
+
+message Course {
+    string course_id = 1;                              // ID курса
+    string teacher_id = 2;                             // ID Владельца
+    string title = 3;                                  // Название курса
+    string description = 4;                            // Описание курса
+    bool visibility = 5;                               // Видимость курса пользователю
+    optional google.protobuf.Timestamp start_time = 6; // Дата открытия доступа к курсу
+    optional google.protobuf.Timestamp end_time = 7;   // Дата закрытия доступа к курсу
+}
+
+message CreateCourseRequest {
+    string teacher_id = 1;
+    string title = 2;
+    string description = 3;
+    bool visibility = 4;
+    optional google.protobuf.Timestamp start_time = 5;
+    optional google.protobuf.Timestamp end_time = 6;
+}
+
+message CreateCourseResponse {
+    string course_id = 1;
+}
+
+message GetCourseRequest {
+    string course_id = 1;
+}
+
+message GetCourseResponse {
+    Course course = 1;
+}
+
+message GetCoursesRequest {
+    string user_id = 1; // ID пользователя
+}
+
+message GetCoursesResponse {
+    repeated Course course = 1;
+}
+
+message UpdateCourseRequest {
+    string course_id = 1;
+    optional string title = 3;
+    optional string description = 4; 
+    optional bool visibility = 5;
+    optional google.protobuf.Timestamp start_time = 6;
+    optional google.protobuf.Timestamp end_time = 7;
+}
+
+message UpdateCourseResponse {
+    bool success = 1;
+}
+
+message DeleteCourseRequest {
+    string course_id = 1;
+}
+
+message DeleteCourseResponse {
+    bool success = 1;
+}
+
+message EnrollUserRequest {
+    string course_id = 1;
+    string user_id = 2; // ID ученика
+}
+
+message EnrollUserResponse{
+    bool success = 1;
+}
+
+
+
+
+
+
+
+
+
