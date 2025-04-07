@@ -14,14 +14,13 @@ service AuthService {
 message RegisterRequest {
   string email = 1;      // Почта пользователя
   string password = 2;   // Пароль пользователя
-  string first_name = 3; // Имя пользователя
-  string last_name = 4;  // Фамилия пользователя
+  string password_repeat = 3; // Повтор пароля
+  string first_name = 4; // Имя пользователя
+  string last_name = 5;  // Фамилия пользователя
 }
 
 message RegisterResponse {
-  bool   success = 1;
-  string message = 2;
-  string user_id = 3;
+  string user_id = 1;
 }
 
 message LoginRequest {
@@ -30,10 +29,8 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  bool   success = 1;
-  string message = 2;
-  string access_token = 3;
-  string refresh_token = 4;
+  string access_token = 1;
+  string refresh_token = 2;
 }
 
 message RefreshRequest {
@@ -41,16 +38,11 @@ message RefreshRequest {
 }
 
 message RefreshResponse {
-  bool   success = 1;
-  string message = 2;
-  string access_token = 3;
+  string access_token = 1;
 }
 
 message LogoutRequest {
   string refresh_token = 1;
 }
 
-message LogoutResponse {
-  bool   success = 1;
-  string message = 2;
-}
+message LogoutResponse {}
