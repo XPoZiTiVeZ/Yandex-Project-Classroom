@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS tasks_submissions;
+DROP TABLE IF EXISTS tasks;
