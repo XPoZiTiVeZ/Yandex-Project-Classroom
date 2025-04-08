@@ -6,8 +6,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 );
 
 CREATE TABLE IF NOT EXISTS task_submissions (
-  solution TEXT,
-  submitted_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  completed BOOLEAN NOT NULL DEFAULT FALSE,
   student_id UUID NOT NULL REFERENCES users(user_id),
   task_id UUID NOT NULL REFERENCES tasks(task_id),
   PRIMARY KEY (student_id, task_id)
