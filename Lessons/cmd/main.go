@@ -31,7 +31,7 @@ func main() {
 	defer postgres.Close()
 
 	lessonRepo := repo.NewLessonRepo(postgres)
-	taskRepo := repo.NewLessonRepo(postgres)
+	taskRepo := repo.NewTaskRepo(postgres)
 
 	lessonService := service.NewLessonService(logger, lessonRepo)
 	taskService := service.NewTaskService(logger, taskRepo)

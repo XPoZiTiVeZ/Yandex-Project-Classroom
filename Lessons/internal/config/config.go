@@ -21,6 +21,7 @@ func MustNew() *Config {
 
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.BindEnv("postgres_url")
 
 	v.SetConfigFile(*configPath)
 
