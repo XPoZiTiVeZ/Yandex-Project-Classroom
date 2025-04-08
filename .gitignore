@@ -4,3 +4,8 @@
 
 # dirs
 postgres_data/
+
+.idea/
+*.iml
+*.ipr
+*.iws
