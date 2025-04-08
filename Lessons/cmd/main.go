@@ -2,6 +2,9 @@ package main
 
 import (
 	"Classroom/Lessons/internal/config"
+	"Classroom/Lessons/internal/controller"
+	"Classroom/Lessons/internal/repo"
+	"Classroom/Lessons/internal/service"
 	"Classroom/Lessons/pkg/postgres"
 	"context"
 	"fmt"
@@ -27,7 +30,18 @@ func main() {
 	postgres := postgres.MustNew(conf.PostgresURL)
 	defer postgres.Close()
 
+	lessonRepo := repo.NewLessonRepo(postgres)
+	taskRepo := repo.NewLessonRepo(postgres)
+
+	lessonService := service.NewLessonService(logger, lessonRepo)
+	taskService := service.NewTaskService(logger, taskRepo)
+
+	lessonController := controller.NewLessonController(logger, lessonService)
+	taskController := controller.NewTaskController(logger, taskService)
+
 	server := grpc.NewServer()
+	lessonController.Init(server)
+	taskController.Init(server)
 
 	// Для graceful shutdown лучше использовать контекст, так лаконичнее
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
