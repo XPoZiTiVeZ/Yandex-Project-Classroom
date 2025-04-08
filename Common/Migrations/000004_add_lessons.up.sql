@@ -4,9 +4,3 @@ CREATE TABLE IF NOT EXISTS lessons (
  title TEXT NOT NULL,
  content TEXT NOT NULL
 );
-
-CREATE TABLE IF NOT EXISTS lesson_materials (
- material_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
- object_url TEXT NOT NULL,
- lesson_id UUID NOT NULL REFERENCES lessons(lesson_id)
-);

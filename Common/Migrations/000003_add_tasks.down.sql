@@ -1,2 +1,2 @@
-DROP TABLE IF EXISTS tasks_submissions;
+DROP TABLE IF EXISTS task_submissions;
 DROP TABLE IF EXISTS tasks;
