@@ -1,3 +1,11 @@
+# Опционально загружаем переменные из .env, если файл существует, для POSTGRES_URL
+ifneq (,$(wildcard .env))
+	include .env
+	export
+endif
+
+POSTGRES_URL ?= postgres://user:password@localhost:5432/dbname?sslmode=disable
+
 BINARY_NAME=classroom
 
 GO=go
@@ -10,6 +18,22 @@ NOTIFICATION_GEN_DIR=./Notifications/pkg/
 CHAT_GEN_DIR=./Chat/pkg/
 
 PROTO_DIR=./Common/Proto
+
+MIGRATIONS_DIR=./Common/Migrations
+
+# Создание миграций, используется https://github.com/golang-migrate/migrate, name - название миграции
+migrate-create:
+	@name=$(name);
+	@migrate create -seq -ext sql -dir $(MIGRATIONS_DIR) $(name)
+
+# Применение миграций
+migrate-up:
+	@migrate -path=$(MIGRATIONS_DIR) -database=$(POSTGRES_URL) up
+
+# Откат миграций, name - к какой миграции откатить
+migrate-down:
+	@name=$(name);
+	@migrate -path=$(MIGRATIONS_DIR) -database=$(POSTGRES_URL) down $(name)
 
 # @protoc --proto_path=common/proto/$(AUTH_GEN_DIR) \
 # --go_out=common/api/$(name) --go_opt=paths=source_relative \
@@ -57,7 +81,10 @@ help:
 	@echo "  build    - Собрать проект"
 	@echo "  run      - Запустить проект"
 	@echo "  clean    - Очистить скомпилированные файлы"
-	@echo "  help     - Показать доступные команды"
+	@echo "  migrate-create name=<название миграции> - Создание миграций"
+	@echo "  migrate-up - Применение миграций"
+	@echo "  migrate-down name=<к какой миграции откатить> - Откат миграций"
+	@echo "  help - Показать доступные команды"
 
 # По умолчанию запускается help
 .DEFAULT_GOAL := help
