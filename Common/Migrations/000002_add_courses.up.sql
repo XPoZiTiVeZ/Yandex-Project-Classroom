@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS courses (
  teacher_id UUID NOT NULL REFERENCES users(user_id),
  title TEXT NOT NULL,
  content TEXT NOT NULL,
+ visibility BOOLEAN NOT NULL,
  start_time TIMESTAMP,
  end_time TIMESTAMP
 );
