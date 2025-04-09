@@ -64,6 +64,7 @@ func (s *taskService) Update(ctx context.Context, dto dto.UpdateTaskDTO) (domain
 		return domain.Task{}, fmt.Errorf("failed to update task: %w", err)
 	}
 
+	s.logger.Info("task updated", "id", task.ID, "title", task.Title, "content", task.Content)
 	return task, nil
 }
 
@@ -87,6 +88,8 @@ func (s *taskService) UpdateTaskStatus(ctx context.Context, taskID, userID strin
 		if err := s.tasks.CreateTaskStatus(ctx, currentStatus); err != nil {
 			return domain.TaskStatus{}, fmt.Errorf("failed to create task status: %w", err)
 		}
+
+		s.logger.Info("task status created", "task_id", taskID, "user_id", userID, "status", currentStatus.IsCompleted)
 		return currentStatus, nil
 	}
 
@@ -96,5 +99,6 @@ func (s *taskService) UpdateTaskStatus(ctx context.Context, taskID, userID strin
 		return domain.TaskStatus{}, fmt.Errorf("failed to update task status: %w", err)
 	}
 
+	s.logger.Info("task status updated", "task_id", taskID, "user_id", userID, "status", currentStatus.IsCompleted)
 	return currentStatus, nil
 }
