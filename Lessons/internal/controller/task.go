@@ -20,6 +20,7 @@ type TaskService interface {
 	Create(ctx context.Context, dto dto.CreateTaskDTO) (string, error)
 	GetTaskByID(ctx context.Context, id string) (domain.Task, error)
 	ListByCourseID(ctx context.Context, course_id string) ([]domain.Task, error)
+	Update(ctx context.Context, dto dto.UpdateTaskDTO) (domain.Task, error)
 }
 
 type taskController struct {
@@ -112,7 +113,34 @@ func (c *taskController) GetTasks(ctx context.Context, req *pb.GetTasksRequest) 
 }
 
 func (c *taskController) UpdateTask(ctx context.Context, req *pb.UpdateTaskRequest) (*pb.UpdateTaskResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateTask not implemented")
+	dto := dto.UpdateTaskDTO{
+		Title:   req.Title,
+		Content: req.Content,
+		TaskID:  req.TaskId,
+	}
+	if err := c.validate.Struct(dto); err != nil {
+		c.logger.Debug("invalid request", "err", err)
+		return nil, status.Errorf(codes.InvalidArgument, "invalid request: %v", err)
+	}
+
+	task, err := c.svc.Update(ctx, dto)
+	if errors.Is(err, domain.ErrNotFound) {
+		return nil, status.Error(codes.NotFound, "task not found")
+	}
+	if err != nil {
+		c.logger.Error("failed to update task", "err", err, "id", req.TaskId)
+		return nil, status.Error(codes.Internal, "failed to update task")
+	}
+
+	return &pb.UpdateTaskResponse{
+		Task: &pb.Task{
+			TaskId:    task.ID,
+			Title:     task.Title,
+			Content:   task.Content,
+			CourseId:  task.CourseID,
+			CreatedAt: timestamppb.New(task.CreatedAt),
+		},
+	}, nil
 }
 
 func (c *taskController) ChangeStatusTask(ctx context.Context, req *pb.ChangeStatusTaskRequest) (*pb.ChangeStatusTaskResponse, error) {

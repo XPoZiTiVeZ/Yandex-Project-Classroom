@@ -82,3 +82,15 @@ func (r *taskRepo) ListByCourseID(ctx context.Context, course_id string) ([]doma
 
 	return result, nil
 }
+
+func (r *taskRepo) Update(ctx context.Context, task domain.Task) error {
+	query, args := r.qb.
+		Update("tasks").
+		Set("title", task.Title).
+		Set("content", task.Content).
+		Where(sq.Eq{"task_id": task.ID}).
+		MustSql()
+
+	_, err := r.storage.ExecContext(ctx, query, args...)
+	return err
+}
