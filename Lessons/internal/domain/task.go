@@ -9,3 +9,9 @@ type Task struct {
 	Content   string    // Содержание задания
 	CreatedAt time.Time // Дата создания задания
 }
+
+type TaskStatus struct {
+	UserID      string // Идентификатор пользователя
+	TaskID      string // Идентификатор задания
+	IsCompleted bool   // Флаг, указывающий на выполненность задания
+}

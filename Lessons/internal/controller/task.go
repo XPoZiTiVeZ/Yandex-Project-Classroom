@@ -2,8 +2,10 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
+	"Classroom/Lessons/internal/domain"
 	"Classroom/Lessons/internal/dto"
 	pb "Classroom/Lessons/pkg/api/task"
 
@@ -11,10 +13,13 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type TaskService interface {
 	Create(ctx context.Context, dto dto.CreateTaskDTO) (string, error)
+	GetTaskByID(ctx context.Context, id string) (domain.Task, error)
+	ListByCourseID(ctx context.Context, course_id string) ([]domain.Task, error)
 }
 
 type taskController struct {
@@ -59,11 +64,51 @@ func (c *taskController) CreateTask(ctx context.Context, req *pb.CreateTaskReque
 }
 
 func (c *taskController) GetTask(ctx context.Context, req *pb.GetTaskRequest) (*pb.GetTaskResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTask not implemented")
+	if err := c.validate.Var(req.TaskId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid task id")
+	}
+
+	task, err := c.svc.GetTaskByID(ctx, req.TaskId)
+	if errors.Is(err, domain.ErrNotFound) {
+		return nil, status.Error(codes.NotFound, "task not found")
+	}
+	if err != nil {
+		c.logger.Error("failed to get task", "err", err, "id", req.TaskId)
+		return nil, status.Error(codes.Internal, "failed to get task")
+	}
+
+	return &pb.GetTaskResponse{
+		Task: &pb.Task{
+			TaskId:    task.ID,
+			Title:     task.Title,
+			Content:   task.Content,
+			CourseId:  task.CourseID,
+			CreatedAt: timestamppb.New(task.CreatedAt),
+		},
+	}, nil
 }
 
 func (c *taskController) GetTasks(ctx context.Context, req *pb.GetTasksRequest) (*pb.GetTasksResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTasks not implemented")
+	if err := c.validate.Var(req.CourseId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid task id")
+	}
+	tasks, err := c.svc.ListByCourseID(ctx, req.CourseId)
+	if err != nil {
+		c.logger.Error("failed to get tasks", "err", err, "course_id", req.CourseId)
+		return nil, status.Error(codes.Internal, "failed to get tasks")
+	}
+
+	pbTasks := make([]*pb.Task, len(tasks))
+	for i, task := range tasks {
+		pbTasks[i] = &pb.Task{
+			TaskId:    task.ID,
+			Title:     task.Title,
+			Content:   task.Content,
+			CourseId:  task.CourseID,
+			CreatedAt: timestamppb.New(task.CreatedAt),
+		}
+	}
+	return &pb.GetTasksResponse{Tasks: pbTasks}, nil
 }
 
 func (c *taskController) UpdateTask(ctx context.Context, req *pb.UpdateTaskRequest) (*pb.UpdateTaskResponse, error) {
