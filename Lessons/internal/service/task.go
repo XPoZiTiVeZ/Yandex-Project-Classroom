@@ -13,6 +13,7 @@ type TaskRepo interface {
 	GetTaskByID(ctx context.Context, id string) (domain.Task, error)
 	ListByCourseID(ctx context.Context, course_id string) ([]domain.Task, error)
 	Update(ctx context.Context, task domain.Task) error
+	Delete(ctx context.Context, id string) error
 }
 
 type taskService struct {
@@ -60,4 +61,8 @@ func (s *taskService) Update(ctx context.Context, dto dto.UpdateTaskDTO) (domain
 	}
 
 	return task, nil
+}
+
+func (s *taskService) Delete(ctx context.Context, id string) error {
+	return s.tasks.Delete(ctx, id)
 }

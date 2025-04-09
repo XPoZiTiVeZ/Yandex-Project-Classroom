@@ -94,3 +94,21 @@ func (r *taskRepo) Update(ctx context.Context, task domain.Task) error {
 	_, err := r.storage.ExecContext(ctx, query, args...)
 	return err
 }
+
+// Метод проверяет наличие записи в БД и удаляет ее
+func (r *taskRepo) Delete(ctx context.Context, id string) error {
+	query, args := r.qb.
+		Delete("tasks").
+		Where(sq.Eq{"task_id": id}).
+		MustSql()
+
+	res, err := r.storage.ExecContext(ctx, query, args...)
+	aff, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if aff == 0 {
+		return domain.ErrNotFound
+	}
+	return err
+}

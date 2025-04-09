@@ -21,6 +21,7 @@ type TaskService interface {
 	GetTaskByID(ctx context.Context, id string) (domain.Task, error)
 	ListByCourseID(ctx context.Context, course_id string) ([]domain.Task, error)
 	Update(ctx context.Context, dto dto.UpdateTaskDTO) (domain.Task, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type taskController struct {
@@ -148,5 +149,16 @@ func (c *taskController) ChangeStatusTask(ctx context.Context, req *pb.ChangeSta
 }
 
 func (c *taskController) DeleteTask(ctx context.Context, req *pb.DeleteTaskRequest) (*pb.DeleteTaskResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteTask not implemented")
+	if err := c.validate.Var(req.TaskId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid task id")
+	}
+	err := c.svc.Delete(ctx, req.TaskId)
+	if errors.Is(err, domain.ErrNotFound) {
+		return nil, status.Error(codes.NotFound, "task not found")
+	}
+	if err != nil {
+		c.logger.Error("failed to delete task", "err", err, "id", req.TaskId)
+		return nil, status.Error(codes.Internal, "failed to delete task")
+	}
+	return &pb.DeleteTaskResponse{Success: true}, nil
 }
