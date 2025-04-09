@@ -24,10 +24,9 @@ func (t Task) ToEntity() domain.Task {
 }
 
 type TaskStatus struct {
-	UserID      string    `db:"student_id"`
-	TaskID      string    `db:"task_id"`
-	IsCompleted bool      `db:"completed"`
-	SubmittedAt time.Time `db:"submitted_at"`
+	UserID      string `db:"student_id"`
+	TaskID      string `db:"task_id"`
+	IsCompleted bool   `db:"completed"`
 }
 
 func (t TaskStatus) ToEntity() domain.TaskStatus {
