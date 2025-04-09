@@ -22,6 +22,7 @@ type TaskService interface {
 	ListByCourseID(ctx context.Context, course_id string) ([]domain.Task, error)
 	Update(ctx context.Context, dto dto.UpdateTaskDTO) (domain.Task, error)
 	Delete(ctx context.Context, id string) error
+	UpdateTaskStatus(ctx context.Context, taskID, userID string) (domain.TaskStatus, error)
 }
 
 type taskController struct {
@@ -145,7 +146,20 @@ func (c *taskController) UpdateTask(ctx context.Context, req *pb.UpdateTaskReque
 }
 
 func (c *taskController) ChangeStatusTask(ctx context.Context, req *pb.ChangeStatusTaskRequest) (*pb.ChangeStatusTaskResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ChangeStatusTask not implemented")
+	if err := c.validate.Var(req.TaskId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid task id")
+	}
+	if err := c.validate.Var(req.StudentId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid student id")
+	}
+
+	taskStatus, err := c.svc.UpdateTaskStatus(ctx, req.TaskId, req.StudentId)
+	if err != nil {
+		c.logger.Error("failed to update task status", "err", err, "task_id", req.TaskId, "student_id", req.StudentId)
+		return nil, status.Error(codes.Internal, "failed to update task status")
+	}
+
+	return &pb.ChangeStatusTaskResponse{TaskStatus: taskStatus.IsCompleted}, nil
 }
 
 func (c *taskController) DeleteTask(ctx context.Context, req *pb.DeleteTaskRequest) (*pb.DeleteTaskResponse, error) {

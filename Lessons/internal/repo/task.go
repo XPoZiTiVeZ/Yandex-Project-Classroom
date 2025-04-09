@@ -59,11 +59,11 @@ func (r *taskRepo) GetTaskByID(ctx context.Context, id string) (domain.Task, err
 	return task.ToEntity(), nil
 }
 
-func (r *taskRepo) ListByCourseID(ctx context.Context, course_id string) ([]domain.Task, error) {
+func (r *taskRepo) ListByCourseID(ctx context.Context, courseID string) ([]domain.Task, error) {
 	query, args := r.qb.
 		Select("*").
 		From("tasks").
-		Where(sq.Eq{"course_id": course_id}).
+		Where(sq.Eq{"course_id": courseID}).
 		MustSql()
 
 	var tasks []Task
@@ -110,5 +110,45 @@ func (r *taskRepo) Delete(ctx context.Context, id string) error {
 	if aff == 0 {
 		return domain.ErrNotFound
 	}
+	return err
+}
+
+func (r *taskRepo) GetTaskStatus(ctx context.Context, taskID, userID string) (domain.TaskStatus, error) {
+	query, args := r.qb.
+		Select("*").
+		From("task_submissions").
+		Where(sq.Eq{"task_id": taskID, "student_id": userID}).
+		MustSql()
+
+	var status TaskStatus
+	err := r.storage.GetContext(ctx, &status, query, args...)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.TaskStatus{}, domain.ErrNotFound
+	}
+	if err != nil {
+		return domain.TaskStatus{}, err
+	}
+	return status.ToEntity(), nil
+}
+
+func (r *taskRepo) UpdateTaskStatus(ctx context.Context, status domain.TaskStatus) error {
+	query, args := r.qb.
+		Update("task_submissions").
+		Set("completed", status.IsCompleted).
+		Where(sq.Eq{"task_id": status.TaskID, "student_id": status.UserID}).
+		MustSql()
+
+	_, err := r.storage.ExecContext(ctx, query, args...)
+	return err
+}
+
+func (r *taskRepo) CreateTaskStatus(ctx context.Context, status domain.TaskStatus) error {
+	query, args := r.qb.
+		Insert("task_submissions").
+		Columns("task_id", "student_id", "completed").
+		Values(status.TaskID, status.UserID, status.IsCompleted).
+		MustSql()
+
+	_, err := r.storage.ExecContext(ctx, query, args...)
 	return err
 }

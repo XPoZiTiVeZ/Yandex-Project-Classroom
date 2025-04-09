@@ -4,6 +4,7 @@ import (
 	"Classroom/Lessons/internal/domain"
 	"Classroom/Lessons/internal/dto"
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 )
@@ -14,6 +15,9 @@ type TaskRepo interface {
 	ListByCourseID(ctx context.Context, course_id string) ([]domain.Task, error)
 	Update(ctx context.Context, task domain.Task) error
 	Delete(ctx context.Context, id string) error
+	GetTaskStatus(ctx context.Context, taskID, userID string) (domain.TaskStatus, error)
+	UpdateTaskStatus(ctx context.Context, status domain.TaskStatus) error
+	CreateTaskStatus(ctx context.Context, status domain.TaskStatus) error
 }
 
 type taskService struct {
@@ -39,8 +43,8 @@ func (s *taskService) GetTaskByID(ctx context.Context, id string) (domain.Task, 
 	return s.tasks.GetTaskByID(ctx, id)
 }
 
-func (s *taskService) ListByCourseID(ctx context.Context, course_id string) ([]domain.Task, error) {
-	return s.tasks.ListByCourseID(ctx, course_id)
+func (s *taskService) ListByCourseID(ctx context.Context, courseID string) ([]domain.Task, error) {
+	return s.tasks.ListByCourseID(ctx, courseID)
 }
 
 func (s *taskService) Update(ctx context.Context, dto dto.UpdateTaskDTO) (domain.Task, error) {
@@ -65,4 +69,32 @@ func (s *taskService) Update(ctx context.Context, dto dto.UpdateTaskDTO) (domain
 
 func (s *taskService) Delete(ctx context.Context, id string) error {
 	return s.tasks.Delete(ctx, id)
+}
+
+func (s *taskService) UpdateTaskStatus(ctx context.Context, taskID, userID string) (domain.TaskStatus, error) {
+	currentStatus, err := s.tasks.GetTaskStatus(ctx, taskID, userID)
+	if err != nil && !errors.Is(err, domain.ErrNotFound) {
+		return domain.TaskStatus{}, fmt.Errorf("failed to get task status: %w", err)
+	}
+
+	// Если записи еще нет, создаем и ставим true
+	if errors.Is(err, domain.ErrNotFound) {
+		currentStatus = domain.TaskStatus{
+			UserID:      userID,
+			TaskID:      taskID,
+			IsCompleted: true,
+		}
+		if err := s.tasks.CreateTaskStatus(ctx, currentStatus); err != nil {
+			return domain.TaskStatus{}, fmt.Errorf("failed to create task status: %w", err)
+		}
+		return currentStatus, nil
+	}
+
+	// Меняем статус на противоположный
+	currentStatus.IsCompleted = !currentStatus.IsCompleted
+	if err := s.tasks.UpdateTaskStatus(ctx, currentStatus); err != nil {
+		return domain.TaskStatus{}, fmt.Errorf("failed to update task status: %w", err)
+	}
+
+	return currentStatus, nil
 }
