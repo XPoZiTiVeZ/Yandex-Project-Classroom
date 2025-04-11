@@ -19,7 +19,7 @@ message Task {
   string task_id = 1;                       // ID задания
   string course_id = 2;                     // ID курса
   string title = 3;                         // Название задания
-  string description = 4;                   // Описание задания
+  string content = 4;                       // Содержание задания
   google.protobuf.Timestamp created_at = 5; // Дата создания задания
 }
 
@@ -51,19 +51,21 @@ message GetTasksResponse {
 
 message UpdateTaskRequest {
   optional string title = 1;
-  optional string description = 2;
+  optional string content = 2;
+  string task_id = 3;
 }
 
 message UpdateTaskResponse {
-  bool success = 1;
+  Task task = 1;
 }
 
 message ChangeStatusTaskRequest {
   string task_id = 1;
+  string student_id = 2;
 }
 
 message ChangeStatusTaskResponse {
-  bool success = 1;
+  bool task_status = 1;
 }
 
 message DeleteTaskRequest {
