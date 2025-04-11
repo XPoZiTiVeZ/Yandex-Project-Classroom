@@ -55,7 +55,7 @@ message UpdateLessonRequest {
 }
 
 message UpdateLessonResponse {
-  bool success = 1;
+  Lesson lesson = 1;
 }
 
 message DeleteLessonRequest {
