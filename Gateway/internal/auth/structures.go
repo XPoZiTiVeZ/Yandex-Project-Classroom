@@ -14,23 +14,20 @@ type RegisterRequest struct {
 
 func NewRegisterRequest(req RegisterRequest) *pb.RegisterRequest {
 	return &pb.RegisterRequest{
-		Email:     req.Email,
-		Password:  req.Password,
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
+		Email:          req.Email,
+		Password:       req.Password,
+		PasswordRepeat: req.PasswordRepeat,
+		FirstName:      req.FirstName,
+		LastName:       req.LastName,
 	}
 }
 
 type RegisterResponse struct {
-	Success bool   `json:"success"`
-	Message string `Json:"message"`
-	UserID  string `json:"user_id"`
+	UserID string `json:"user_id"`
 }
 
 func NewRegisterResponse(resp *pb.RegisterResponse) RegisterResponse {
 	return RegisterResponse{
-		resp.GetSuccess(),
-		resp.GetMessage(),
 		resp.GetUserId(),
 	}
 }
@@ -48,17 +45,50 @@ func NewLoginRequest(req LoginRequest) *pb.LoginRequest {
 }
 
 type LoginResponse struct {
-	Success      bool   `json:"success"`
-	Message      string `Json:"message"`
 	RefreshToken string `json:"refresh_token"`
 	AccessToken  string `json:"access_token"`
 }
 
 func NewLoginResponse(resp *pb.LoginResponse) LoginResponse {
 	return LoginResponse{
-		resp.GetSuccess(),
-		resp.GetMessage(),
 		resp.GetAccessToken(),
 		resp.GetRefreshToken(),
 	}
+}
+
+type RefreshRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+func NewRefreshRequest(req RefreshRequest) *pb.RefreshRequest {
+	return &pb.RefreshRequest{
+		RefreshToken: req.RefreshToken,
+	}
+}
+
+type RefreshResponse struct {
+	AccessToken string `json:"access_token"`
+}
+
+func NewRefreshResponse(resp *pb.RefreshResponse) RefreshResponse {
+	return RefreshResponse{
+		resp.GetAccessToken(),
+	}
+}
+
+type LogoutRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+func NewLogoutRequest(req LogoutRequest) *pb.LogoutRequest {
+	return &pb.LogoutRequest{
+		RefreshToken: req.RefreshToken,
+	}
+}
+
+type LogoutResponse struct {
+}
+
+func NewLogoutResponse(resp *pb.LogoutResponse) LogoutResponse {
+	return LogoutResponse{}
 }

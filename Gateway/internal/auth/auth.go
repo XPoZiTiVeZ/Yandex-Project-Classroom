@@ -8,103 +8,100 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type AuthServiceClient struct {
+	Conn   *grpc.ClientConn
 	Client *pb.AuthServiceClient
+	DefaultTimeout time.Duration
 }
 
-func NewAuthServiceClient(address string, port int) (*AuthServiceClient, error) {
+func NewAuthServiceClient(address string, port int, DefaultTimeout *time.Duration) (*AuthServiceClient, error) {
 	var opts []grpc.DialOption
+	opts = append(
+		opts, grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 
 	conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", address, port), opts...)
 	if err != nil {
 		slog.Error("fail to dial: %v", slog.Any("error", err))
 		return nil, err
 	}
-	defer conn.Close()
+	
+	state := conn.GetState()
+	// if state != connectivity.Ready {
+	// 	return nil, fmt.Errorf("connection is not ready, state: %v", state)
+	// }
+
+	slog.Info("Connected to grpc Auth", slog.String("address", address), slog.Int("port", port), slog.String("state", state.String()))
 
 	client := pb.NewAuthServiceClient(conn)
 
+	timeout := 10 * time.Second
+	if DefaultTimeout != nil {
+		timeout = *DefaultTimeout
+	}
+
 	return &AuthServiceClient{
-		Client: &client,
+		Conn:           conn,
+		Client:         &client,
+		DefaultTimeout: timeout,
 	}, nil
 }
 
 func (s AuthServiceClient) Register(ctx context.Context, req RegisterRequest) (RegisterResponse, error) {
-	slog.Info("registering user", slog.Any("request", req))
+	slog.Debug("registering user", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	resp, err := (*s.Client).Register(ctx, NewRegisterRequest(req))
-
 	if err != nil {
-		slog.Error("auth.Register failed", slog.Any("error", err))
 		return RegisterResponse{}, err
 	}
 
-	slog.Info("auth.Register succeed")
+	slog.Debug("auth.Register succeed")
 	return NewRegisterResponse(resp), nil
 }
 
 func (s AuthServiceClient) Login(ctx context.Context, req LoginRequest) (LoginResponse, error) {
-	slog.Info("registering user", slog.Any("request", req))
+	slog.Debug("logging in user", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	resp, err := (*s.Client).Login(ctx, NewLoginRequest(req))
-
 	if err != nil {
-		slog.Error("auth.Register failed", slog.Any("error", err))
 		return LoginResponse{}, err
 	}
 
-	slog.Info("auth.Register succeed")
+	slog.Debug("auth.Login succeed")
 	return NewLoginResponse(resp), nil
 }
 
-// func (s AuthServiceClient) Refresh(ctx context.Context, req RefreshUserRequest) error {
-// 	slog.Info("registering user", slog.Any("request", req))
-// 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
-// 	defer cancel()
+func (s AuthServiceClient) Refresh(ctx context.Context, req RefreshRequest) (RefreshResponse, error) {
+	slog.Debug("refreshing user token", slog.Any("request", req))
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
 
-// 	resp, err := (*s.Client).Register(ctx, &pb.RegisterRequest{
-// 		RefreshToken: req.RefreshToken,
-// 	})
+	resp, err := (*s.Client).Refresh(ctx, NewRefreshRequest(req))
+	if err != nil {
+		return RefreshResponse{}, err
+	}
 
-// 	if err != nil {
-// 		slog.Error("auth.Register failed", slog.Any("error", err))
-// 		return err
-// 	}
+	slog.Debug("auth.Refresh succeed")
+	return NewRefreshResponse(resp), nil
+}
 
-// 	if !resp.GetSuccess() {
-// 		slog.Error("auth.Register failed", slog.String("error", resp.GetMessage()))
-// 		return fmt.Errorf(resp.GetMessage())
-// 	}
+func (s AuthServiceClient) Logout(ctx context.Context, req LogoutRequest) (LogoutResponse, error) {
+	slog.Debug("logging out user", slog.Any("request", req))
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
 
-// 	slog.Info("auth.Register succeed")
-// 	return nil
-// }
+	resp, err := (*s.Client).Logout(ctx, NewLogoutRequest(req))
+	if err != nil {
+		return LogoutResponse{}, err
+	}
 
-// func (s AuthServiceClient) Logout(ctx context.Context, req LogoutUserRequest) error {
-// 	slog.Info("registering user", slog.Any("request", req))
-// 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
-// 	defer cancel()
-
-// 	resp, err := (*s.Client).Register(ctx, &pb.RegisterRequest{
-// 		RefreshToken: req.RefreshToken,
-// 	})
-
-// 	if err != nil {
-// 		slog.Error("auth.Register failed", slog.Any("error", err))
-// 		return err
-// 	}
-
-// 	if !resp.GetSuccess() {
-// 		slog.Error("auth.Register failed", slog.String("error", resp.GetMessage()))
-// 		return fmt.Errorf(resp.GetMessage())
-// 	}
-
-// 	slog.Info("auth.Register succeed")
-// 	return nil
-// }
+	slog.Debug("auth.Logout succeed")
+	return NewLogoutResponse(resp), nil
+}
