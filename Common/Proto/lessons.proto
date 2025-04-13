@@ -6,7 +6,7 @@ option go_package = "api/lessons";
 
 package lessons;
 
-service LessonService {
+service LessonsService {
   rpc CreateLesson(CreateLessonRequest) returns (CreateLessonResponse); // Создание урока
   rpc GetLesson(GetLessonRequest)       returns (GetLessonResponse);    // Получение урока
   rpc GetLessons(GetLessonsRequest)     returns (GetLessonsResponse);   // Получение уроков

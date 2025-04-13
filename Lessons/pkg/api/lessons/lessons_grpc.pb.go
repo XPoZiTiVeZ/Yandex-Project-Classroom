@@ -19,17 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	LessonService_CreateLesson_FullMethodName = "/lessons.LessonService/CreateLesson"
-	LessonService_GetLesson_FullMethodName    = "/lessons.LessonService/GetLesson"
-	LessonService_GetLessons_FullMethodName   = "/lessons.LessonService/GetLessons"
-	LessonService_UpdateLesson_FullMethodName = "/lessons.LessonService/UpdateLesson"
-	LessonService_DeleteLesson_FullMethodName = "/lessons.LessonService/DeleteLesson"
+	LessonsService_CreateLesson_FullMethodName = "/lessons.LessonsService/CreateLesson"
+	LessonsService_GetLesson_FullMethodName    = "/lessons.LessonsService/GetLesson"
+	LessonsService_GetLessons_FullMethodName   = "/lessons.LessonsService/GetLessons"
+	LessonsService_UpdateLesson_FullMethodName = "/lessons.LessonsService/UpdateLesson"
+	LessonsService_DeleteLesson_FullMethodName = "/lessons.LessonsService/DeleteLesson"
 )
 
-// LessonServiceClient is the client API for LessonService service.
+// LessonsServiceClient is the client API for LessonsService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type LessonServiceClient interface {
+type LessonsServiceClient interface {
 	CreateLesson(ctx context.Context, in *CreateLessonRequest, opts ...grpc.CallOption) (*CreateLessonResponse, error)
 	GetLesson(ctx context.Context, in *GetLessonRequest, opts ...grpc.CallOption) (*GetLessonResponse, error)
 	GetLessons(ctx context.Context, in *GetLessonsRequest, opts ...grpc.CallOption) (*GetLessonsResponse, error)
@@ -37,235 +37,235 @@ type LessonServiceClient interface {
 	DeleteLesson(ctx context.Context, in *DeleteLessonRequest, opts ...grpc.CallOption) (*DeleteLessonResponse, error)
 }
 
-type lessonServiceClient struct {
+type lessonsServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewLessonServiceClient(cc grpc.ClientConnInterface) LessonServiceClient {
-	return &lessonServiceClient{cc}
+func NewLessonsServiceClient(cc grpc.ClientConnInterface) LessonsServiceClient {
+	return &lessonsServiceClient{cc}
 }
 
-func (c *lessonServiceClient) CreateLesson(ctx context.Context, in *CreateLessonRequest, opts ...grpc.CallOption) (*CreateLessonResponse, error) {
+func (c *lessonsServiceClient) CreateLesson(ctx context.Context, in *CreateLessonRequest, opts ...grpc.CallOption) (*CreateLessonResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateLessonResponse)
-	err := c.cc.Invoke(ctx, LessonService_CreateLesson_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, LessonsService_CreateLesson_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *lessonServiceClient) GetLesson(ctx context.Context, in *GetLessonRequest, opts ...grpc.CallOption) (*GetLessonResponse, error) {
+func (c *lessonsServiceClient) GetLesson(ctx context.Context, in *GetLessonRequest, opts ...grpc.CallOption) (*GetLessonResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetLessonResponse)
-	err := c.cc.Invoke(ctx, LessonService_GetLesson_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, LessonsService_GetLesson_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *lessonServiceClient) GetLessons(ctx context.Context, in *GetLessonsRequest, opts ...grpc.CallOption) (*GetLessonsResponse, error) {
+func (c *lessonsServiceClient) GetLessons(ctx context.Context, in *GetLessonsRequest, opts ...grpc.CallOption) (*GetLessonsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetLessonsResponse)
-	err := c.cc.Invoke(ctx, LessonService_GetLessons_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, LessonsService_GetLessons_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *lessonServiceClient) UpdateLesson(ctx context.Context, in *UpdateLessonRequest, opts ...grpc.CallOption) (*UpdateLessonResponse, error) {
+func (c *lessonsServiceClient) UpdateLesson(ctx context.Context, in *UpdateLessonRequest, opts ...grpc.CallOption) (*UpdateLessonResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateLessonResponse)
-	err := c.cc.Invoke(ctx, LessonService_UpdateLesson_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, LessonsService_UpdateLesson_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *lessonServiceClient) DeleteLesson(ctx context.Context, in *DeleteLessonRequest, opts ...grpc.CallOption) (*DeleteLessonResponse, error) {
+func (c *lessonsServiceClient) DeleteLesson(ctx context.Context, in *DeleteLessonRequest, opts ...grpc.CallOption) (*DeleteLessonResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteLessonResponse)
-	err := c.cc.Invoke(ctx, LessonService_DeleteLesson_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, LessonsService_DeleteLesson_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// LessonServiceServer is the server API for LessonService service.
-// All implementations must embed UnimplementedLessonServiceServer
+// LessonsServiceServer is the server API for LessonsService service.
+// All implementations must embed UnimplementedLessonsServiceServer
 // for forward compatibility.
-type LessonServiceServer interface {
+type LessonsServiceServer interface {
 	CreateLesson(context.Context, *CreateLessonRequest) (*CreateLessonResponse, error)
 	GetLesson(context.Context, *GetLessonRequest) (*GetLessonResponse, error)
 	GetLessons(context.Context, *GetLessonsRequest) (*GetLessonsResponse, error)
 	UpdateLesson(context.Context, *UpdateLessonRequest) (*UpdateLessonResponse, error)
 	DeleteLesson(context.Context, *DeleteLessonRequest) (*DeleteLessonResponse, error)
-	mustEmbedUnimplementedLessonServiceServer()
+	mustEmbedUnimplementedLessonsServiceServer()
 }
 
-// UnimplementedLessonServiceServer must be embedded to have
+// UnimplementedLessonsServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedLessonServiceServer struct{}
+type UnimplementedLessonsServiceServer struct{}
 
-func (UnimplementedLessonServiceServer) CreateLesson(context.Context, *CreateLessonRequest) (*CreateLessonResponse, error) {
+func (UnimplementedLessonsServiceServer) CreateLesson(context.Context, *CreateLessonRequest) (*CreateLessonResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateLesson not implemented")
 }
-func (UnimplementedLessonServiceServer) GetLesson(context.Context, *GetLessonRequest) (*GetLessonResponse, error) {
+func (UnimplementedLessonsServiceServer) GetLesson(context.Context, *GetLessonRequest) (*GetLessonResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLesson not implemented")
 }
-func (UnimplementedLessonServiceServer) GetLessons(context.Context, *GetLessonsRequest) (*GetLessonsResponse, error) {
+func (UnimplementedLessonsServiceServer) GetLessons(context.Context, *GetLessonsRequest) (*GetLessonsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLessons not implemented")
 }
-func (UnimplementedLessonServiceServer) UpdateLesson(context.Context, *UpdateLessonRequest) (*UpdateLessonResponse, error) {
+func (UnimplementedLessonsServiceServer) UpdateLesson(context.Context, *UpdateLessonRequest) (*UpdateLessonResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateLesson not implemented")
 }
-func (UnimplementedLessonServiceServer) DeleteLesson(context.Context, *DeleteLessonRequest) (*DeleteLessonResponse, error) {
+func (UnimplementedLessonsServiceServer) DeleteLesson(context.Context, *DeleteLessonRequest) (*DeleteLessonResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteLesson not implemented")
 }
-func (UnimplementedLessonServiceServer) mustEmbedUnimplementedLessonServiceServer() {}
-func (UnimplementedLessonServiceServer) testEmbeddedByValue()                       {}
+func (UnimplementedLessonsServiceServer) mustEmbedUnimplementedLessonsServiceServer() {}
+func (UnimplementedLessonsServiceServer) testEmbeddedByValue()                        {}
 
-// UnsafeLessonServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to LessonServiceServer will
+// UnsafeLessonsServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to LessonsServiceServer will
 // result in compilation errors.
-type UnsafeLessonServiceServer interface {
-	mustEmbedUnimplementedLessonServiceServer()
+type UnsafeLessonsServiceServer interface {
+	mustEmbedUnimplementedLessonsServiceServer()
 }
 
-func RegisterLessonServiceServer(s grpc.ServiceRegistrar, srv LessonServiceServer) {
-	// If the following call pancis, it indicates UnimplementedLessonServiceServer was
+func RegisterLessonsServiceServer(s grpc.ServiceRegistrar, srv LessonsServiceServer) {
+	// If the following call pancis, it indicates UnimplementedLessonsServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&LessonService_ServiceDesc, srv)
+	s.RegisterService(&LessonsService_ServiceDesc, srv)
 }
 
-func _LessonService_CreateLesson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LessonsService_CreateLesson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateLessonRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LessonServiceServer).CreateLesson(ctx, in)
+		return srv.(LessonsServiceServer).CreateLesson(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: LessonService_CreateLesson_FullMethodName,
+		FullMethod: LessonsService_CreateLesson_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LessonServiceServer).CreateLesson(ctx, req.(*CreateLessonRequest))
+		return srv.(LessonsServiceServer).CreateLesson(ctx, req.(*CreateLessonRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LessonService_GetLesson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LessonsService_GetLesson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetLessonRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LessonServiceServer).GetLesson(ctx, in)
+		return srv.(LessonsServiceServer).GetLesson(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: LessonService_GetLesson_FullMethodName,
+		FullMethod: LessonsService_GetLesson_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LessonServiceServer).GetLesson(ctx, req.(*GetLessonRequest))
+		return srv.(LessonsServiceServer).GetLesson(ctx, req.(*GetLessonRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LessonService_GetLessons_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LessonsService_GetLessons_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetLessonsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LessonServiceServer).GetLessons(ctx, in)
+		return srv.(LessonsServiceServer).GetLessons(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: LessonService_GetLessons_FullMethodName,
+		FullMethod: LessonsService_GetLessons_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LessonServiceServer).GetLessons(ctx, req.(*GetLessonsRequest))
+		return srv.(LessonsServiceServer).GetLessons(ctx, req.(*GetLessonsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LessonService_UpdateLesson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LessonsService_UpdateLesson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateLessonRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LessonServiceServer).UpdateLesson(ctx, in)
+		return srv.(LessonsServiceServer).UpdateLesson(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: LessonService_UpdateLesson_FullMethodName,
+		FullMethod: LessonsService_UpdateLesson_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LessonServiceServer).UpdateLesson(ctx, req.(*UpdateLessonRequest))
+		return srv.(LessonsServiceServer).UpdateLesson(ctx, req.(*UpdateLessonRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LessonService_DeleteLesson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LessonsService_DeleteLesson_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteLessonRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LessonServiceServer).DeleteLesson(ctx, in)
+		return srv.(LessonsServiceServer).DeleteLesson(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: LessonService_DeleteLesson_FullMethodName,
+		FullMethod: LessonsService_DeleteLesson_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LessonServiceServer).DeleteLesson(ctx, req.(*DeleteLessonRequest))
+		return srv.(LessonsServiceServer).DeleteLesson(ctx, req.(*DeleteLessonRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// LessonService_ServiceDesc is the grpc.ServiceDesc for LessonService service.
+// LessonsService_ServiceDesc is the grpc.ServiceDesc for LessonsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var LessonService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "lessons.LessonService",
-	HandlerType: (*LessonServiceServer)(nil),
+var LessonsService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "lessons.LessonsService",
+	HandlerType: (*LessonsServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "CreateLesson",
-			Handler:    _LessonService_CreateLesson_Handler,
+			Handler:    _LessonsService_CreateLesson_Handler,
 		},
 		{
 			MethodName: "GetLesson",
-			Handler:    _LessonService_GetLesson_Handler,
+			Handler:    _LessonsService_GetLesson_Handler,
 		},
 		{
 			MethodName: "GetLessons",
-			Handler:    _LessonService_GetLessons_Handler,
+			Handler:    _LessonsService_GetLessons_Handler,
 		},
 		{
 			MethodName: "UpdateLesson",
-			Handler:    _LessonService_UpdateLesson_Handler,
+			Handler:    _LessonsService_UpdateLesson_Handler,
 		},
 		{
 			MethodName: "DeleteLesson",
-			Handler:    _LessonService_DeleteLesson_Handler,
+			Handler:    _LessonsService_DeleteLesson_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

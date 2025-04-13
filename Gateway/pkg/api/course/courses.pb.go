@@ -797,8 +797,8 @@ const file_Common_Proto_courses_proto_rawDesc = "" +
 	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\".\n" +
 	"\x12EnrollUserResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess2\xbc\x03\n" +
-	"\rCourseService\x12I\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\xbd\x03\n" +
+	"\x0eCoursesService\x12I\n" +
 	"\fCreateCourse\x12\x1b.course.CreateCourseRequest\x1a\x1c.course.CreateCourseResponse\x12@\n" +
 	"\tGetCourse\x12\x18.course.GetCourseRequest\x1a\x19.course.GetCourseResponse\x12C\n" +
 	"\n" +
@@ -847,18 +847,18 @@ var file_Common_Proto_courses_proto_depIdxs = []int32{
 	0,  // 5: course.GetCoursesResponse.course:type_name -> course.Course
 	13, // 6: course.UpdateCourseRequest.start_time:type_name -> google.protobuf.Timestamp
 	13, // 7: course.UpdateCourseRequest.end_time:type_name -> google.protobuf.Timestamp
-	1,  // 8: course.CourseService.CreateCourse:input_type -> course.CreateCourseRequest
-	3,  // 9: course.CourseService.GetCourse:input_type -> course.GetCourseRequest
-	5,  // 10: course.CourseService.GetCourses:input_type -> course.GetCoursesRequest
-	7,  // 11: course.CourseService.UpdateCourse:input_type -> course.UpdateCourseRequest
-	9,  // 12: course.CourseService.DeleteCourse:input_type -> course.DeleteCourseRequest
-	11, // 13: course.CourseService.EnrollUser:input_type -> course.EnrollUserRequest
-	2,  // 14: course.CourseService.CreateCourse:output_type -> course.CreateCourseResponse
-	4,  // 15: course.CourseService.GetCourse:output_type -> course.GetCourseResponse
-	6,  // 16: course.CourseService.GetCourses:output_type -> course.GetCoursesResponse
-	8,  // 17: course.CourseService.UpdateCourse:output_type -> course.UpdateCourseResponse
-	10, // 18: course.CourseService.DeleteCourse:output_type -> course.DeleteCourseResponse
-	12, // 19: course.CourseService.EnrollUser:output_type -> course.EnrollUserResponse
+	1,  // 8: course.CoursesService.CreateCourse:input_type -> course.CreateCourseRequest
+	3,  // 9: course.CoursesService.GetCourse:input_type -> course.GetCourseRequest
+	5,  // 10: course.CoursesService.GetCourses:input_type -> course.GetCoursesRequest
+	7,  // 11: course.CoursesService.UpdateCourse:input_type -> course.UpdateCourseRequest
+	9,  // 12: course.CoursesService.DeleteCourse:input_type -> course.DeleteCourseRequest
+	11, // 13: course.CoursesService.EnrollUser:input_type -> course.EnrollUserRequest
+	2,  // 14: course.CoursesService.CreateCourse:output_type -> course.CreateCourseResponse
+	4,  // 15: course.CoursesService.GetCourse:output_type -> course.GetCourseResponse
+	6,  // 16: course.CoursesService.GetCourses:output_type -> course.GetCoursesResponse
+	8,  // 17: course.CoursesService.UpdateCourse:output_type -> course.UpdateCourseResponse
+	10, // 18: course.CoursesService.DeleteCourse:output_type -> course.DeleteCourseResponse
+	12, // 19: course.CoursesService.EnrollUser:output_type -> course.EnrollUserResponse
 	14, // [14:20] is the sub-list for method output_type
 	8,  // [8:14] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name

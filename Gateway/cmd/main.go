@@ -26,14 +26,14 @@ func main() {
 		slog.Error(err.Error())
 	}
 
-	server, err := srv.NewServer(config.Server.Address, config.Server.Port, ctx)
+	server, err := srv.NewServer(config.Host.Address, config.Host.Port, ctx)
 	server.CtxStop = stop
 	server.Config = config
 	if err != nil {
 		slog.Error("Server ran into problem: ", slog.Any("error", err))
 		stop()
 	}
-	slog.Info(fmt.Sprintf("Server running on %s:%d", config.Server.Address, config.Server.Port))
+	slog.Info(fmt.Sprintf("Server running on %s:%d", config.Host.Address, config.Host.Port))
 	go server.Run()
 	
 	select {

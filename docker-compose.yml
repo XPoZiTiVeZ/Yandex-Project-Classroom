@@ -3,6 +3,7 @@ version: "3.8"
 services:
   postgres:
     container_name: postgres
+    restart: unless-stopped
     build:
       context: ./Postgres
       dockerfile: Dockerfile
@@ -11,17 +12,164 @@ services:
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     healthcheck:
-      test: "psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c 'SELECT 1' || exit 1"
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} || exit 1"]
       interval: 10s
       timeout: 1s
-      retries: 1
+      retries: 3
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - ./Postgres/postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  redis:
+    container_name: redis
+    restart: unless-stopped
+    build:
+      context: ./Redis
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 1s
+      retries: 3
+    volumes:
+      - ./Redis/redis_data:/data
+    networks:
+      - app-network
+
+  auth-service:
+    container_name: auth-service
+    restart: unless-stopped
+    build:
+      context: ./Auth
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # courses-service:
+  #   container_name: courses-service
+  #   restart: unless-stopped
+  #   build:
+  #     context: ./Courses
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "${COURSES_SERVICE_PORT}:${COURSES_SERVICE_PORT}"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - app-network
+
+  # lessons-service:
+  #   container_name: lessons-service
+  #   restart: unless-stopped
+  #   build:
+  #     context: ./Lessons
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "${LESSONS_SERVICE_PORT}:${LESSONS_SERVICE_PORT}"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - app-network
+
+  # tasks-service:
+  #   container_name: tasks-service
+  #   restart: unless-stopped
+  #   build:
+  #     context: ./Tasks
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "${TASKS_SERVICE_PORT}:${TASKS_SERVICE_PORT}"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - app-network
+
+  # notifications-service:
+  #   container_name: notifications-service
+  #   restart: unless-stopped
+  #   build:
+  #     context: ./Notifications
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "${NOTIFICATIONS_SERVICE_PORT}:${NOTIFICATIONS_SERVICE_PORT}"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - app-network
+
+  # chat-service:
+  #   container_name: chat-service
+  #   restart: unless-stopped
+  #   build:
+  #     context: ./Chat
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "${CHAT_SERVICE_PORT}:${CHAT_SERVICE_PORT}"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - app-network
+
+  gateway:
+    container_name: gateway
+    restart: unless-stopped
+    build:
+      context: ./Gateway
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "${API_GATEWAY_PORT}:${API_GATEWAY_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - app-network
 
   nginx:
     container_name: nginx
+    restart: unless-stopped
     build:
       context: ./Nginx
       dockerfile: Dockerfile
@@ -29,6 +177,8 @@ services:
       - "80:80"
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - app-network

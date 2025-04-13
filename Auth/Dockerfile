@@ -12,8 +12,11 @@ FROM gcr.io/distroless/base-debian12
 
 WORKDIR /app
 
+
+COPY --from=builder /app/.env ./.env
+COPY --from=builder /app/config/config.yaml ./config.yaml
 COPY --from=builder /app/auth ./auth
 
 USER nonroot:nonroot
 
-CMD ["./auth"]
+CMD ["./auth", "-config", "./config.yaml"]

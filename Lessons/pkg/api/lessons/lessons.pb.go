@@ -607,8 +607,8 @@ const file_Common_Proto_lessons_proto_rawDesc = "" +
 	"\x13DeleteLessonRequest\x12\x1b\n" +
 	"\tlesson_id\x18\x01 \x01(\tR\blessonId\"0\n" +
 	"\x14DeleteLessonResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess2\x81\x03\n" +
-	"\rLessonService\x12K\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\x82\x03\n" +
+	"\x0eLessonsService\x12K\n" +
 	"\fCreateLesson\x12\x1c.lessons.CreateLessonRequest\x1a\x1d.lessons.CreateLessonResponse\x12B\n" +
 	"\tGetLesson\x12\x19.lessons.GetLessonRequest\x1a\x1a.lessons.GetLessonResponse\x12E\n" +
 	"\n" +
@@ -648,16 +648,16 @@ var file_Common_Proto_lessons_proto_depIdxs = []int32{
 	0,  // 1: lessons.GetLessonResponse.lesson:type_name -> lessons.Lesson
 	0,  // 2: lessons.GetLessonsResponse.lessons:type_name -> lessons.Lesson
 	0,  // 3: lessons.UpdateLessonResponse.lesson:type_name -> lessons.Lesson
-	1,  // 4: lessons.LessonService.CreateLesson:input_type -> lessons.CreateLessonRequest
-	3,  // 5: lessons.LessonService.GetLesson:input_type -> lessons.GetLessonRequest
-	5,  // 6: lessons.LessonService.GetLessons:input_type -> lessons.GetLessonsRequest
-	7,  // 7: lessons.LessonService.UpdateLesson:input_type -> lessons.UpdateLessonRequest
-	9,  // 8: lessons.LessonService.DeleteLesson:input_type -> lessons.DeleteLessonRequest
-	2,  // 9: lessons.LessonService.CreateLesson:output_type -> lessons.CreateLessonResponse
-	4,  // 10: lessons.LessonService.GetLesson:output_type -> lessons.GetLessonResponse
-	6,  // 11: lessons.LessonService.GetLessons:output_type -> lessons.GetLessonsResponse
-	8,  // 12: lessons.LessonService.UpdateLesson:output_type -> lessons.UpdateLessonResponse
-	10, // 13: lessons.LessonService.DeleteLesson:output_type -> lessons.DeleteLessonResponse
+	1,  // 4: lessons.LessonsService.CreateLesson:input_type -> lessons.CreateLessonRequest
+	3,  // 5: lessons.LessonsService.GetLesson:input_type -> lessons.GetLessonRequest
+	5,  // 6: lessons.LessonsService.GetLessons:input_type -> lessons.GetLessonsRequest
+	7,  // 7: lessons.LessonsService.UpdateLesson:input_type -> lessons.UpdateLessonRequest
+	9,  // 8: lessons.LessonsService.DeleteLesson:input_type -> lessons.DeleteLessonRequest
+	2,  // 9: lessons.LessonsService.CreateLesson:output_type -> lessons.CreateLessonResponse
+	4,  // 10: lessons.LessonsService.GetLesson:output_type -> lessons.GetLessonResponse
+	6,  // 11: lessons.LessonsService.GetLessons:output_type -> lessons.GetLessonsResponse
+	8,  // 12: lessons.LessonsService.UpdateLesson:output_type -> lessons.UpdateLessonResponse
+	10, // 13: lessons.LessonsService.DeleteLesson:output_type -> lessons.DeleteLessonResponse
 	9,  // [9:14] is the sub-list for method output_type
 	4,  // [4:9] is the sub-list for method input_type
 	4,  // [4:4] is the sub-list for extension type_name

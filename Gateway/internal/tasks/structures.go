@@ -79,19 +79,18 @@ func NewGetTasksResponse(resp *pb.GetTasksResponse) GetTasksResponse {
 }
 
 type UpdateTaskRequest struct {
-	Title       *string `json:"title,omitempty"`
-	Description *string `json:"description,omitempty"`
+	Title   *string `json:"title,omitempty"`
+	Content *string `json:"description,omitempty"`
 }
 
 func NewUpdateTaskRequest(req UpdateTaskRequest) *pb.UpdateTaskRequest {
 	return &pb.UpdateTaskRequest{
-		Title:       req.Title,
-		Description: req.Description,
+		Title:   req.Title,
+		Content: req.Content,
 	}
 }
 
 type UpdateTaskResponse struct {
-	
 }
 
 func NewUpdateTaskResponse(resp *pb.UpdateTaskResponse) UpdateTaskResponse {
@@ -109,7 +108,6 @@ func NewChangeStatusTaskRequest(req ChangeStatusTaskRequest) *pb.ChangeStatusTas
 }
 
 type ChangeStatusTaskResponse struct {
-
 }
 
 func NewChangeStatusTaskResponse(resp *pb.ChangeStatusTaskResponse) ChangeStatusTaskResponse {

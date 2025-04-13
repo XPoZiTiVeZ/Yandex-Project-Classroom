@@ -6,7 +6,7 @@ option go_package = "api/course";
 
 package course;
 
-service CourseService {
+service CoursesService {
     rpc CreateCourse(CreateCourseRequest) returns (CreateCourseResponse); // Создание курса
     rpc GetCourse(GetCourseRequest)       returns (GetCourseResponse);    // Получение данных курса
     rpc GetCourses(GetCoursesRequest)     returns (GetCoursesResponse);   // Получение курсов пользователя
