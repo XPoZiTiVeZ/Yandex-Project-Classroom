@@ -7,7 +7,7 @@ import (
 
 	"Classroom/Lessons/internal/domain"
 	"Classroom/Lessons/internal/dto"
-	pb "Classroom/Lessons/pkg/api/lesson"
+	pb "Classroom/Lessons/pkg/api/lessons"
 
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc"

@@ -2,9 +2,9 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "api/task";
+option go_package = "api/tasks";
 
-package task;
+package tasks;
 
 service TasksService {
   rpc CreateTask(CreateTaskRequest)           returns (CreateTaskResponse);         // Создание задания

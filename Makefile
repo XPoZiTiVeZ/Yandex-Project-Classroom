@@ -13,6 +13,7 @@ GO=go
 AUTH_GEN_DIR=./Auth/pkg/
 COURSE_GEN_DIR=./Courses/pkg/
 LESSON_GEN_DIR=./Lessons/pkg/
+TASK_GEN_DIR=./Tasks/pkg/
 GATEWAY_GEN_DIR=./Gateway/pkg/
 NOTIFICATION_GEN_DIR=./Notifications/pkg/
 CHAT_GEN_DIR=./Chat/pkg/
@@ -48,13 +49,15 @@ proto-gen:
 	@mkdir -p $(AUTH_GEN_DIR)
 	@mkdir -p $(COURSE_GEN_DIR)
 	@mkdir -p $(LESSON_GEN_DIR)
+	@mkdir -p $(TASK_GEN_DIR)
 	@mkdir -p $(GATEWAY_GEN_DIR)
 	
 	@protoc --go_out=$(AUTH_GEN_DIR) --go-grpc_out=$(AUTH_GEN_DIR)  -I. $(PROTO_DIR)/auth.proto
 	@protoc --go_out=$(COURSE_GEN_DIR) --go-grpc_out=$(COURSE_GEN_DIR)  -I. $(PROTO_DIR)/course.proto
-	@protoc --go_out=$(LESSON_GEN_DIR) --go-grpc_out=$(LESSON_GEN_DIR)  -I. $(PROTO_DIR)/lesson.proto $(PROTO_DIR)/task.proto
+	@protoc --go_out=$(LESSON_GEN_DIR) --go-grpc_out=$(LESSON_GEN_DIR)  -I. $(PROTO_DIR)/lessons.proto
+	@protoc --go_out=$(TASK_GEN_DIR) --go-grpc_out=$(TASK_GEN_DIR)  -I. $(PROTO_DIR)/tasks.proto
 
-	@protoc --go_out=$(GATEWAY_GEN_DIR) --go-grpc_out=$(GATEWAY_GEN_DIR)  -I. $(PROTO_DIR)/auth.proto $(PROTO_DIR)/course.proto $(PROTO_DIR)/lesson.proto $(PROTO_DIR)/task.proto
+	@protoc --go_out=$(GATEWAY_GEN_DIR) --go-grpc_out=$(GATEWAY_GEN_DIR)  -I. $(PROTO_DIR)/auth.proto $(PROTO_DIR)/course.proto $(PROTO_DIR)/lessons.proto $(PROTO_DIR)/tasks.proto
 	
 
 build:
