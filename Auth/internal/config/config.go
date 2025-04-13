@@ -23,7 +23,7 @@ type Auth struct {
 }
 
 func MustNew() *Config {
-	configPath := flag.String("config", "./config/config.yaml", "path to config file")
+	configPath := flag.String("config", "./config.yaml", "path to config file")
 	flag.Parse()
 
 	v := viper.New()
