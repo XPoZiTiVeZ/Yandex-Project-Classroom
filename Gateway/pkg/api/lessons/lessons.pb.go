@@ -440,6 +440,7 @@ func (x *UpdateLessonRequest) GetDescription() string {
 
 type UpdateLessonResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Lesson        *Lesson                `protobuf:"bytes,1,opt,name=lesson,proto3" json:"lesson,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -472,6 +473,13 @@ func (x *UpdateLessonResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use UpdateLessonResponse.ProtoReflect.Descriptor instead.
 func (*UpdateLessonResponse) Descriptor() ([]byte, []int) {
 	return file_Common_Proto_lessons_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UpdateLessonResponse) GetLesson() *Lesson {
+	if x != nil {
+		return x.Lesson
+	}
+	return nil
 }
 
 type DeleteLessonRequest struct {
@@ -520,6 +528,7 @@ func (x *DeleteLessonRequest) GetLessonId() string {
 
 type DeleteLessonResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -554,6 +563,13 @@ func (*DeleteLessonResponse) Descriptor() ([]byte, []int) {
 	return file_Common_Proto_lessons_proto_rawDescGZIP(), []int{10}
 }
 
+func (x *DeleteLessonResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 var File_Common_Proto_lessons_proto protoreflect.FileDescriptor
 
 const file_Common_Proto_lessons_proto_rawDesc = "" +
@@ -585,12 +601,14 @@ const file_Common_Proto_lessons_proto_rawDesc = "" +
 	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x03 \x01(\tH\x01R\vdescription\x88\x01\x01B\b\n" +
 	"\x06_titleB\x0e\n" +
-	"\f_description\"\x16\n" +
-	"\x14UpdateLessonResponse\"2\n" +
+	"\f_description\"?\n" +
+	"\x14UpdateLessonResponse\x12'\n" +
+	"\x06lesson\x18\x01 \x01(\v2\x0f.lessons.LessonR\x06lesson\"2\n" +
 	"\x13DeleteLessonRequest\x12\x1b\n" +
-	"\tlesson_id\x18\x01 \x01(\tR\blessonId\"\x16\n" +
-	"\x14DeleteLessonResponse2\x82\x03\n" +
-	"\x0eLessonsService\x12K\n" +
+	"\tlesson_id\x18\x01 \x01(\tR\blessonId\"0\n" +
+	"\x14DeleteLessonResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\x81\x03\n" +
+	"\rLessonService\x12K\n" +
 	"\fCreateLesson\x12\x1c.lessons.CreateLessonRequest\x1a\x1d.lessons.CreateLessonResponse\x12B\n" +
 	"\tGetLesson\x12\x19.lessons.GetLessonRequest\x1a\x1a.lessons.GetLessonResponse\x12E\n" +
 	"\n" +
@@ -629,21 +647,22 @@ var file_Common_Proto_lessons_proto_depIdxs = []int32{
 	11, // 0: lessons.Lesson.created_at:type_name -> google.protobuf.Timestamp
 	0,  // 1: lessons.GetLessonResponse.lesson:type_name -> lessons.Lesson
 	0,  // 2: lessons.GetLessonsResponse.lessons:type_name -> lessons.Lesson
-	1,  // 3: lessons.LessonsService.CreateLesson:input_type -> lessons.CreateLessonRequest
-	3,  // 4: lessons.LessonsService.GetLesson:input_type -> lessons.GetLessonRequest
-	5,  // 5: lessons.LessonsService.GetLessons:input_type -> lessons.GetLessonsRequest
-	7,  // 6: lessons.LessonsService.UpdateLesson:input_type -> lessons.UpdateLessonRequest
-	9,  // 7: lessons.LessonsService.DeleteLesson:input_type -> lessons.DeleteLessonRequest
-	2,  // 8: lessons.LessonsService.CreateLesson:output_type -> lessons.CreateLessonResponse
-	4,  // 9: lessons.LessonsService.GetLesson:output_type -> lessons.GetLessonResponse
-	6,  // 10: lessons.LessonsService.GetLessons:output_type -> lessons.GetLessonsResponse
-	8,  // 11: lessons.LessonsService.UpdateLesson:output_type -> lessons.UpdateLessonResponse
-	10, // 12: lessons.LessonsService.DeleteLesson:output_type -> lessons.DeleteLessonResponse
-	8,  // [8:13] is the sub-list for method output_type
-	3,  // [3:8] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	0,  // 3: lessons.UpdateLessonResponse.lesson:type_name -> lessons.Lesson
+	1,  // 4: lessons.LessonService.CreateLesson:input_type -> lessons.CreateLessonRequest
+	3,  // 5: lessons.LessonService.GetLesson:input_type -> lessons.GetLessonRequest
+	5,  // 6: lessons.LessonService.GetLessons:input_type -> lessons.GetLessonsRequest
+	7,  // 7: lessons.LessonService.UpdateLesson:input_type -> lessons.UpdateLessonRequest
+	9,  // 8: lessons.LessonService.DeleteLesson:input_type -> lessons.DeleteLessonRequest
+	2,  // 9: lessons.LessonService.CreateLesson:output_type -> lessons.CreateLessonResponse
+	4,  // 10: lessons.LessonService.GetLesson:output_type -> lessons.GetLessonResponse
+	6,  // 11: lessons.LessonService.GetLessons:output_type -> lessons.GetLessonsResponse
+	8,  // 12: lessons.LessonService.UpdateLesson:output_type -> lessons.UpdateLessonResponse
+	10, // 13: lessons.LessonService.DeleteLesson:output_type -> lessons.DeleteLessonResponse
+	9,  // [9:14] is the sub-list for method output_type
+	4,  // [4:9] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_Common_Proto_lessons_proto_init() }

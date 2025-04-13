@@ -4,7 +4,7 @@
 // 	protoc        v3.21.12
 // source: Common/Proto/courses.proto
 
-package courses
+package course
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -116,7 +116,7 @@ func (x *Course) GetEndTime() *timestamppb.Timestamp {
 
 type CreateCourseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	TeacherId     string                 `protobuf:"bytes,1,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"`
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	Visibility    bool                   `protobuf:"varint,4,opt,name=visibility,proto3" json:"visibility,omitempty"`
@@ -156,9 +156,9 @@ func (*CreateCourseRequest) Descriptor() ([]byte, []int) {
 	return file_Common_Proto_courses_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CreateCourseRequest) GetUserId() string {
+func (x *CreateCourseRequest) GetTeacherId() string {
 	if x != nil {
-		return x.UserId
+		return x.TeacherId
 	}
 	return ""
 }
@@ -288,7 +288,7 @@ func (x *GetCourseRequest) GetCourseId() string {
 
 type GetCourseResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Course        *Course                `protobuf:"bytes,1,opt,name=course,proto3,oneof" json:"course,omitempty"`
+	Course        *Course                `protobuf:"bytes,1,opt,name=course,proto3" json:"course,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -734,7 +734,7 @@ var File_Common_Proto_courses_proto protoreflect.FileDescriptor
 
 const file_Common_Proto_courses_proto_rawDesc = "" +
 	"\n" +
-	"\x1aCommon/Proto/courses.proto\x12\acourses\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb4\x02\n" +
+	"\x1aCommon/Proto/courses.proto\x12\x06course\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb4\x02\n" +
 	"\x06Course\x12\x1b\n" +
 	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\x12\x1d\n" +
 	"\n" +
@@ -748,9 +748,10 @@ const file_Common_Proto_courses_proto_rawDesc = "" +
 	"start_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\tstartTime\x88\x01\x01\x12:\n" +
 	"\bend_time\x18\a \x01(\v2\x1a.google.protobuf.TimestampH\x01R\aendTime\x88\x01\x01B\r\n" +
 	"\v_start_timeB\v\n" +
-	"\t_end_time\"\x9e\x02\n" +
-	"\x13CreateCourseRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
+	"\t_end_time\"\xa4\x02\n" +
+	"\x13CreateCourseRequest\x12\x1d\n" +
+	"\n" +
+	"teacher_id\x18\x01 \x01(\tR\tteacherId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1e\n" +
 	"\n" +
@@ -764,14 +765,13 @@ const file_Common_Proto_courses_proto_rawDesc = "" +
 	"\x14CreateCourseResponse\x12\x1b\n" +
 	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\"/\n" +
 	"\x10GetCourseRequest\x12\x1b\n" +
-	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\"L\n" +
-	"\x11GetCourseResponse\x12,\n" +
-	"\x06course\x18\x01 \x01(\v2\x0f.courses.CourseH\x00R\x06course\x88\x01\x01B\t\n" +
-	"\a_course\",\n" +
+	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\";\n" +
+	"\x11GetCourseResponse\x12&\n" +
+	"\x06course\x18\x01 \x01(\v2\x0e.course.CourseR\x06course\",\n" +
 	"\x11GetCoursesRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"=\n" +
-	"\x12GetCoursesResponse\x12'\n" +
-	"\x06course\x18\x01 \x03(\v2\x0f.courses.CourseR\x06course\"\xda\x02\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"<\n" +
+	"\x12GetCoursesResponse\x12&\n" +
+	"\x06course\x18\x01 \x03(\v2\x0e.course.CourseR\x06course\"\xda\x02\n" +
 	"\x13UpdateCourseRequest\x12\x1b\n" +
 	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\x12\x19\n" +
 	"\x05title\x18\x03 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
@@ -797,16 +797,17 @@ const file_Common_Proto_courses_proto_rawDesc = "" +
 	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\".\n" +
 	"\x12EnrollUserResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess2\xc9\x03\n" +
-	"\x0eCoursesService\x12K\n" +
-	"\fCreateCourse\x12\x1c.courses.CreateCourseRequest\x1a\x1d.courses.CreateCourseResponse\x12B\n" +
-	"\tGetCourse\x12\x19.courses.GetCourseRequest\x1a\x1a.courses.GetCourseResponse\x12E\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\xbc\x03\n" +
+	"\rCourseService\x12I\n" +
+	"\fCreateCourse\x12\x1b.course.CreateCourseRequest\x1a\x1c.course.CreateCourseResponse\x12@\n" +
+	"\tGetCourse\x12\x18.course.GetCourseRequest\x1a\x19.course.GetCourseResponse\x12C\n" +
 	"\n" +
-	"GetCourses\x12\x1a.courses.GetCoursesRequest\x1a\x1b.courses.GetCoursesResponse\x12K\n" +
-	"\fUpdateCourse\x12\x1c.courses.UpdateCourseRequest\x1a\x1d.courses.UpdateCourseResponse\x12K\n" +
-	"\fDeleteCourse\x12\x1c.courses.DeleteCourseRequest\x1a\x1d.courses.DeleteCourseResponse\x12E\n" +
+	"GetCourses\x12\x19.course.GetCoursesRequest\x1a\x1a.course.GetCoursesResponse\x12I\n" +
+	"\fUpdateCourse\x12\x1b.course.UpdateCourseRequest\x1a\x1c.course.UpdateCourseResponse\x12I\n" +
+	"\fDeleteCourse\x12\x1b.course.DeleteCourseRequest\x1a\x1c.course.DeleteCourseResponse\x12C\n" +
 	"\n" +
-	"EnrollUser\x12\x1a.courses.EnrollUserRequest\x1a\x1b.courses.EnrollUserResponseB\rZ\vapi/coursesb\x06proto3"
+	"EnrollUser\x12\x19.course.EnrollUserRequest\x1a\x1a.course.EnrollUserResponseB\fZ\n" +
+	"api/courseb\x06proto3"
 
 var (
 	file_Common_Proto_courses_proto_rawDescOnce sync.Once
@@ -822,42 +823,42 @@ func file_Common_Proto_courses_proto_rawDescGZIP() []byte {
 
 var file_Common_Proto_courses_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_Common_Proto_courses_proto_goTypes = []any{
-	(*Course)(nil),                // 0: courses.Course
-	(*CreateCourseRequest)(nil),   // 1: courses.CreateCourseRequest
-	(*CreateCourseResponse)(nil),  // 2: courses.CreateCourseResponse
-	(*GetCourseRequest)(nil),      // 3: courses.GetCourseRequest
-	(*GetCourseResponse)(nil),     // 4: courses.GetCourseResponse
-	(*GetCoursesRequest)(nil),     // 5: courses.GetCoursesRequest
-	(*GetCoursesResponse)(nil),    // 6: courses.GetCoursesResponse
-	(*UpdateCourseRequest)(nil),   // 7: courses.UpdateCourseRequest
-	(*UpdateCourseResponse)(nil),  // 8: courses.UpdateCourseResponse
-	(*DeleteCourseRequest)(nil),   // 9: courses.DeleteCourseRequest
-	(*DeleteCourseResponse)(nil),  // 10: courses.DeleteCourseResponse
-	(*EnrollUserRequest)(nil),     // 11: courses.EnrollUserRequest
-	(*EnrollUserResponse)(nil),    // 12: courses.EnrollUserResponse
+	(*Course)(nil),                // 0: course.Course
+	(*CreateCourseRequest)(nil),   // 1: course.CreateCourseRequest
+	(*CreateCourseResponse)(nil),  // 2: course.CreateCourseResponse
+	(*GetCourseRequest)(nil),      // 3: course.GetCourseRequest
+	(*GetCourseResponse)(nil),     // 4: course.GetCourseResponse
+	(*GetCoursesRequest)(nil),     // 5: course.GetCoursesRequest
+	(*GetCoursesResponse)(nil),    // 6: course.GetCoursesResponse
+	(*UpdateCourseRequest)(nil),   // 7: course.UpdateCourseRequest
+	(*UpdateCourseResponse)(nil),  // 8: course.UpdateCourseResponse
+	(*DeleteCourseRequest)(nil),   // 9: course.DeleteCourseRequest
+	(*DeleteCourseResponse)(nil),  // 10: course.DeleteCourseResponse
+	(*EnrollUserRequest)(nil),     // 11: course.EnrollUserRequest
+	(*EnrollUserResponse)(nil),    // 12: course.EnrollUserResponse
 	(*timestamppb.Timestamp)(nil), // 13: google.protobuf.Timestamp
 }
 var file_Common_Proto_courses_proto_depIdxs = []int32{
-	13, // 0: courses.Course.start_time:type_name -> google.protobuf.Timestamp
-	13, // 1: courses.Course.end_time:type_name -> google.protobuf.Timestamp
-	13, // 2: courses.CreateCourseRequest.start_time:type_name -> google.protobuf.Timestamp
-	13, // 3: courses.CreateCourseRequest.end_time:type_name -> google.protobuf.Timestamp
-	0,  // 4: courses.GetCourseResponse.course:type_name -> courses.Course
-	0,  // 5: courses.GetCoursesResponse.course:type_name -> courses.Course
-	13, // 6: courses.UpdateCourseRequest.start_time:type_name -> google.protobuf.Timestamp
-	13, // 7: courses.UpdateCourseRequest.end_time:type_name -> google.protobuf.Timestamp
-	1,  // 8: courses.CoursesService.CreateCourse:input_type -> courses.CreateCourseRequest
-	3,  // 9: courses.CoursesService.GetCourse:input_type -> courses.GetCourseRequest
-	5,  // 10: courses.CoursesService.GetCourses:input_type -> courses.GetCoursesRequest
-	7,  // 11: courses.CoursesService.UpdateCourse:input_type -> courses.UpdateCourseRequest
-	9,  // 12: courses.CoursesService.DeleteCourse:input_type -> courses.DeleteCourseRequest
-	11, // 13: courses.CoursesService.EnrollUser:input_type -> courses.EnrollUserRequest
-	2,  // 14: courses.CoursesService.CreateCourse:output_type -> courses.CreateCourseResponse
-	4,  // 15: courses.CoursesService.GetCourse:output_type -> courses.GetCourseResponse
-	6,  // 16: courses.CoursesService.GetCourses:output_type -> courses.GetCoursesResponse
-	8,  // 17: courses.CoursesService.UpdateCourse:output_type -> courses.UpdateCourseResponse
-	10, // 18: courses.CoursesService.DeleteCourse:output_type -> courses.DeleteCourseResponse
-	12, // 19: courses.CoursesService.EnrollUser:output_type -> courses.EnrollUserResponse
+	13, // 0: course.Course.start_time:type_name -> google.protobuf.Timestamp
+	13, // 1: course.Course.end_time:type_name -> google.protobuf.Timestamp
+	13, // 2: course.CreateCourseRequest.start_time:type_name -> google.protobuf.Timestamp
+	13, // 3: course.CreateCourseRequest.end_time:type_name -> google.protobuf.Timestamp
+	0,  // 4: course.GetCourseResponse.course:type_name -> course.Course
+	0,  // 5: course.GetCoursesResponse.course:type_name -> course.Course
+	13, // 6: course.UpdateCourseRequest.start_time:type_name -> google.protobuf.Timestamp
+	13, // 7: course.UpdateCourseRequest.end_time:type_name -> google.protobuf.Timestamp
+	1,  // 8: course.CourseService.CreateCourse:input_type -> course.CreateCourseRequest
+	3,  // 9: course.CourseService.GetCourse:input_type -> course.GetCourseRequest
+	5,  // 10: course.CourseService.GetCourses:input_type -> course.GetCoursesRequest
+	7,  // 11: course.CourseService.UpdateCourse:input_type -> course.UpdateCourseRequest
+	9,  // 12: course.CourseService.DeleteCourse:input_type -> course.DeleteCourseRequest
+	11, // 13: course.CourseService.EnrollUser:input_type -> course.EnrollUserRequest
+	2,  // 14: course.CourseService.CreateCourse:output_type -> course.CreateCourseResponse
+	4,  // 15: course.CourseService.GetCourse:output_type -> course.GetCourseResponse
+	6,  // 16: course.CourseService.GetCourses:output_type -> course.GetCoursesResponse
+	8,  // 17: course.CourseService.UpdateCourse:output_type -> course.UpdateCourseResponse
+	10, // 18: course.CourseService.DeleteCourse:output_type -> course.DeleteCourseResponse
+	12, // 19: course.CourseService.EnrollUser:output_type -> course.EnrollUserResponse
 	14, // [14:20] is the sub-list for method output_type
 	8,  // [8:14] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
@@ -872,7 +873,6 @@ func file_Common_Proto_courses_proto_init() {
 	}
 	file_Common_Proto_courses_proto_msgTypes[0].OneofWrappers = []any{}
 	file_Common_Proto_courses_proto_msgTypes[1].OneofWrappers = []any{}
-	file_Common_Proto_courses_proto_msgTypes[4].OneofWrappers = []any{}
 	file_Common_Proto_courses_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

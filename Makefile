@@ -1,3 +1,20 @@
+.PHONY:
+	migrate-create
+	migrate-up
+	migrate-down
+	proto-gen
+	proto-gen-gateway
+	proto-gen-auth
+	proto-gen-course
+	proto-gen-lessons
+	proto-gen-tasks
+	proto-gen-notifications
+	proto-gen-chat
+	build
+	run
+	clean
+	help
+
 # Опционально загружаем переменные из .env, если файл существует, для POSTGRES_URL
 ifneq (,$(wildcard .env))
 	include .env
@@ -10,12 +27,13 @@ BINARY_NAME=classroom
 
 GO=go
 
-AUTH_GEN_DIR=./Auth/pkg/
-COURSE_GEN_DIR=./Courses/pkg/
-LESSON_GEN_DIR=./Lessons/pkg/
-TASK_GEN_DIR=./Tasks/pkg/
 GATEWAY_GEN_DIR=./Gateway/pkg/
-NOTIFICATION_GEN_DIR=./Notifications/pkg/
+
+AUTH_GEN_DIR=./Auth/pkg/
+COURSES_GEN_DIR=./Courses/pkg/
+LESSONS_GEN_DIR=./Lessons/pkg/
+TASKS_GEN_DIR=./Tasks/pkg/
+NOTIFICATIONS_GEN_DIR=./Notifications/pkg/
 CHAT_GEN_DIR=./Chat/pkg/
 
 PROTO_DIR=./Common/Proto
@@ -36,29 +54,43 @@ migrate-down:
 	@name=$(name);
 	@migrate -path=$(MIGRATIONS_DIR) -database=$(POSTGRES_URL) down $(name)
 
-# @protoc --proto_path=common/proto/$(AUTH_GEN_DIR) \
-# --go_out=common/api/$(name) --go_opt=paths=source_relative \
-# --go-grpc_out=common/api/$(name) --go-grpc_opt=paths=source_relative \
-# common/api/$(name)/$(name).proto
-
-# @mkdir -p $(NOTIFICATION_GEN_DIR)
-# @mkdir -p $(CHAT_GEN_DIR)
-
 ## generate: Генерация кода из .proto файлов
-proto-gen:
-	@mkdir -p $(AUTH_GEN_DIR)
-	@mkdir -p $(COURSE_GEN_DIR)
-	@mkdir -p $(LESSON_GEN_DIR)
-	@mkdir -p $(TASK_GEN_DIR)
-	@mkdir -p $(GATEWAY_GEN_DIR)
-	
-	@protoc --go_out=$(AUTH_GEN_DIR) --go-grpc_out=$(AUTH_GEN_DIR)  -I. $(PROTO_DIR)/auth.proto
-	@protoc --go_out=$(COURSE_GEN_DIR) --go-grpc_out=$(COURSE_GEN_DIR)  -I. $(PROTO_DIR)/course.proto
-	@protoc --go_out=$(LESSON_GEN_DIR) --go-grpc_out=$(LESSON_GEN_DIR)  -I. $(PROTO_DIR)/lessons.proto
-	@protoc --go_out=$(TASK_GEN_DIR) --go-grpc_out=$(TASK_GEN_DIR)  -I. $(PROTO_DIR)/tasks.proto
+proto-gen: \
+	proto-gen-gateway \
+	proto-gen-auth \
+	proto-gen-courses \
+	proto-gen-lessons \
+	proto-gen-tasks \
+# proto-gen-notifications \
+proto-gen-chat \
 
-	@protoc --go_out=$(GATEWAY_GEN_DIR) --go-grpc_out=$(GATEWAY_GEN_DIR)  -I. $(PROTO_DIR)/auth.proto $(PROTO_DIR)/course.proto $(PROTO_DIR)/lessons.proto $(PROTO_DIR)/tasks.proto
-	
+proto-gen-gateway:
+	@mkdir -p $(GATEWAY_GEN_DIR)
+	@protoc --go_out=$(GATEWAY_GEN_DIR) --go-grpc_out=$(GATEWAY_GEN_DIR)  -I. $(wildcard $(PROTO_DIR)/*.proto)
+
+proto-gen-auth:
+	@mkdir -p $(AUTH_GEN_DIR)
+	@protoc --go_out=$(AUTH_GEN_DIR) --go-grpc_out=$(AUTH_GEN_DIR)  -I. $(PROTO_DIR)/auth.proto
+
+proto-gen-courses:
+	@mkdir -p $(COURSES_GEN_DIR)
+	@protoc --go_out=$(COURSES_GEN_DIR) --go-grpc_out=$(COURSES_GEN_DIR)  -I. $(PROTO_DIR)/courses.proto
+
+proto-gen-lessons:
+	@mkdir -p $(LESSONS_GEN_DIR)
+	@protoc --go_out=$(LESSONS_GEN_DIR) --go-grpc_out=$(LESSONS_GEN_DIR)  -I. $(PROTO_DIR)/lessons.proto
+
+proto-gen-tasks:
+	@mkdir -p $(TASKS_GEN_DIR)
+	@protoc --go_out=$(TASKS_GEN_DIR) --go-grpc_out=$(TASKS_GEN_DIR)  -I. $(PROTO_DIR)/tasks.proto
+
+proto-gen-notifications:
+	@mkdir -p $(NOTIFICATIONS_GEN_DIR)
+	@protoc --go_out=$(NOTIFICATIONS_GEN_DIR) --go-grpc_out=$(NOTIFICATIONS_GEN_DIR)  -I. $(PROTO_DIR)/notifications.proto
+
+proto-gen-chat:
+	@mkdir -p $(CHAT_GEN_DIR)
+	@protoc --go_out=$(CHAT_GEN_DIR) --go-grpc_out=$(CHAT_GEN_DIR)  -I. $(PROTO_DIR)/chat.proto
 
 build:
 	if [ ! -f "go.mod" ]; then \
@@ -79,8 +111,10 @@ clean:
 ## help: Показать доступные команды
 help:
 	@echo "Доступные команды:"
-	@echo "  generate - Сгенерировать go файлы из proto\n\
-             !!! должен быть установлен protobuf-compiler"
+	@echo "  proto-gen - Сгенерировать go файлы из proto для всех сервисов\n\
+              !!! должен быть установлен protobuf-compiler"
+	@echo "  proto-gen-<сервис> - Сгенерировать go файлы из proto для <сервис>\n\
+                !!! должен быть установлен protobuf-compiler"
 	@echo "  build    - Собрать проект"
 	@echo "  run      - Запустить проект"
 	@echo "  clean    - Очистить скомпилированные файлы"
