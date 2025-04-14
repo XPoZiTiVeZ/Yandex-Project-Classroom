@@ -1,4 +1,4 @@
-FROM golang:1.24.2 AS builder
+FROM golang:1.24.2-alpine AS builder
 
 WORKDIR /app
 
@@ -12,11 +12,8 @@ FROM gcr.io/distroless/base-debian12
 
 WORKDIR /app
 
-
-COPY --from=builder /app/.env ./.env
-COPY --from=builder /app/config/config.yaml ./config.yaml
 COPY --from=builder /app/auth ./auth
 
 USER nonroot:nonroot
 
-CMD ["./auth", "-config", "./config.yaml"]
+CMD ["./auth"]

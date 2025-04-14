@@ -1,1 +1,2 @@
 port: 8001
+postgres_url: 'postgres://postgres:1324@postgres:5432/classroom?sslmode=disable'

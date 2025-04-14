@@ -28,7 +28,7 @@ type lessonController struct {
 	svc      LessonService
 	logger   *slog.Logger // Для логирования ошибок и дебага запросов
 	validate *validator.Validate
-	pb.UnimplementedLessonServiceServer
+	pb.UnimplementedLessonsServiceServer
 }
 
 func NewLessonController(logger *slog.Logger, svc LessonService) *lessonController {
@@ -41,7 +41,7 @@ func NewLessonController(logger *slog.Logger, svc LessonService) *lessonControll
 }
 
 func (c *lessonController) Init(srv *grpc.Server) {
-	pb.RegisterLessonServiceServer(srv, c)
+	pb.RegisterLessonsServiceServer(srv, c)
 }
 
 func (c *lessonController) CreateLesson(ctx context.Context, req *pb.CreateLessonRequest) (*pb.CreateLessonResponse, error) {
