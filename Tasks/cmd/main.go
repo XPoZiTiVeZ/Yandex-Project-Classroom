@@ -31,7 +31,8 @@ func main() {
 	defer postgres.Close()
 
 	taskRepo := repo.NewTaskRepo(postgres)
-	taskService := service.NewTaskService(logger, taskRepo)
+	statusesRepo := repo.NewStatusesRepo(postgres)
+	taskService := service.NewTaskService(logger, taskRepo, statusesRepo)
 	taskController := controller.NewTaskController(logger, taskService)
 
 	server := grpc.NewServer()

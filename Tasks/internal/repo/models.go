@@ -44,15 +44,15 @@ func (t Task) ToEntity() domain.Task {
 }
 
 type TaskStatus struct {
-	UserID      string `db:"student_id"`
-	TaskID      string `db:"task_id"`
-	IsCompleted bool   `db:"completed"`
+	UserID    string `db:"student_id"`
+	TaskID    string `db:"task_id"`
+	Completed bool   `db:"completed"`
 }
 
 func (t TaskStatus) ToEntity() domain.TaskStatus {
 	return domain.TaskStatus{
-		UserID:      t.UserID,
-		TaskID:      t.TaskID,
-		IsCompleted: t.IsCompleted,
+		UserID:    t.UserID,
+		TaskID:    t.TaskID,
+		Completed: t.Completed,
 	}
 }

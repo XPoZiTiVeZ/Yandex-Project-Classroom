@@ -13,7 +13,7 @@ service TasksService {
   rpc GetTasksForStudent(GetTasksForStudentRequest)   returns (GetTasksForStudentResponse);    // Получение заданий для пользователя со статусами
   rpc GetStudentStatuses(GetStudentStatusesRequest)   returns (GetStudentStatusesResponse);    // Получение статусов выполнения задания пользователями
   rpc UpdateTask(UpdateTaskRequest)             returns (UpdateTaskResponse);         // Редактирование задания
-  rpc ChangeStatusTask(ChangeStatusTaskRequest) returns (ChangeStatusTaskResponse);   // Поменять статус задания
+  rpc ChangeStatusTask(ChangeStatusTaskRequest) returns (ChangeStatusTaskResponse);   // Поменять статус задания для пользователя
   rpc DeleteTask(DeleteTaskRequest)             returns (DeleteTaskResponse);         // Удалить задание
 }
 

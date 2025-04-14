@@ -20,7 +20,7 @@ type StudentTask struct {
 }
 
 type TaskStatus struct {
-	UserID      string // Идентификатор пользователя
-	TaskID      string // Идентификатор задания
-	IsCompleted bool   // Флаг, указывающий на выполненность задания
+	UserID    string // Идентификатор пользователя
+	TaskID    string // Идентификатор задания
+	Completed bool   // Флаг, указывающий на выполненность задания
 }

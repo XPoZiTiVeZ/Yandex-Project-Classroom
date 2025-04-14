@@ -18,14 +18,14 @@ import (
 
 type TaskService interface {
 	Create(ctx context.Context, dto dto.CreateTaskDTO) (string, error)
+	Update(ctx context.Context, dto dto.UpdateTaskDTO) (domain.Task, error)
+	Delete(ctx context.Context, id string) error
 	GetTaskByID(ctx context.Context, id string) (domain.Task, error)
 	ListByCourseID(ctx context.Context, courseID string) ([]domain.Task, error)
 	ListByStudentID(ctx context.Context, studentID, courseID string) ([]domain.StudentTask, error)
-	Update(ctx context.Context, dto dto.UpdateTaskDTO) (domain.Task, error)
-	Delete(ctx context.Context, id string) error
 
 	ListTaskStatuses(ctx context.Context, taskID string) ([]domain.TaskStatus, error)
-	UpdateTaskStatus(ctx context.Context, taskID, userID string) (domain.TaskStatus, error)
+	ToggleTaskStatus(ctx context.Context, taskID, userID string) (domain.TaskStatus, error)
 }
 
 type taskController struct {
@@ -156,13 +156,13 @@ func (c *taskController) ChangeStatusTask(ctx context.Context, req *pb.ChangeSta
 		return nil, status.Error(codes.InvalidArgument, "invalid student id")
 	}
 
-	taskStatus, err := c.svc.UpdateTaskStatus(ctx, req.TaskId, req.StudentId)
+	taskStatus, err := c.svc.ToggleTaskStatus(ctx, req.TaskId, req.StudentId)
 	if err != nil {
 		c.logger.Error("failed to update task status", "err", err, "task_id", req.TaskId, "student_id", req.StudentId)
 		return nil, status.Error(codes.Internal, "failed to update task status")
 	}
 
-	return &pb.ChangeStatusTaskResponse{TaskStatus: taskStatus.IsCompleted}, nil
+	return &pb.ChangeStatusTaskResponse{TaskStatus: taskStatus.Completed}, nil
 }
 
 func (c *taskController) DeleteTask(ctx context.Context, req *pb.DeleteTaskRequest) (*pb.DeleteTaskResponse, error) {
@@ -224,7 +224,7 @@ func (c *taskController) GetStudentStatuses(ctx context.Context, req *pb.GetStud
 	for i, status := range statuses {
 		pbStatuses[i] = &pb.TaskStatus{
 			StudentId: status.UserID,
-			Completed: status.IsCompleted,
+			Completed: status.Completed,
 			TaskId:    status.TaskID,
 		}
 	}
