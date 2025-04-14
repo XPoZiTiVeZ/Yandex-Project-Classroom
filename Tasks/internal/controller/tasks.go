@@ -19,9 +19,12 @@ import (
 type TaskService interface {
 	Create(ctx context.Context, dto dto.CreateTaskDTO) (string, error)
 	GetTaskByID(ctx context.Context, id string) (domain.Task, error)
-	ListByCourseID(ctx context.Context, course_id string) ([]domain.Task, error)
+	ListByCourseID(ctx context.Context, courseID string) ([]domain.Task, error)
+	ListByStudentID(ctx context.Context, studentID, courseID string) ([]domain.StudentTask, error)
 	Update(ctx context.Context, dto dto.UpdateTaskDTO) (domain.Task, error)
 	Delete(ctx context.Context, id string) error
+
+	ListTaskStatuses(ctx context.Context, taskID string) ([]domain.TaskStatus, error)
 	UpdateTaskStatus(ctx context.Context, taskID, userID string) (domain.TaskStatus, error)
 }
 
@@ -175,4 +178,56 @@ func (c *taskController) DeleteTask(ctx context.Context, req *pb.DeleteTaskReque
 		return nil, status.Error(codes.Internal, "failed to delete task")
 	}
 	return &pb.DeleteTaskResponse{Success: true}, nil
+}
+
+func (c *taskController) GetTasksForStudent(ctx context.Context, req *pb.GetTasksForStudentRequest) (*pb.GetTasksForStudentResponse, error) {
+	if err := c.validate.Var(req.CourseId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid course id")
+	}
+	if err := c.validate.Var(req.StudentId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid student id")
+	}
+
+	tasks, err := c.svc.ListByStudentID(ctx, req.StudentId, req.CourseId)
+	if err != nil {
+		c.logger.Error("failed to get tasks for student", "err", err, "student_id", req.StudentId, "course_id", req.CourseId)
+		return nil, status.Error(codes.Internal, "failed to get tasks for student")
+	}
+
+	pbTasks := make([]*pb.StudentTask, len(tasks))
+	for i, task := range tasks {
+		pbTasks[i] = &pb.StudentTask{
+			TaskId:    task.ID,
+			Title:     task.Title,
+			Content:   task.Content,
+			CourseId:  task.CourseID,
+			Completed: task.Completed,
+			CreatedAt: timestamppb.New(task.CreatedAt),
+		}
+	}
+	return &pb.GetTasksForStudentResponse{Tasks: pbTasks}, nil
+
+}
+
+func (c *taskController) GetStudentStatuses(ctx context.Context, req *pb.GetStudentStatusesRequest) (*pb.GetStudentStatusesResponse, error) {
+	if err := c.validate.Var(req.TaskId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid task id")
+	}
+
+	statuses, err := c.svc.ListTaskStatuses(ctx, req.TaskId)
+	if err != nil {
+		c.logger.Error("failed to get student statuses", "err", err, "task_id", req.TaskId)
+		return nil, status.Error(codes.Internal, "failed to get student statuses")
+	}
+
+	pbStatuses := make([]*pb.TaskStatus, len(statuses))
+	for i, status := range statuses {
+		pbStatuses[i] = &pb.TaskStatus{
+			StudentId: status.UserID,
+			Completed: status.IsCompleted,
+			TaskId:    status.TaskID,
+		}
+	}
+
+	return &pb.GetStudentStatusesResponse{Statuses: pbStatuses}, nil
 }

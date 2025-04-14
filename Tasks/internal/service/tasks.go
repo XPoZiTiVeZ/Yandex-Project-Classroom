@@ -18,6 +18,8 @@ type TaskRepo interface {
 	GetTaskStatus(ctx context.Context, taskID, userID string) (domain.TaskStatus, error)
 	UpdateTaskStatus(ctx context.Context, status domain.TaskStatus) error
 	CreateTaskStatus(ctx context.Context, status domain.TaskStatus) error
+	ListTaskStatuses(ctx context.Context, taskID string) ([]domain.TaskStatus, error)
+	ListByStudentID(ctx context.Context, studentID, courseID string) ([]domain.StudentTask, error)
 }
 
 type taskService struct {
@@ -101,4 +103,12 @@ func (s *taskService) UpdateTaskStatus(ctx context.Context, taskID, userID strin
 
 	s.logger.Info("task status updated", "task_id", taskID, "user_id", userID, "status", currentStatus.IsCompleted)
 	return currentStatus, nil
+}
+
+func (s *taskService) ListTaskStatuses(ctx context.Context, taskID string) ([]domain.TaskStatus, error) {
+	return s.tasks.ListTaskStatuses(ctx, taskID)
+}
+
+func (s *taskService) ListByStudentID(ctx context.Context, studentID, courseID string) ([]domain.StudentTask, error) {
+	return s.tasks.ListByStudentID(ctx, studentID, courseID)
 }

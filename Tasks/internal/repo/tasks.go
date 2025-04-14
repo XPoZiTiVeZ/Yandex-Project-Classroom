@@ -152,3 +152,66 @@ func (r *taskRepo) CreateTaskStatus(ctx context.Context, status domain.TaskStatu
 	_, err := r.storage.ExecContext(ctx, query, args...)
 	return err
 }
+
+func (r *taskRepo) ListTaskStatuses(ctx context.Context, taskID string) ([]domain.TaskStatus, error) {
+	query, args := r.qb.
+		Select(
+			"t.task_id",
+			"e.student_id",
+			"COALESCE(ts.completed, FALSE) AS completed",
+		).
+		From("tasks t").
+		Join("enrollments e ON e.course_id = t.course_id").
+		LeftJoin("task_submissions ts ON ts.task_id = t.task_id AND ts.student_id = e.student_id").
+		Where(sq.Eq{"t.task_id": taskID}).
+		MustSql()
+
+	var statuses []TaskStatus
+	err := r.storage.SelectContext(ctx, &statuses, query, args...)
+	if errors.Is(err, sql.ErrNoRows) {
+		return []domain.TaskStatus{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]domain.TaskStatus, len(statuses))
+	for i, status := range statuses {
+		result[i] = status.ToEntity()
+	}
+
+	return result, nil
+}
+
+func (r *taskRepo) ListByStudentID(ctx context.Context, studentID, courseID string) ([]domain.StudentTask, error) {
+	query, args := r.qb.
+		Select(
+			"t.task_id AS task_id",
+			"t.title AS title",
+			"t.content AS content",
+			"COALESCE(ts.completed, FALSE) AS completed",
+			"t.created_at AS created_at",
+			"e.course_id AS course_id",
+		).
+		From("tasks t").
+		Join("enrollments e ON e.course_id = t.course_id").
+		LeftJoin("task_submissions ts ON ts.task_id = t.task_id AND ts.student_id = e.student_id").
+		Where(sq.Eq{"e.student_id": studentID, "t.course_id": courseID}).
+		MustSql()
+
+	var tasks []StudentTask
+	err := r.storage.SelectContext(ctx, &tasks, query, args...)
+	if errors.Is(err, sql.ErrNoRows) {
+		return []domain.StudentTask{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]domain.StudentTask, len(tasks))
+	for i, task := range tasks {
+		result[i] = task.ToEntity()
+	}
+
+	return result, nil
+}

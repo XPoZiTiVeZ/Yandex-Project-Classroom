@@ -7,12 +7,14 @@ option go_package = "api/tasks";
 package tasks;
 
 service TasksService {
-  rpc CreateTask(CreateTaskRequest)           returns (CreateTaskResponse);         // Создание задания
-  rpc GetTask(GetTaskRequest)                 returns (GetTaskResponse);            // Получение задания
-  rpc GetTasks(GetTasksRequest)               returns (GetTasksResponse);           // Получение заданий
-  rpc UpdateTask(UpdateTaskRequest)           returns (UpdateTaskResponse);         // Редактирование задания
-  rpc ChangeStatusTask(ChangeStatusTaskRequest) returns (ChangeStatusTaskResponse); // Поменять статус задания
-  rpc DeleteTask(DeleteTaskRequest)           returns (DeleteTaskResponse);         // Удалить задание
+  rpc CreateTask(CreateTaskRequest)             returns (CreateTaskResponse);         // Создание задания
+  rpc GetTask(GetTaskRequest)                   returns (GetTaskResponse);            // Получение задания
+  rpc GetTasks(GetTasksRequest)                 returns (GetTasksResponse);           // Получение заданий
+  rpc GetTasksForStudent(GetTasksForStudentRequest)   returns (GetTasksForStudentResponse);    // Получение заданий для пользователя со статусами
+  rpc GetStudentStatuses(GetStudentStatusesRequest)   returns (GetStudentStatusesResponse);    // Получение статусов выполнения задания пользователями
+  rpc UpdateTask(UpdateTaskRequest)             returns (UpdateTaskResponse);         // Редактирование задания
+  rpc ChangeStatusTask(ChangeStatusTaskRequest) returns (ChangeStatusTaskResponse);   // Поменять статус задания
+  rpc DeleteTask(DeleteTaskRequest)             returns (DeleteTaskResponse);         // Удалить задание
 }
 
 message Task {
@@ -21,6 +23,21 @@ message Task {
   string title = 3;                         // Название задания
   string content = 4;                       // Содержание задания
   google.protobuf.Timestamp created_at = 5; // Дата создания задания
+}
+
+message StudentTask {
+  string task_id = 1;                       // ID задания
+  string course_id = 2;                     // ID курса
+  string title = 3;                         // Название задания
+  string content = 4;                       // Содержание задания
+  bool completed = 5;                       // Выполнено ли задание
+  google.protobuf.Timestamp created_at = 6; // Дата создания задания
+}
+
+message TaskStatus {
+  string task_id = 1; // ID задания
+  string student_id = 2; // ID пользователя
+  bool completed = 3; // Выполнено ли задание
 }
 
 message CreateTaskRequest {
@@ -74,4 +91,21 @@ message DeleteTaskRequest {
 
 message DeleteTaskResponse {
   bool success = 1;
+}
+
+message GetTasksForStudentRequest {
+  string student_id = 1;
+  string course_id = 2;
+}
+
+message GetTasksForStudentResponse {
+  repeated StudentTask tasks = 1;
+}
+
+message GetStudentStatusesRequest {
+  string task_id = 1;
+}
+
+message GetStudentStatusesResponse {
+  repeated TaskStatus statuses = 1;
 }
