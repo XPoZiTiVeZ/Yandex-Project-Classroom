@@ -1,0 +1,53 @@
+stages:
+  - test
+
+# Общие настройки для всех тестов
+.test_template: &test_config
+  stage: test
+  image: golang:1.24.2
+  before_script:
+    - chmod +x ./Pipelines/test/${CI_JOB_NAME#*_}_test.sh
+  script:
+    - ./Pipelines/test/${CI_JOB_NAME#*_}_test.sh
+    - EXIT_CODE=$?
+    - if [ $EXIT_CODE -ne 0 ]; then
+        echo "❌ Merge request declined (${CI_JOB_NAME#*_} tests failed)";
+        exit $EXIT_CODE;
+      fi
+    - echo "✅ Merge request approved (${CI_JOB_NAME#*_} tests passed)";
+
+.test_rules: &test_rules
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME == "dev-${CI_JOB_NAME#*_}"
+      when: always
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "dev"
+      when: always
+
+# Задачи для каждой ветки
+test_gateway:
+  <<: *test_config
+  extends: .test_rules
+
+test_auth:
+  <<: *test_config
+  extends: .test_rules
+
+test_courses:
+  <<: *test_config
+  extends: .test_rules
+
+test_lessons:
+  <<: *test_config
+  extends: .test_rules
+
+test_tasks:
+  <<: *test_config
+  extends: .test_rules
+
+# test_notifications:
+#   <<: *test_config
+#   extends: .test_rules
+
+# test_chat:
+#   <<: *test_config
+#   extends: .test_rules
