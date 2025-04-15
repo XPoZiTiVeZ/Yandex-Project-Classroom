@@ -27,8 +27,8 @@ func NewLessonRepo(storage *sqlx.DB) *lessonRepo {
 func (r *lessonRepo) Create(ctx context.Context, dto dto.CreateLessonDTO) (domain.Lesson, error) {
 	query, args := r.qb.
 		Insert("lessons").
-		Columns("course_id", "title", "description").
-		Values(dto.CourseID, dto.Title, dto.Description).
+		Columns("course_id", "title", "content").
+		Values(dto.CourseID, dto.Title, dto.Content).
 		Suffix("RETURNING *").
 		MustSql()
 
@@ -83,8 +83,8 @@ func (r *lessonRepo) Update(ctx context.Context, dto dto.UpdateLessonDTO) (domai
 	if dto.Title != nil {
 		m["title"] = *dto.Title
 	}
-	if dto.Description != nil {
-		m["description"] = *dto.Description
+	if dto.Content != nil {
+		m["content"] = *dto.Content
 	}
 	query, args := r.qb.
 		Update("lessons").
