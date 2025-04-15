@@ -1,0 +1,9 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+packages:
+  Classroom/Lessons/internal/controller:
+    interfaces:
+      LessonService:
+  Classroom/Lessons/internal/service:
+    interfaces:
+      LessonRepo:
