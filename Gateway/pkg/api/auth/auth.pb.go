@@ -22,14 +22,13 @@ const (
 )
 
 type RegisterRequest struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Email          string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`                                         // Почта пользователя
-	Password       string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`                                   // Пароль пользователя
-	PasswordRepeat string                 `protobuf:"bytes,3,opt,name=password_repeat,json=passwordRepeat,proto3" json:"password_repeat,omitempty"` // Повтор пароля
-	FirstName      string                 `protobuf:"bytes,4,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`                // Имя пользователя
-	LastName       string                 `protobuf:"bytes,5,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`                   // Фамилия пользователя
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`                          // Почта пользователя
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`                    // Пароль пользователя
+	FirstName     string                 `protobuf:"bytes,4,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"` // Имя пользователя
+	LastName      string                 `protobuf:"bytes,5,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`    // Фамилия пользователя
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RegisterRequest) Reset() {
@@ -72,13 +71,6 @@ func (x *RegisterRequest) GetEmail() string {
 func (x *RegisterRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
-	}
-	return ""
-}
-
-func (x *RegisterRequest) GetPasswordRepeat() string {
-	if x != nil {
-		return x.PasswordRepeat
 	}
 	return ""
 }
@@ -417,11 +409,10 @@ var File_Common_Proto_auth_proto protoreflect.FileDescriptor
 
 const file_Common_Proto_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x17Common/Proto/auth.proto\x12\x04auth\"\xa8\x01\n" +
+	"\x17Common/Proto/auth.proto\x12\x04auth\"\x7f\n" +
 	"\x0fRegisterRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\x12'\n" +
-	"\x0fpassword_repeat\x18\x03 \x01(\tR\x0epasswordRepeat\x12\x1d\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x04 \x01(\tR\tfirstName\x12\x1b\n" +
 	"\tlast_name\x18\x05 \x01(\tR\blastName\"+\n" +

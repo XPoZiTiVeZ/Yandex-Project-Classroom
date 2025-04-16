@@ -9,14 +9,12 @@ type RegisterRequest struct {
 	FirstName      string `json:"first_name"`
 	LastName       string `json:"last_name"`
 	Password       string `json:"password"`
-	PasswordRepeat string `json:"password_repeat"`
 }
 
 func NewRegisterRequest(req RegisterRequest) *pb.RegisterRequest {
 	return &pb.RegisterRequest{
 		Email:          req.Email,
 		Password:       req.Password,
-		PasswordRepeat: req.PasswordRepeat,
 		FirstName:      req.FirstName,
 		LastName:       req.LastName,
 	}

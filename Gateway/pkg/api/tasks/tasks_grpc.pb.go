@@ -19,12 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TasksService_CreateTask_FullMethodName       = "/tasks.TasksService/CreateTask"
-	TasksService_GetTask_FullMethodName          = "/tasks.TasksService/GetTask"
-	TasksService_GetTasks_FullMethodName         = "/tasks.TasksService/GetTasks"
-	TasksService_UpdateTask_FullMethodName       = "/tasks.TasksService/UpdateTask"
-	TasksService_ChangeStatusTask_FullMethodName = "/tasks.TasksService/ChangeStatusTask"
-	TasksService_DeleteTask_FullMethodName       = "/tasks.TasksService/DeleteTask"
+	TasksService_CreateTask_FullMethodName         = "/tasks.TasksService/CreateTask"
+	TasksService_GetTask_FullMethodName            = "/tasks.TasksService/GetTask"
+	TasksService_GetTasks_FullMethodName           = "/tasks.TasksService/GetTasks"
+	TasksService_GetTasksForStudent_FullMethodName = "/tasks.TasksService/GetTasksForStudent"
+	TasksService_GetStudentStatuses_FullMethodName = "/tasks.TasksService/GetStudentStatuses"
+	TasksService_UpdateTask_FullMethodName         = "/tasks.TasksService/UpdateTask"
+	TasksService_ChangeStatusTask_FullMethodName   = "/tasks.TasksService/ChangeStatusTask"
+	TasksService_DeleteTask_FullMethodName         = "/tasks.TasksService/DeleteTask"
 )
 
 // TasksServiceClient is the client API for TasksService service.
@@ -34,6 +36,8 @@ type TasksServiceClient interface {
 	CreateTask(ctx context.Context, in *CreateTaskRequest, opts ...grpc.CallOption) (*CreateTaskResponse, error)
 	GetTask(ctx context.Context, in *GetTaskRequest, opts ...grpc.CallOption) (*GetTaskResponse, error)
 	GetTasks(ctx context.Context, in *GetTasksRequest, opts ...grpc.CallOption) (*GetTasksResponse, error)
+	GetTasksForStudent(ctx context.Context, in *GetTasksForStudentRequest, opts ...grpc.CallOption) (*GetTasksForStudentResponse, error)
+	GetStudentStatuses(ctx context.Context, in *GetStudentStatusesRequest, opts ...grpc.CallOption) (*GetStudentStatusesResponse, error)
 	UpdateTask(ctx context.Context, in *UpdateTaskRequest, opts ...grpc.CallOption) (*UpdateTaskResponse, error)
 	ChangeStatusTask(ctx context.Context, in *ChangeStatusTaskRequest, opts ...grpc.CallOption) (*ChangeStatusTaskResponse, error)
 	DeleteTask(ctx context.Context, in *DeleteTaskRequest, opts ...grpc.CallOption) (*DeleteTaskResponse, error)
@@ -77,6 +81,26 @@ func (c *tasksServiceClient) GetTasks(ctx context.Context, in *GetTasksRequest, 
 	return out, nil
 }
 
+func (c *tasksServiceClient) GetTasksForStudent(ctx context.Context, in *GetTasksForStudentRequest, opts ...grpc.CallOption) (*GetTasksForStudentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTasksForStudentResponse)
+	err := c.cc.Invoke(ctx, TasksService_GetTasksForStudent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tasksServiceClient) GetStudentStatuses(ctx context.Context, in *GetStudentStatusesRequest, opts ...grpc.CallOption) (*GetStudentStatusesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetStudentStatusesResponse)
+	err := c.cc.Invoke(ctx, TasksService_GetStudentStatuses_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tasksServiceClient) UpdateTask(ctx context.Context, in *UpdateTaskRequest, opts ...grpc.CallOption) (*UpdateTaskResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateTaskResponse)
@@ -114,6 +138,8 @@ type TasksServiceServer interface {
 	CreateTask(context.Context, *CreateTaskRequest) (*CreateTaskResponse, error)
 	GetTask(context.Context, *GetTaskRequest) (*GetTaskResponse, error)
 	GetTasks(context.Context, *GetTasksRequest) (*GetTasksResponse, error)
+	GetTasksForStudent(context.Context, *GetTasksForStudentRequest) (*GetTasksForStudentResponse, error)
+	GetStudentStatuses(context.Context, *GetStudentStatusesRequest) (*GetStudentStatusesResponse, error)
 	UpdateTask(context.Context, *UpdateTaskRequest) (*UpdateTaskResponse, error)
 	ChangeStatusTask(context.Context, *ChangeStatusTaskRequest) (*ChangeStatusTaskResponse, error)
 	DeleteTask(context.Context, *DeleteTaskRequest) (*DeleteTaskResponse, error)
@@ -135,6 +161,12 @@ func (UnimplementedTasksServiceServer) GetTask(context.Context, *GetTaskRequest)
 }
 func (UnimplementedTasksServiceServer) GetTasks(context.Context, *GetTasksRequest) (*GetTasksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTasks not implemented")
+}
+func (UnimplementedTasksServiceServer) GetTasksForStudent(context.Context, *GetTasksForStudentRequest) (*GetTasksForStudentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTasksForStudent not implemented")
+}
+func (UnimplementedTasksServiceServer) GetStudentStatuses(context.Context, *GetStudentStatusesRequest) (*GetStudentStatusesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStudentStatuses not implemented")
 }
 func (UnimplementedTasksServiceServer) UpdateTask(context.Context, *UpdateTaskRequest) (*UpdateTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateTask not implemented")
@@ -220,6 +252,42 @@ func _TasksService_GetTasks_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TasksService_GetTasksForStudent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTasksForStudentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TasksServiceServer).GetTasksForStudent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TasksService_GetTasksForStudent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TasksServiceServer).GetTasksForStudent(ctx, req.(*GetTasksForStudentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TasksService_GetStudentStatuses_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStudentStatusesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TasksServiceServer).GetStudentStatuses(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TasksService_GetStudentStatuses_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TasksServiceServer).GetStudentStatuses(ctx, req.(*GetStudentStatusesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TasksService_UpdateTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateTaskRequest)
 	if err := dec(in); err != nil {
@@ -292,6 +360,14 @@ var TasksService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTasks",
 			Handler:    _TasksService_GetTasks_Handler,
+		},
+		{
+			MethodName: "GetTasksForStudent",
+			Handler:    _TasksService_GetTasksForStudent_Handler,
+		},
+		{
+			MethodName: "GetStudentStatuses",
+			Handler:    _TasksService_GetStudentStatuses_Handler,
 		},
 		{
 			MethodName: "UpdateTask",

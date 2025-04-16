@@ -848,7 +848,7 @@ func (x *IsTeacherRequest) GetCourseId() string {
 
 type IsTeacherResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	IsTeacher     bool                   `protobuf:"varint,1,opt,name=is_teacher,json=isTeacher,proto3" json:"is_teacher,omitempty"` // Является ли пользователь учителем курса
+	IsTeacher     bool                   `protobuf:"varint,1,opt,name=is_teacher,json=isTeacher,proto3" json:"is_teacher,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -944,7 +944,7 @@ func (x *IsMemberRequest) GetCourseId() string {
 
 type IsMemberResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	IsMember      bool                   `protobuf:"varint,1,opt,name=is_member,json=isMember,proto3" json:"is_member,omitempty"` // Является ли пользователь студентом курса
+	IsMember      bool                   `protobuf:"varint,1,opt,name=is_member,json=isMember,proto3" json:"is_member,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -989,8 +989,7 @@ func (x *IsMemberResponse) GetIsMember() bool {
 type GetCourseMembersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CourseId      string                 `protobuf:"bytes,1,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`
-	Index         int32                  `protobuf:"varint,2,opt,name=index,proto3" json:"index,omitempty"` // Индекс текущего среза
-	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"` // Количество пользователей в срезе
+	Index         int32                  `protobuf:"varint,2,opt,name=index,proto3" json:"index,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1039,19 +1038,12 @@ func (x *GetCourseMembersRequest) GetIndex() int32 {
 	return 0
 }
 
-func (x *GetCourseMembersRequest) GetLimit() int32 {
-	if x != nil {
-		return x.Limit
-	}
-	return 0
-}
-
 type Member struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`          // ID ученика
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`                          // Почта ученика
-	FirstName     string                 `protobuf:"bytes,3,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"` // Имя ученика
-	LastName      string                 `protobuf:"bytes,4,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`    // Фамилия ученика
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	FirstName     string                 `protobuf:"bytes,3,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName      string                 `protobuf:"bytes,4,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1116,9 +1108,9 @@ func (x *Member) GetLastName() string {
 
 type GetCourseMembersResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`    // Общее количество пользователей курса
-	Index         int32                  `protobuf:"varint,2,opt,name=index,proto3" json:"index,omitempty"`    // Индекс текущего среза
-	Members       []*Member              `protobuf:"bytes,3,rep,name=members,proto3" json:"members,omitempty"` // Список пользователей курса
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Index         int32                  `protobuf:"varint,2,opt,name=index,proto3" json:"index,omitempty"`
+	Members       []*Member              `protobuf:"bytes,3,rep,name=members,proto3" json:"members,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1252,11 +1244,10 @@ const file_Common_Proto_courses_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tcourse_id\x18\x02 \x01(\tR\bcourseId\"/\n" +
 	"\x10IsMemberResponse\x12\x1b\n" +
-	"\tis_member\x18\x01 \x01(\bR\bisMember\"b\n" +
+	"\tis_member\x18\x01 \x01(\bR\bisMember\"L\n" +
 	"\x17GetCourseMembersRequest\x12\x1b\n" +
 	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\x12\x14\n" +
-	"\x05index\x18\x02 \x01(\x05R\x05index\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\x05R\x05limit\"s\n" +
+	"\x05index\x18\x02 \x01(\x05R\x05index\"s\n" +
 	"\x06Member\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1d\n" +

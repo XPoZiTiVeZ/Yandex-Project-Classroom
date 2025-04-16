@@ -14,7 +14,6 @@ service AuthService {
 message RegisterRequest {
   string email = 1;      // Почта пользователя
   string password = 2;   // Пароль пользователя
-  string password_repeat = 3; // Повтор пароля
   string first_name = 4; // Имя пользователя
   string last_name = 5;  // Фамилия пользователя
 }
