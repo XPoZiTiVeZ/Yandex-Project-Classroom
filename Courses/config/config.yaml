@@ -1,0 +1,2 @@
+port: 50052
+postgres_url: 'postgres://postgres:password@localhost:5432/classroom?sslmode=disable'
