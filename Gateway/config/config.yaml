@@ -2,26 +2,26 @@ host:
     address: 0.0.0.0
     port: 8080
 auth:
-    address: 127.0.0.1
+    address: auth
     port: 50051
     enabled: false
 courses:
-    address: 127.0.0.1
+    address: courses
     port: 50052
     enabled: false
 lessons:
-    address: 127.0.0.1
+    address: lessons
     port: 50053
     enabled: false
 tasks:
-    address: 127.0.0.1
+    address: tasks
     port: 50054
     enabled: false
 notifications:
-    address: 127.0.0.1
+    address: notifications
     port: 50055
     enabled: false
 chat:
-    address: 127.0.0.1
+    address: chat
     port: 50056
     enabled: false

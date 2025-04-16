@@ -1,5 +1,5 @@
-port: 8080
-postgres_url: 'postgres://postgres:1324@postgres:5432/classroom?sslmode=disable'
+port: 50051
+postgres_url: 'postgres://postgres:password@postgres:5432/classroom?sslmode=disable'
 redis_url: 'redis://redis:6379/0'
 auth:
   jwt_secret: secret
