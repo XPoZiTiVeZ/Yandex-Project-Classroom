@@ -18,14 +18,14 @@ message Lesson {
   string lesson_id = 1;                     // ID урока
   string course_id = 2;                     // ID курса
   string title = 3;                         // Название урока
-  string description = 4;                   // Описание урока
+  string content = 4;                       // Описание урока
   google.protobuf.Timestamp created_at = 5; // Время создания урока
 }
 
 message CreateLessonRequest {
   string course_id = 1;
   string title = 2;
-  string description = 3;
+  string content = 3;
 }
 
 message CreateLessonResponse {
@@ -51,7 +51,7 @@ message GetLessonsResponse {
 message UpdateLessonRequest {
   string lesson_id = 1;
   optional string title = 2;
-  optional string description = 3;
+  optional string content = 3;
 }
 
 message UpdateLessonResponse {
