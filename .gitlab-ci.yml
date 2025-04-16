@@ -2,7 +2,7 @@ stages:
   - test
 
 # Общие настройки для всех тестов
-.test_template: &test_config
+.test_config: &test_config
   stage: test
   image: golang:1.24.2
   allow_failure: false
