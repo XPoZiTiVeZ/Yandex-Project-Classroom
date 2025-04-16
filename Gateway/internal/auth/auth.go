@@ -50,7 +50,7 @@ func NewAuthServiceClient(address string, port int, DefaultTimeout *time.Duratio
 	}, nil
 }
 
-func (s AuthServiceClient) Register(ctx context.Context, req RegisterRequest) (RegisterResponse, error) {
+func (s *AuthServiceClient) Register(ctx context.Context, req RegisterRequest) (RegisterResponse, error) {
 	slog.Debug("registering user", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
@@ -64,7 +64,7 @@ func (s AuthServiceClient) Register(ctx context.Context, req RegisterRequest) (R
 	return NewRegisterResponse(resp), nil
 }
 
-func (s AuthServiceClient) Login(ctx context.Context, req LoginRequest) (LoginResponse, error) {
+func (s *AuthServiceClient) Login(ctx context.Context, req LoginRequest) (LoginResponse, error) {
 	slog.Debug("logging in user", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
@@ -78,7 +78,7 @@ func (s AuthServiceClient) Login(ctx context.Context, req LoginRequest) (LoginRe
 	return NewLoginResponse(resp), nil
 }
 
-func (s AuthServiceClient) Refresh(ctx context.Context, req RefreshRequest) (RefreshResponse, error) {
+func (s *AuthServiceClient) Refresh(ctx context.Context, req RefreshRequest) (RefreshResponse, error) {
 	slog.Debug("refreshing user token", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
@@ -92,7 +92,7 @@ func (s AuthServiceClient) Refresh(ctx context.Context, req RefreshRequest) (Ref
 	return NewRefreshResponse(resp), nil
 }
 
-func (s AuthServiceClient) Logout(ctx context.Context, req LogoutRequest) (LogoutResponse, error) {
+func (s *AuthServiceClient) Logout(ctx context.Context, req LogoutRequest) (LogoutResponse, error) {
 	slog.Debug("logging out user", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()

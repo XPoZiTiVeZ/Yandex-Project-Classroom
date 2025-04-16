@@ -46,7 +46,7 @@ func NewTasksServiceClient(address string, port int, DefaultTimeout *time.Durati
 	}, nil
 }
 
-func (s TasksServiceClient) CreateTask(ctx context.Context, req CreateTaskRequest) (CreateTaskResponse, error) {
+func (s *TasksServiceClient) CreateTask(ctx context.Context, req CreateTaskRequest) (CreateTaskResponse, error) {
 	slog.Debug("creating task", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
@@ -60,7 +60,7 @@ func (s TasksServiceClient) CreateTask(ctx context.Context, req CreateTaskReques
 	return NewCreateTaskResponse(resp), nil
 }
 
-func (s TasksServiceClient) GetTask(ctx context.Context, req GetTaskRequest) (GetTaskResponse, error) {
+func (s *TasksServiceClient) GetTask(ctx context.Context, req GetTaskRequest) (GetTaskResponse, error) {
 	slog.Debug("getting task", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
@@ -74,7 +74,7 @@ func (s TasksServiceClient) GetTask(ctx context.Context, req GetTaskRequest) (Ge
 	return NewGetTaskResponse(resp), nil
 }
 
-func (s TasksServiceClient) GetTasks(ctx context.Context, req GetTasksRequest) (GetTasksResponse, error) {
+func (s *TasksServiceClient) GetTasks(ctx context.Context, req GetTasksRequest) (GetTasksResponse, error) {
 	slog.Debug("getting tasks", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
@@ -88,7 +88,7 @@ func (s TasksServiceClient) GetTasks(ctx context.Context, req GetTasksRequest) (
 	return NewGetTasksResponse(resp), nil
 }
 
-func (s TasksServiceClient) UpdateTask(ctx context.Context, req UpdateTaskRequest) (UpdateTaskResponse, error) {
+func (s *TasksServiceClient) UpdateTask(ctx context.Context, req UpdateTaskRequest) (UpdateTaskResponse, error) {
 	slog.Debug("updating task", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
@@ -102,7 +102,7 @@ func (s TasksServiceClient) UpdateTask(ctx context.Context, req UpdateTaskReques
 	return NewUpdateTaskResponse(resp), nil
 }
 
-func (s TasksServiceClient) ChangeStatusTask(ctx context.Context, req ChangeStatusTaskRequest) (ChangeStatusTaskResponse, error) {
+func (s *TasksServiceClient) ChangeStatusTask(ctx context.Context, req ChangeStatusTaskRequest) (ChangeStatusTaskResponse, error) {
 	slog.Debug("changing task status", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
@@ -116,7 +116,7 @@ func (s TasksServiceClient) ChangeStatusTask(ctx context.Context, req ChangeStat
 	return NewChangeStatusTaskResponse(resp), nil
 }
 
-func (s TasksServiceClient) DeleteTask(ctx context.Context, req DeleteTaskRequest) (DeleteTaskResponse, error) {
+func (s *TasksServiceClient) DeleteTask(ctx context.Context, req DeleteTaskRequest) (DeleteTaskResponse, error) {
 	slog.Debug("deleting task", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()

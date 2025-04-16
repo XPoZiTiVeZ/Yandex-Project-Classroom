@@ -3,6 +3,7 @@ package server
 import (
 	"Classroom/Gateway/internal/auth"
 	"Classroom/Gateway/internal/courses"
+	he "Classroom/Gateway/internal/errors"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -21,7 +22,7 @@ func HandlerWrapper(handler func(w http.ResponseWriter, r *http.Request) (error,
 		if err != nil {
 			slog.Debug("unmarshal error", slog.Any("error", err))
 
-			InternalError(w)
+			he.InternalError(w)
 			return
 		}
 
@@ -41,7 +42,7 @@ func HandlerWrapper(handler func(w http.ResponseWriter, r *http.Request) (error,
 		if err != nil {
 			slog.Debug("marshal error", slog.Any("error", err))
 
-			InternalError(w)
+			he.InternalError(w)
 			return
 		}
 
@@ -60,21 +61,13 @@ func (s *Server) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			http.Error(
-				w,
-				"Authorization header required",
-				http.StatusUnauthorized,
-			)
+			http.Error(w, "Authorization header required", http.StatusUnauthorized)
 			return
 		}
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			http.Error(
-				w,
-				"Invalid format of authorization header",
-				http.StatusUnauthorized,
-			)
+			http.Error(w, "Invalid format of authorization header", http.StatusUnauthorized)
 			return
 		}
 
@@ -84,11 +77,7 @@ func (s *Server) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			http.Error(
-				w,
-				"Invalid access token",
-				http.StatusUnauthorized,
-			)
+			http.Error(w, "Invalid access token", http.StatusUnauthorized)
 			return
 		}
 
@@ -101,42 +90,74 @@ func (s *Server) IsTeacher(next http.HandlerFunc) http.HandlerFunc {
 	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims, ok := r.Context().Value("claims").(*AuthClaims)
 		if !ok {
-			http.Error(
-				w,
-				"Claims not found",
-				http.StatusUnauthorized,
-			)
+			he.NotAuthenticated(w)
 			return
 		}
 
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			InternalError(w)
+			he.InternalError(w)
 			return
 		}
 
-		var req courses.GetCourseRequest
+		var req courses.IsTeacherRequest
 		err = json.Unmarshal(body, &req)
 		if err != nil {
-			BadRequest(w)
+			he.BadRequest(w)
 			return
 		}
+		req.UserID = claims.UserID
 
-		resp, err := s.Courses.GetCourse(r.Context(), req)
+		resp, err := s.Courses.IsTeacher(r.Context(), req)
 		if err != nil {
-			slog.Debug("courses GetCourse error", slog.Any("error", err))
+			slog.Debug("courses.IsTeacher error", slog.Any("error", err))
 
-			InternalError(w)
+			he.InternalError(w)
 			return
 		}
 
-		if claims.UserID != resp.Course.TeacherID || claims.IsSuperUser {
-			http.Error(
-				w,
-				"Insufficient permissions",
-				http.StatusForbidden,
-			)
-			
+		if resp.IsTeacher || claims.IsSuperUser {
+			he.NotTacher(w)
+			return
+		}
+
+		r.Body = io.NopCloser(bytes.NewReader(body))
+		next.ServeHTTP(w, r)
+	}))
+}
+
+func (s *Server) IsMember(next http.HandlerFunc) http.HandlerFunc {
+	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		claims, ok := r.Context().Value("claims").(*AuthClaims)
+		if !ok {
+			he.NotAuthenticated(w)
+			return
+		}
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			he.InternalError(w)
+			return
+		}
+
+		var req courses.IsMemberRequest
+		err = json.Unmarshal(body, &req)
+		if err != nil {
+			he.BadRequest(w)
+			return
+		}
+		req.UserID = claims.UserID
+
+		resp, err := s.Courses.IsMember(r.Context(), req)
+		if err != nil {
+			slog.Debug("courses.IsMember error", slog.Any("error", err))
+
+			he.InternalError(w)
+			return
+		}
+
+		if !resp.IsMember && !claims.IsSuperUser {
+			he.NotMember(w)
 			return
 		}
 
@@ -149,20 +170,12 @@ func (s *Server) IsSuperUser(next http.HandlerFunc) http.HandlerFunc {
 	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims, ok := r.Context().Value("claims").(*AuthClaims)
 		if !ok {
-			http.Error(
-				w,
-				"Claims not found",
-				http.StatusUnauthorized,
-			)
+			he.NotAuthenticated(w)
 			return
 		}
 
 		if !claims.IsSuperUser {
-			http.Error(
-				w,
-				"Insufficient permissions",
-				http.StatusForbidden,
-			)
+			he.NotSuperUser(w)
 			return
 		}
 

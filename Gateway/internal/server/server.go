@@ -41,7 +41,7 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 	if s.Config.Auth.Enabled && s.Config.Courses.Enabled {
 		mux.HandleFunc("/api/courses/enroll", s.IsTeacher(HandlerWrapper(s.EnrollUserHandler)))
 		mux.HandleFunc("/api/courses/create", s.IsAuthenticated(HandlerWrapper(s.CreateCourseHandler)))
-		mux.HandleFunc("/api/courses/course", s.IsAuthenticated(HandlerWrapper(s.GetCourseHandler)))
+		mux.HandleFunc("/api/courses/course", s.IsMember(HandlerWrapper(s.GetCourseHandler)))
 		mux.HandleFunc("/api/courses/courses", s.IsAuthenticated(HandlerWrapper(s.GetCoursesHandler)))
 		mux.HandleFunc("/api/courses/course/update", s.IsTeacher(HandlerWrapper(s.UpdateCourseHandler)))
 		mux.HandleFunc("/api/courses/course/delete", s.IsTeacher(HandlerWrapper(s.DeleteCourseHandler)))
@@ -50,8 +50,8 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 	// Lessons handlers
 	if s.Config.Auth.Enabled && s.Config.Courses.Enabled && s.Config.Lessons.Enabled {
 		mux.HandleFunc("/api/lessons/create", s.IsTeacher(HandlerWrapper(s.CreateLessonHandler)))
-		mux.HandleFunc("/api/lessons/lesson", s.IsAuthenticated(HandlerWrapper(s.GetLessonHandler)))
-		mux.HandleFunc("/api/lessons/lessons", s.IsAuthenticated(HandlerWrapper(s.GetLessonsHandler)))
+		mux.HandleFunc("/api/lessons/lesson", s.IsMember(HandlerWrapper(s.GetLessonHandler)))
+		mux.HandleFunc("/api/lessons/lessons", s.IsMember(HandlerWrapper(s.GetLessonsHandler)))
 		mux.HandleFunc("/api/lessons/lesson/update", s.IsTeacher(HandlerWrapper(s.UpdateLessonHandler)))
 		mux.HandleFunc("/api/lessons/lesson/delete", s.IsTeacher(HandlerWrapper(s.DeleteLessonHandler)))
 	}
@@ -59,11 +59,11 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 	// Tasks handlers
 	if s.Config.Auth.Enabled && s.Config.Courses.Enabled && s.Config.Tasks.Enabled {
 		mux.HandleFunc("/api/tasks/create", s.IsTeacher(HandlerWrapper(s.CreateTaskHandler)))
-		mux.HandleFunc("/api/tasks/task", s.IsAuthenticated(HandlerWrapper(s.GetTaskHandler)))
-		mux.HandleFunc("/api/tasks/tasks", s.IsAuthenticated(HandlerWrapper(s.GetTasksHandler)))
+		mux.HandleFunc("/api/tasks/task", s.IsMember(HandlerWrapper(s.GetTaskHandler)))
+		mux.HandleFunc("/api/tasks/tasks", s.IsMember(HandlerWrapper(s.GetTasksHandler)))
 		mux.HandleFunc("/api/tasks/task/update", s.IsTeacher(HandlerWrapper(s.UpdateTaskHandler)))
 		mux.HandleFunc("/api/tasks/task/delete", s.IsTeacher(HandlerWrapper(s.DeleteTaskHandler)))
-		mux.HandleFunc("/api/tasks/task/changestatus", s.IsAuthenticated(HandlerWrapper(s.ChangeStatusTaskHandler)))
+		mux.HandleFunc("/api/tasks/task/changestatus", s.IsMember(HandlerWrapper(s.ChangeStatusTaskHandler)))
 	}
 }
 

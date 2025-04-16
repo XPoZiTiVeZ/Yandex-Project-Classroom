@@ -27,7 +27,7 @@ type Lesson struct {
 	LessonId      string                 `protobuf:"bytes,1,opt,name=lesson_id,json=lessonId,proto3" json:"lesson_id,omitempty"`    // ID урока
 	CourseId      string                 `protobuf:"bytes,2,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`    // ID курса
 	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`                          // Название урока
-	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`              // Описание урока
+	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`                      // Описание урока
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // Время создания урока
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -84,9 +84,9 @@ func (x *Lesson) GetTitle() string {
 	return ""
 }
 
-func (x *Lesson) GetDescription() string {
+func (x *Lesson) GetContent() string {
 	if x != nil {
-		return x.Description
+		return x.Content
 	}
 	return ""
 }
@@ -102,7 +102,7 @@ type CreateLessonRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CourseId      string                 `protobuf:"bytes,1,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Content       string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -151,9 +151,9 @@ func (x *CreateLessonRequest) GetTitle() string {
 	return ""
 }
 
-func (x *CreateLessonRequest) GetDescription() string {
+func (x *CreateLessonRequest) GetContent() string {
 	if x != nil {
-		return x.Description
+		return x.Content
 	}
 	return ""
 }
@@ -382,7 +382,7 @@ type UpdateLessonRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	LessonId      string                 `protobuf:"bytes,1,opt,name=lesson_id,json=lessonId,proto3" json:"lesson_id,omitempty"`
 	Title         *string                `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`
-	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	Content       *string                `protobuf:"bytes,3,opt,name=content,proto3,oneof" json:"content,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -431,9 +431,9 @@ func (x *UpdateLessonRequest) GetTitle() string {
 	return ""
 }
 
-func (x *UpdateLessonRequest) GetDescription() string {
-	if x != nil && x.Description != nil {
-		return *x.Description
+func (x *UpdateLessonRequest) GetContent() string {
+	if x != nil && x.Content != nil {
+		return *x.Content
 	}
 	return ""
 }
@@ -574,18 +574,18 @@ var File_Common_Proto_lessons_proto protoreflect.FileDescriptor
 
 const file_Common_Proto_lessons_proto_rawDesc = "" +
 	"\n" +
-	"\x1aCommon/Proto/lessons.proto\x12\alessons\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb5\x01\n" +
+	"\x1aCommon/Proto/lessons.proto\x12\alessons\x1a\x1fgoogle/protobuf/timestamp.proto\"\xad\x01\n" +
 	"\x06Lesson\x12\x1b\n" +
 	"\tlesson_id\x18\x01 \x01(\tR\blessonId\x12\x1b\n" +
 	"\tcourse_id\x18\x02 \x01(\tR\bcourseId\x12\x14\n" +
-	"\x05title\x18\x03 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\x129\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\x12\x18\n" +
+	"\acontent\x18\x04 \x01(\tR\acontent\x129\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"j\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"b\n" +
 	"\x13CreateLessonRequest\x12\x1b\n" +
 	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\x12\x14\n" +
-	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"3\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x18\n" +
+	"\acontent\x18\x03 \x01(\tR\acontent\"3\n" +
 	"\x14CreateLessonResponse\x12\x1b\n" +
 	"\tlesson_id\x18\x01 \x01(\tR\blessonId\"/\n" +
 	"\x10GetLessonRequest\x12\x1b\n" +
@@ -595,13 +595,14 @@ const file_Common_Proto_lessons_proto_rawDesc = "" +
 	"\x11GetLessonsRequest\x12\x1b\n" +
 	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\"?\n" +
 	"\x12GetLessonsResponse\x12)\n" +
-	"\alessons\x18\x01 \x03(\v2\x0f.lessons.LessonR\alessons\"\x8e\x01\n" +
+	"\alessons\x18\x01 \x03(\v2\x0f.lessons.LessonR\alessons\"\x82\x01\n" +
 	"\x13UpdateLessonRequest\x12\x1b\n" +
 	"\tlesson_id\x18\x01 \x01(\tR\blessonId\x12\x19\n" +
-	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
-	"\vdescription\x18\x03 \x01(\tH\x01R\vdescription\x88\x01\x01B\b\n" +
-	"\x06_titleB\x0e\n" +
-	"\f_description\"?\n" +
+	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12\x1d\n" +
+	"\acontent\x18\x03 \x01(\tH\x01R\acontent\x88\x01\x01B\b\n" +
+	"\x06_titleB\n" +
+	"\n" +
+	"\b_content\"?\n" +
 	"\x14UpdateLessonResponse\x12'\n" +
 	"\x06lesson\x18\x01 \x01(\v2\x0f.lessons.LessonR\x06lesson\"2\n" +
 	"\x13DeleteLessonRequest\x12\x1b\n" +

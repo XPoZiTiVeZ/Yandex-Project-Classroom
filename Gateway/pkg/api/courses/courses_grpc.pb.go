@@ -19,12 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CoursesService_CreateCourse_FullMethodName = "/courses.CoursesService/CreateCourse"
-	CoursesService_GetCourse_FullMethodName    = "/courses.CoursesService/GetCourse"
-	CoursesService_GetCourses_FullMethodName   = "/courses.CoursesService/GetCourses"
-	CoursesService_UpdateCourse_FullMethodName = "/courses.CoursesService/UpdateCourse"
-	CoursesService_DeleteCourse_FullMethodName = "/courses.CoursesService/DeleteCourse"
-	CoursesService_EnrollUser_FullMethodName   = "/courses.CoursesService/EnrollUser"
+	CoursesService_CreateCourse_FullMethodName     = "/courses.CoursesService/CreateCourse"
+	CoursesService_GetCourse_FullMethodName        = "/courses.CoursesService/GetCourse"
+	CoursesService_GetCourses_FullMethodName       = "/courses.CoursesService/GetCourses"
+	CoursesService_UpdateCourse_FullMethodName     = "/courses.CoursesService/UpdateCourse"
+	CoursesService_DeleteCourse_FullMethodName     = "/courses.CoursesService/DeleteCourse"
+	CoursesService_EnrollUser_FullMethodName       = "/courses.CoursesService/EnrollUser"
+	CoursesService_ExpelUser_FullMethodName        = "/courses.CoursesService/ExpelUser"
+	CoursesService_IsTeacher_FullMethodName        = "/courses.CoursesService/IsTeacher"
+	CoursesService_IsMember_FullMethodName         = "/courses.CoursesService/IsMember"
+	CoursesService_GetCourseMembers_FullMethodName = "/courses.CoursesService/GetCourseMembers"
 )
 
 // CoursesServiceClient is the client API for CoursesService service.
@@ -37,6 +41,10 @@ type CoursesServiceClient interface {
 	UpdateCourse(ctx context.Context, in *UpdateCourseRequest, opts ...grpc.CallOption) (*UpdateCourseResponse, error)
 	DeleteCourse(ctx context.Context, in *DeleteCourseRequest, opts ...grpc.CallOption) (*DeleteCourseResponse, error)
 	EnrollUser(ctx context.Context, in *EnrollUserRequest, opts ...grpc.CallOption) (*EnrollUserResponse, error)
+	ExpelUser(ctx context.Context, in *ExpelUserRequest, opts ...grpc.CallOption) (*ExpelUserResponse, error)
+	IsTeacher(ctx context.Context, in *IsTeacherRequest, opts ...grpc.CallOption) (*IsTeacherResponse, error)
+	IsMember(ctx context.Context, in *IsMemberRequest, opts ...grpc.CallOption) (*IsMemberResponse, error)
+	GetCourseMembers(ctx context.Context, in *GetCourseMembersRequest, opts ...grpc.CallOption) (*GetCourseMembersResponse, error)
 }
 
 type coursesServiceClient struct {
@@ -107,6 +115,46 @@ func (c *coursesServiceClient) EnrollUser(ctx context.Context, in *EnrollUserReq
 	return out, nil
 }
 
+func (c *coursesServiceClient) ExpelUser(ctx context.Context, in *ExpelUserRequest, opts ...grpc.CallOption) (*ExpelUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExpelUserResponse)
+	err := c.cc.Invoke(ctx, CoursesService_ExpelUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *coursesServiceClient) IsTeacher(ctx context.Context, in *IsTeacherRequest, opts ...grpc.CallOption) (*IsTeacherResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(IsTeacherResponse)
+	err := c.cc.Invoke(ctx, CoursesService_IsTeacher_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *coursesServiceClient) IsMember(ctx context.Context, in *IsMemberRequest, opts ...grpc.CallOption) (*IsMemberResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(IsMemberResponse)
+	err := c.cc.Invoke(ctx, CoursesService_IsMember_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *coursesServiceClient) GetCourseMembers(ctx context.Context, in *GetCourseMembersRequest, opts ...grpc.CallOption) (*GetCourseMembersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCourseMembersResponse)
+	err := c.cc.Invoke(ctx, CoursesService_GetCourseMembers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CoursesServiceServer is the server API for CoursesService service.
 // All implementations must embed UnimplementedCoursesServiceServer
 // for forward compatibility.
@@ -117,6 +165,10 @@ type CoursesServiceServer interface {
 	UpdateCourse(context.Context, *UpdateCourseRequest) (*UpdateCourseResponse, error)
 	DeleteCourse(context.Context, *DeleteCourseRequest) (*DeleteCourseResponse, error)
 	EnrollUser(context.Context, *EnrollUserRequest) (*EnrollUserResponse, error)
+	ExpelUser(context.Context, *ExpelUserRequest) (*ExpelUserResponse, error)
+	IsTeacher(context.Context, *IsTeacherRequest) (*IsTeacherResponse, error)
+	IsMember(context.Context, *IsMemberRequest) (*IsMemberResponse, error)
+	GetCourseMembers(context.Context, *GetCourseMembersRequest) (*GetCourseMembersResponse, error)
 	mustEmbedUnimplementedCoursesServiceServer()
 }
 
@@ -144,6 +196,18 @@ func (UnimplementedCoursesServiceServer) DeleteCourse(context.Context, *DeleteCo
 }
 func (UnimplementedCoursesServiceServer) EnrollUser(context.Context, *EnrollUserRequest) (*EnrollUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EnrollUser not implemented")
+}
+func (UnimplementedCoursesServiceServer) ExpelUser(context.Context, *ExpelUserRequest) (*ExpelUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExpelUser not implemented")
+}
+func (UnimplementedCoursesServiceServer) IsTeacher(context.Context, *IsTeacherRequest) (*IsTeacherResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsTeacher not implemented")
+}
+func (UnimplementedCoursesServiceServer) IsMember(context.Context, *IsMemberRequest) (*IsMemberResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsMember not implemented")
+}
+func (UnimplementedCoursesServiceServer) GetCourseMembers(context.Context, *GetCourseMembersRequest) (*GetCourseMembersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCourseMembers not implemented")
 }
 func (UnimplementedCoursesServiceServer) mustEmbedUnimplementedCoursesServiceServer() {}
 func (UnimplementedCoursesServiceServer) testEmbeddedByValue()                        {}
@@ -274,6 +338,78 @@ func _CoursesService_EnrollUser_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CoursesService_ExpelUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExpelUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CoursesServiceServer).ExpelUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CoursesService_ExpelUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CoursesServiceServer).ExpelUser(ctx, req.(*ExpelUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CoursesService_IsTeacher_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IsTeacherRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CoursesServiceServer).IsTeacher(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CoursesService_IsTeacher_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CoursesServiceServer).IsTeacher(ctx, req.(*IsTeacherRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CoursesService_IsMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IsMemberRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CoursesServiceServer).IsMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CoursesService_IsMember_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CoursesServiceServer).IsMember(ctx, req.(*IsMemberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CoursesService_GetCourseMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCourseMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CoursesServiceServer).GetCourseMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CoursesService_GetCourseMembers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CoursesServiceServer).GetCourseMembers(ctx, req.(*GetCourseMembersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CoursesService_ServiceDesc is the grpc.ServiceDesc for CoursesService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -304,6 +440,22 @@ var CoursesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EnrollUser",
 			Handler:    _CoursesService_EnrollUser_Handler,
+		},
+		{
+			MethodName: "ExpelUser",
+			Handler:    _CoursesService_ExpelUser_Handler,
+		},
+		{
+			MethodName: "IsTeacher",
+			Handler:    _CoursesService_IsTeacher_Handler,
+		},
+		{
+			MethodName: "IsMember",
+			Handler:    _CoursesService_IsMember_Handler,
+		},
+		{
+			MethodName: "GetCourseMembers",
+			Handler:    _CoursesService_GetCourseMembers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -1,73 +1,73 @@
 package config
 
 import (
+	"flag"
+
 	"github.com/spf13/viper"
 )
 
 type Config struct {
 	Host struct {
-		Address string `mapstructure:"Address"`
-		Port    int    `mapstructure:"Port"`
-	} `mapstructure:"Host"`
+		Address string `mapstructure:"address"`
+		Port    int    `mapstructure:"port"`
+	} `mapstructure:"host"`
 	Auth struct {
-		Address string `mapstructure:"Address"`
-		Port    int    `mapstructure:"Port"`
-		Enabled bool   `mapstructure:"Enabled"`
-	} `mapstructure:"Auth"`
+		Address string `mapstructure:"address"`
+		Port    int    `mapstructure:"port"`
+		Enabled bool   `mapstructure:"enabled"`
+	} `mapstructure:"auth"`
 	Courses struct {
-		Address string `mapstructure:"Address"`
-		Port    int    `mapstructure:"Port"`
-		Enabled bool   `mapstructure:"Enabled"`
-	} `mapstructure:"Courses"`
+		Address string `mapstructure:"address"`
+		Port    int    `mapstructure:"port"`
+		Enabled bool   `mapstructure:"enabled"`
+	} `mapstructure:"courses"`
 	Lessons struct {
-		Address string `mapstructure:"Address"`
-		Port    int    `mapstructure:"Port"`
-		Enabled bool   `mapstructure:"Enabled"`
-	} `mapstructure:"Lessons"`
+		Address string `mapstructure:"address"`
+		Port    int    `mapstructure:"port"`
+		Enabled bool   `mapstructure:"enabled"`
+	} `mapstructure:"lessons"`
 	Tasks struct {
-		Address string `mapstructure:"Address"`
-		Port    int    `mapstructure:"Port"`
-		Enabled bool   `mapstructure:"Enabled"`
-	} `mapstructure:"Tasks"`
+		Address string `mapstructure:"address"`
+		Port    int    `mapstructure:"port"`
+		Enabled bool   `mapstructure:"enabled"`
+	} `mapstructure:"tasks"`
 
 	Env struct {
+		RedisURL      string `mapstructure:"REDIS_URL"`
+		KafkaURL      string `mapstructure:"KAFKA_URL"`
 		AuthJWTSecret string `mapstructure:"AUTH_JWT_SECRET"`
 	}
 }
 
-func ReadConfig() (Config, error) {
+func MustReadConfig() Config {
+	configPath := flag.String("config", "./config/config.yaml", "path to config file")
+	flag.Parse()
+
 	viper.SetDefault("Gateway.Address", "127.0.0.1")
 	viper.SetDefault("Gateway.Port", 8000)
-	
-	viper.AddConfigPath("./config")
-	viper.AddConfigPath("./configs")
-	viper.AddConfigPath("..")
-	
+
 	var AppConfig Config
-	
-	viper.SetConfigFile("./config/config.yaml")
-	viper.SetConfigFile("config.yaml")
-	
+
+	viper.SetConfigFile(*configPath)
+
 	err := viper.ReadInConfig()
-	parser := viper.Sub("API-Gateway")
 	if err != nil {
-		return Config{}, err
+		return AppConfig
 	}
-	if err := parser.Unmarshal(&AppConfig); err != nil {
-		return Config{}, err
+	if err := viper.Unmarshal(&AppConfig); err != nil {
+		return AppConfig
 	}
 
-	viper.SetConfigType("env")
+	viper.AutomaticEnv()
 	viper.SetConfigFile(".env")
-	// viper.SetConfigFile("../.env")
+	viper.SetConfigType("env")
 
-	err = viper.ReadInConfig()
-	if err != nil {
-		return Config{}, err
+	if err := viper.ReadInConfig(); err != nil {
+		return AppConfig
 	}
 	if err := viper.Unmarshal(&(AppConfig.Env)); err != nil {
-		return Config{}, err
+		return AppConfig
 	}
 
-	return AppConfig, err
+	return AppConfig
 }

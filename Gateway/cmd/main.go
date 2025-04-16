@@ -21,10 +21,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
-	config, err := cfg.ReadConfig()
-	if err != nil {
-		slog.Error(err.Error())
-	}
+	config := cfg.MustReadConfig()
 
 	server, err := srv.NewServer(config.Host.Address, config.Host.Port, ctx)
 	server.CtxStop = stop

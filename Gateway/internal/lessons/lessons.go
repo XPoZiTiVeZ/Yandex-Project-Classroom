@@ -46,7 +46,7 @@ func NewLessonsServiceClient(address string, port int, DefaultTimeout *time.Dura
 	}, nil
 }
 
-func (s LessonsServiceClient) CreateLesson(ctx context.Context, req CreateLessonRequest) (CreateLessonResponse, error) {
+func (s *LessonsServiceClient) CreateLesson(ctx context.Context, req CreateLessonRequest) (CreateLessonResponse, error) {
 	slog.Debug("creating lesson", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
@@ -60,7 +60,7 @@ func (s LessonsServiceClient) CreateLesson(ctx context.Context, req CreateLesson
 	return NewCreateLessonResponse(resp), nil
 }
 
-func (s LessonsServiceClient) GetLesson(ctx context.Context, req GetLessonRequest) (GetLessonResponse, error) {
+func (s *LessonsServiceClient) GetLesson(ctx context.Context, req GetLessonRequest) (GetLessonResponse, error) {
 	slog.Debug("getting lesson", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
@@ -74,7 +74,7 @@ func (s LessonsServiceClient) GetLesson(ctx context.Context, req GetLessonReques
 	return NewGetLessonResponse(resp), nil
 }
 
-func (s LessonsServiceClient) GetLessons(ctx context.Context, req GetLessonsRequest) (GetLessonsResponse, error) {
+func (s *LessonsServiceClient) GetLessons(ctx context.Context, req GetLessonsRequest) (GetLessonsResponse, error) {
 	slog.Debug("getting lessons", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
@@ -88,7 +88,7 @@ func (s LessonsServiceClient) GetLessons(ctx context.Context, req GetLessonsRequ
 	return NewGetLessonsResponse(resp), nil
 }
 
-func (s LessonsServiceClient) UpdateLesson(ctx context.Context, req UpdateLessonRequest) (UpdateLessonResponse, error) {
+func (s *LessonsServiceClient) UpdateLesson(ctx context.Context, req UpdateLessonRequest) (UpdateLessonResponse, error) {
 	slog.Debug("updating lesson", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
@@ -102,7 +102,7 @@ func (s LessonsServiceClient) UpdateLesson(ctx context.Context, req UpdateLesson
 	return NewUpdateLessonResponse(resp), nil
 }
 
-func (s LessonsServiceClient) DeleteLesson(ctx context.Context, req DeleteLessonRequest) (DeleteLessonResponse, error) {
+func (s *LessonsServiceClient) DeleteLesson(ctx context.Context, req DeleteLessonRequest) (DeleteLessonResponse, error) {
 	slog.Debug("deleting lesson", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
