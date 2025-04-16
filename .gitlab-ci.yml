@@ -7,7 +7,7 @@ stages:
   image: golang:1.24.2
   allow_failure: false
   variables:
-    CI_DEBUG_TRACE: "false"
+    CI_DEBUG_TRACE: 'false'
   before_script:
     - chmod +x ./Pipelines/test/${CI_JOB_NAME}.sh
   script:
@@ -17,8 +17,8 @@ stages:
     - ./Pipelines/test/${CI_JOB_NAME}.sh
     - EXIT_CODE=$?
     - if [ $EXIT_CODE -ne 0 ]; then
-        echo "❌ Merge request declined (${JOB_PREFIX} tests failed)";
-        exit $EXIT_CODE;
+      echo "❌ Merge request declined (${JOB_PREFIX} tests failed)";
+      exit $EXIT_CODE;
       fi
     - echo "✅ Merge request approved (${JOB_PREFIX} tests passed)";
 
@@ -41,7 +41,7 @@ gateway_test:
 auth_test:
   extends: .test_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME == "dev-auth"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME == "auth"
       when: always
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "dev"
       when: always
@@ -69,7 +69,6 @@ tasks_test:
       when: always
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "dev"
       when: always
-
 # notifications_test:
 #   extends: .test_config
 #   <<: *test_rules

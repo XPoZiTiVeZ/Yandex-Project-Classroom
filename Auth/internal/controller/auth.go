@@ -46,11 +46,6 @@ func (c *authController) Register(ctx context.Context, req *pb.RegisterRequest) 
 	const op = "controller.Register"
 	logger := c.logger.With(slog.String("op", op))
 
-	if req.Password != req.PasswordRepeat {
-		logger.Debug("passwords do not match")
-		return nil, status.Error(codes.InvalidArgument, "passwords do not match")
-	}
-
 	// преобразование в dto для передачи между слоями
 	dto := dto.RegisterDTO{
 		Email:     req.Email,
