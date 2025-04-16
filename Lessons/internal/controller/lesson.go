@@ -46,9 +46,9 @@ func (c *lessonController) Init(srv *grpc.Server) {
 
 func (c *lessonController) CreateLesson(ctx context.Context, req *pb.CreateLessonRequest) (*pb.CreateLessonResponse, error) {
 	dto := dto.CreateLessonDTO{
-		Title:       req.Title,
-		Description: req.Description,
-		CourseID:    req.CourseId,
+		Title:    req.Title,
+		Content:  req.Content,
+		CourseID: req.CourseId,
 	}
 	if err := c.validate.Struct(dto); err != nil {
 		c.logger.Debug("invalid request", "err", err)
@@ -80,11 +80,11 @@ func (c *lessonController) GetLesson(ctx context.Context, req *pb.GetLessonReque
 
 	return &pb.GetLessonResponse{
 		Lesson: &pb.Lesson{
-			LessonId:    lesson.ID,
-			Title:       lesson.Title,
-			Description: lesson.Description,
-			CourseId:    lesson.CourseID,
-			CreatedAt:   timestamppb.New(lesson.CreatedAt),
+			LessonId:  lesson.ID,
+			Title:     lesson.Title,
+			Content:   lesson.Content,
+			CourseId:  lesson.CourseID,
+			CreatedAt: timestamppb.New(lesson.CreatedAt),
 		},
 	}, nil
 }
@@ -102,11 +102,11 @@ func (c *lessonController) GetLessons(ctx context.Context, req *pb.GetLessonsReq
 	pbLessons := make([]*pb.Lesson, len(lessons))
 	for i, lesson := range lessons {
 		pbLessons[i] = &pb.Lesson{
-			LessonId:    lesson.ID,
-			Title:       lesson.Title,
-			Description: lesson.Description,
-			CourseId:    lesson.CourseID,
-			CreatedAt:   timestamppb.New(lesson.CreatedAt),
+			LessonId:  lesson.ID,
+			Title:     lesson.Title,
+			Content:   lesson.Content,
+			CourseId:  lesson.CourseID,
+			CreatedAt: timestamppb.New(lesson.CreatedAt),
 		}
 	}
 	return &pb.GetLessonsResponse{Lessons: pbLessons}, nil
@@ -114,9 +114,9 @@ func (c *lessonController) GetLessons(ctx context.Context, req *pb.GetLessonsReq
 
 func (c *lessonController) UpdateLesson(ctx context.Context, req *pb.UpdateLessonRequest) (*pb.UpdateLessonResponse, error) {
 	dto := dto.UpdateLessonDTO{
-		LessonID:    req.LessonId,
-		Title:       req.Title,
-		Description: req.Description,
+		LessonID: req.LessonId,
+		Title:    req.Title,
+		Content:  req.Content,
 	}
 	if err := c.validate.Struct(dto); err != nil {
 		c.logger.Debug("invalid request", "err", err)
@@ -134,11 +134,11 @@ func (c *lessonController) UpdateLesson(ctx context.Context, req *pb.UpdateLesso
 
 	return &pb.UpdateLessonResponse{
 		Lesson: &pb.Lesson{
-			LessonId:    lesson.ID,
-			Title:       lesson.Title,
-			Description: lesson.Description,
-			CourseId:    lesson.CourseID,
-			CreatedAt:   timestamppb.New(lesson.CreatedAt),
+			LessonId:  lesson.ID,
+			Title:     lesson.Title,
+			Content:   lesson.Content,
+			CourseId:  lesson.CourseID,
+			CreatedAt: timestamppb.New(lesson.CreatedAt),
 		},
 	}, nil
 }
