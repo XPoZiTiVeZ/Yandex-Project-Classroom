@@ -110,12 +110,14 @@ type Member struct {
 type GetCourseMembersRequest struct {
 	CourseID string `json:"course_id"`
 	Index    int32  `json:"index"`
+	Limit    int32  `json:"limit"`
 }
 
 func NewGetCourseMembersRequest(req GetCourseMembersRequest) *pb.GetCourseMembersRequest {
 	return &pb.GetCourseMembersRequest{
 		CourseId: req.CourseID,
 		Index:    req.Index,
+		Limit:    req.Index,
 	}
 }
 
