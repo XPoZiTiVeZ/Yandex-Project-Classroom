@@ -3,10 +3,11 @@
 .env
 
 # dirs
-Postgres/
-Redis/
+Postgres/postgres_data/
+Redis/redis_data/
 
-.idea/
+.idea
+.vscode/
 *.iml
 *.ipr
 *.iws
