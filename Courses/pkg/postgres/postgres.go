@@ -1,26 +1,21 @@
 package postgres
 
 import (
-	"context"
-	"fmt"
-	"time"
+	"log"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-func MustNew(url string) (*pgxpool.Pool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	pool, err := pgxpool.New(ctx, url)
+func MustNew(url string) *sqlx.DB {
+	db, err := sqlx.Connect("postgres", url)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect database: %w", err)
+		log.Fatalf("failed to connect to db: %s", err)
 	}
 
-	if err := pool.Ping(ctx); err != nil {
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+	if err = db.Ping(); err != nil {
+		log.Fatalf("failed to ping db: %s", err)
 	}
 
-	return pool, nil
+	return db
 }
