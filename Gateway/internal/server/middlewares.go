@@ -1,7 +1,6 @@
 package server
 
 import (
-	"Classroom/Gateway/internal/auth"
 	"Classroom/Gateway/internal/courses"
 	he "Classroom/Gateway/internal/errors"
 	"bytes"
@@ -15,9 +14,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func HandlerWrapper(handler func(w http.ResponseWriter, r *http.Request) (error, any)) http.HandlerFunc {
+func HandlerWrapper[T any](handler func(w http.ResponseWriter, r *http.Request) (error, any)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var body auth.RegisterRequest
+		var body T
 		err := json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
 			slog.Debug("unmarshal error", slog.Any("error", err))
@@ -73,7 +72,7 @@ func (s *Server) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 
 		claims := &AuthClaims{}
 		token, err := jwt.ParseWithClaims(authHeader, claims, func(token *jwt.Token) (any, error) {
-			return s.Config.Env.AuthJWTSecret, nil
+			return s.Config.Common.AuthJWTSecret, nil
 		})
 
 		if err != nil || !token.Valid {

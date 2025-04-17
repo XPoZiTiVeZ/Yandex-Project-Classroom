@@ -105,3 +105,17 @@ func (s *AuthServiceClient) Logout(ctx context.Context, req LogoutRequest) (Logo
 	slog.Debug("auth.Logout succeed")
 	return NewLogoutResponse(resp), nil
 }
+
+func (s *AuthServiceClient) GetUserInfo(ctx context.Context, req GetUserInfoRequest) (GetUserInfoResponse, error) {
+	slog.Debug("getting user info", slog.Any("request", req))
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	resp, err := (*s.Client).GetUserInfo(ctx, NewGetUserInfoRequest(req))
+	if err != nil {
+		return GetUserInfoResponse{}, err
+	}
+
+	slog.Debug("auth.GetUserInfo succeed")
+	return NewGetUserInfoResponse(resp), nil
+}

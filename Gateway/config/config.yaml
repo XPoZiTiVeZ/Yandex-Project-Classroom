@@ -25,3 +25,6 @@ chat:
     address: chat
     port: 50056
     enabled: false
+
+common:
+    auth_jwt_secret: secret

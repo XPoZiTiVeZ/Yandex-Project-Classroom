@@ -52,12 +52,12 @@ func (s *Server) GetCourseHandler(w http.ResponseWriter, r *http.Request) (error
 	return err, resp
 }
 
-func (s *Server) GetCourseMembersHandler(w http.ResponseWriter, r *http.Request) (error, any) {
-	var body courses.GetCourseMembersRequest = r.Context().Value("body").(courses.GetCourseMembersRequest)
+func (s *Server) GetCoursesHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+	var body courses.GetCoursesRequest = r.Context().Value("body").(courses.GetCoursesRequest)
 
-	resp, err := s.Courses.GetCourseMembers(r.Context(), body)
+	resp, err := s.Courses.GetCourses(r.Context(), body)
 	if err != nil {
-		slog.Error("handler courses.GetCourseMembers error", slog.Any("error", err))
+		slog.Error("handler courses.GetCourses error", slog.Any("error", err))
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
@@ -73,12 +73,33 @@ func (s *Server) GetCourseMembersHandler(w http.ResponseWriter, r *http.Request)
 	return err, resp
 }
 
-func (s *Server) GetCoursesHandler(w http.ResponseWriter, r *http.Request) (error, any) {
-	var body courses.GetCoursesRequest = r.Context().Value("body").(courses.GetCoursesRequest)
+func (s *Server) GetCoursesByStudentHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+	var body courses.GetCoursesByStudentRequest = r.Context().Value("body").(courses.GetCoursesByStudentRequest)
 
-	resp, err := s.Courses.GetCourses(r.Context(), body)
+	resp, err := s.Courses.GetCoursesByStudent(r.Context(), body)
 	if err != nil {
-		slog.Error("handler courses.GetCourses error", slog.Any("error", err))
+		slog.Error("handler courses.GetCoursesByStudent error", slog.Any("error", err))
+
+		if e, ok := status.FromError(err); ok {
+			switch e.Code() {
+			case codes.NotFound:
+				he.NotFound(w)
+			}
+
+		} else {
+			he.ServiceUnavailable(w)
+		}
+	}
+
+	return err, resp
+}
+
+func (s *Server) GetCoursesByTeacherHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+	var body courses.GetCoursesByTeacherRequest = r.Context().Value("body").(courses.GetCoursesByTeacherRequest)
+
+	resp, err := s.Courses.GetCoursesByTeacher(r.Context(), body)
+	if err != nil {
+		slog.Error("handler courses.GetCoursesByTeacher error", slog.Any("error", err))
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
@@ -163,6 +184,27 @@ func (s *Server) ExpelUserHandler(w http.ResponseWriter, r *http.Request) (error
 	resp, err := s.Courses.ExpelUser(r.Context(), body)
 	if err != nil {
 		slog.Error("handler courses.EnrollUser error", slog.Any("error", err))
+
+		if e, ok := status.FromError(err); ok {
+			switch e.Code() {
+			case codes.NotFound:
+				he.NotFound(w)
+			}
+
+		} else {
+			he.ServiceUnavailable(w)
+		}
+	}
+
+	return err, resp
+}
+
+func (s *Server) GetCourseStudentsHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+	var body courses.GetCourseStudentsRequest = r.Context().Value("body").(courses.GetCourseStudentsRequest)
+
+	resp, err := s.Courses.GetCourseStudents(r.Context(), body)
+	if err != nil {
+		slog.Error("handler courses.GetCourseStudents error", slog.Any("error", err))
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {

@@ -8,6 +8,51 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+type Course struct {
+	CourseID    string     `json:"course_id"`
+	TeacherID   string     `json:"user_id"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	Visibility  bool       `json:"visibility"`
+	StartTime   *time.Time `json:"start_time,omitempty"`
+	EndTime     *time.Time `json:"end_time,omitempty"`
+}
+
+func NewCourse(pbCourse *pb.Course) Course {
+	course := Course{
+		CourseID:    pbCourse.GetCourseId(),
+		TeacherID:   pbCourse.GetTeacherId(),
+		Title:       pbCourse.GetTitle(),
+		Description: pbCourse.GetDescription(),
+		Visibility:  pbCourse.GetVisibility(),
+	}
+
+	if pbCourse.GetStartTime() != nil {
+		t := pbCourse.GetStartTime().AsTime()
+		course.StartTime = &t
+	}
+
+	if pbCourse.GetEndTime() != nil {
+		t := pbCourse.GetEndTime().AsTime()
+		course.EndTime = &t
+	}
+
+	return course
+}
+
+type Student struct {
+	UserID    string `json:"user_id"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
+type Enrollment struct {
+	CourseID string `json:"course_id"`
+	StudentID string `json:"student_id"`
+	EnrolledAt time.Time `json:"enrolled_at"`
+}
+
 type CreateCourseRequest struct {
 	UserID      string     `json:"user_id"`
 	Title       string     `json:"title"`
@@ -26,23 +71,27 @@ func NewCreateCourseRequest(req CreateCourseRequest) *pb.CreateCourseRequest {
 	}
 
 	if req.StartTime != nil {
-		pbReq.StartTime = timestamppb.New(*req.StartTime)
+		t := timestamppb.New(*req.StartTime)
+		pbReq.StartTime = t
 	}
 
 	if req.EndTime != nil {
-		pbReq.EndTime = timestamppb.New(*req.EndTime)
+		t := timestamppb.New(*req.EndTime)
+		pbReq.EndTime = t
 	}
 
 	return pbReq
 }
 
 type CreateCourseResponse struct {
-	CourseID string `json:"course_id"`
+	Course
 }
 
 func NewCreateCourseResponse(resp *pb.CreateCourseResponse) CreateCourseResponse {
+	course := NewCourse(resp.GetCourse())
+
 	return CreateCourseResponse{
-		CourseID: resp.GetCourseId(),
+		Course: course,
 	}
 }
 
@@ -56,92 +105,15 @@ func NewGetCourseRequest(req GetCourseRequest) *pb.GetCourseRequest {
 	}
 }
 
-type Course struct {
-	CourseID    string     `json:"course_id"`
-	TeacherID   string     `json:"user_id"`
-	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	Visibility  bool       `json:"visibility"`
-	StartTime   *time.Time `json:"start_time,omitempty"`
-	EndTime     *time.Time `json:"end_time,omitempty"`
-}
-
 type GetCourseResponse struct {
-	Course *Course `json:"course,omitempty"`
+	Course
 }
 
 func NewGetCourseResponse(resp *pb.GetCourseResponse) GetCourseResponse {
-	pbCourse := resp.GetCourse()
-
-	if pbCourse == nil {
-		return GetCourseResponse{}
-	}
-
-	course := &Course{
-		CourseID:    pbCourse.GetCourseId(),
-		TeacherID:   pbCourse.GetTeacherId(),
-		Title:       pbCourse.GetTitle(),
-		Description: pbCourse.GetDescription(),
-		Visibility:  pbCourse.GetVisibility(),
-	}
-
-	if pbCourse.GetStartTime() != nil {
-		t := pbCourse.GetStartTime().AsTime()
-		course.StartTime = &t
-	}
-
-	if pbCourse.GetEndTime() != nil {
-		t := pbCourse.GetEndTime().AsTime()
-		course.EndTime = &t
-	}
+	course := NewCourse(resp.GetCourse())
 
 	return GetCourseResponse{
 		Course: course,
-	}
-}
-
-type Member struct {
-	UserID    string `json:"user_id"`
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-}
-
-type GetCourseMembersRequest struct {
-	CourseID string `json:"course_id"`
-	Index    int32  `json:"index"`
-}
-
-func NewGetCourseMembersRequest(req GetCourseMembersRequest) *pb.GetCourseMembersRequest {
-	return &pb.GetCourseMembersRequest{
-		CourseId: req.CourseID,
-		Index:    req.Index,
-	}
-}
-
-type GetCourseMembersResponse struct {
-	Index   int32    `json:"index"`
-	Total   int32    `json:"total"`
-	Members []Member `json:"members"`
-}
-
-func NewGetCourseMembersResponse(resp *pb.GetCourseMembersResponse) GetCourseMembersResponse {
-	return GetCourseMembersResponse{
-		Index: resp.GetIndex(),
-		Total: resp.GetTotal(),
-		Members: func() []Member {
-			members := make([]Member, len(resp.GetMembers()))
-			for i, m := range resp.GetMembers() {
-				members[i] = Member{
-					UserID:    m.GetUserId(),
-					Email:     m.GetEmail(),
-					FirstName: m.GetFirstName(),
-					LastName:  m.GetLastName(),
-				}
-			}
-			
-			return members
-		}(),
 	}
 }
 
@@ -155,13 +127,39 @@ func NewGetCoursesRequest(req GetCoursesRequest) *pb.GetCoursesRequest {
 	}
 }
 
+type GetCoursesByStudentRequest struct {
+	StudentId string `json:"student_id"`
+}
+
+func NewGetCoursesByStudentRequest(req GetCoursesByStudentRequest) *pb.GetCoursesByStudentRequest {
+	return &pb.GetCoursesByStudentRequest{
+		StudentId: req.StudentId,
+	}
+}
+
+type GetCoursesByTeacherRequest struct {
+	TeacherID string `json:"teacher_id"`
+}
+
+func NewGetCoursesByTeacherRequest(req GetCoursesByTeacherRequest) *pb.GetCoursesByTeacherRequest {
+	return &pb.GetCoursesByTeacherRequest{
+		TeacherId: req.TeacherID,
+	}
+}
+
 type GetCoursesResponse struct {
-	Courses []*pb.Course `json:"courses"`
+	Courses []Course `json:"courses"`
 }
 
 func NewGetCoursesResponse(resp *pb.GetCoursesResponse) GetCoursesResponse {
+	var courses []Course
+	for _, pbCourse := range resp.GetCourses() {
+		course := NewCourse(pbCourse)
+		courses = append(courses, course)
+	}
+
 	return GetCoursesResponse{
-		Courses: resp.GetCourse(),
+		Courses: courses,
 	}
 }
 
@@ -183,19 +181,27 @@ func NewUpdateCourseRequest(req UpdateCourseRequest) *pb.UpdateCourseRequest {
 	}
 
 	if req.StartTime != nil {
-		pbReq.StartTime = timestamppb.New(*req.StartTime)
+		t := timestamppb.New(*req.StartTime)
+		pbReq.StartTime = t
 	}
 	if req.EndTime != nil {
-		pbReq.EndTime = timestamppb.New(*req.EndTime)
+		t := timestamppb.New(*req.EndTime)
+		pbReq.EndTime = t
 	}
 
 	return pbReq
 }
 
-type UpdateCourseResponse struct{}
+type UpdateCourseResponse struct {
+	Course
+}
 
 func NewUpdateCourseResponse(resp *pb.UpdateCourseResponse) UpdateCourseResponse {
-	return UpdateCourseResponse{}
+	course := NewCourse(resp.GetCourse())
+
+	return UpdateCourseResponse{
+		Course: course,
+	}
 }
 
 type DeleteCourseRequest struct {
@@ -208,10 +214,16 @@ func NewDeleteCourseRequest(req DeleteCourseRequest) *pb.DeleteCourseRequest {
 	}
 }
 
-type DeleteCourseResponse struct{}
+type DeleteCourseResponse struct {
+	Course
+}
 
 func NewDeleteCourseResponse(resp *pb.DeleteCourseResponse) DeleteCourseResponse {
-	return DeleteCourseResponse{}
+	course := NewCourse(resp.GetCourse())
+
+	return DeleteCourseResponse{
+		Course: course,
+	}
 }
 
 type EnrollUserRequest struct {
@@ -226,10 +238,18 @@ func NewEnrollUserRequest(req EnrollUserRequest) *pb.EnrollUserRequest {
 	}
 }
 
-type EnrollUserResponse struct{}
+type EnrollUserResponse struct {
+	Enrollment
+}
 
 func NewEnrollUserResponse(resp *pb.EnrollUserResponse) EnrollUserResponse {
-	return EnrollUserResponse{}
+	return EnrollUserResponse{
+		Enrollment: Enrollment{
+			CourseID:   resp.GetEnrollment().GetCourseId(),
+			StudentID:  resp.GetEnrollment().GetStudentId(),
+			EnrolledAt: resp.GetEnrollment().GetEnrolledAt().AsTime(),
+		},
+	}
 }
 
 type ExpelUserRequest struct {
@@ -244,10 +264,18 @@ func NewExpelUserRequest(req ExpelUserRequest) *pb.ExpelUserRequest {
 	}
 }
 
-type ExpelUserResponse struct{}
+type ExpelUserResponse struct {
+	Enrollment
+}
 
 func NewExpelUserResponse(resp *pb.ExpelUserResponse) ExpelUserResponse {
-	return ExpelUserResponse{}
+	return ExpelUserResponse{
+		Enrollment: Enrollment{
+			CourseID:   resp.GetEnrollment().GetCourseId(),
+			StudentID:  resp.GetEnrollment().GetStudentId(),
+			EnrolledAt: resp.GetEnrollment().GetEnrolledAt().AsTime(),
+		},
+	}
 }
 
 type IsTeacherRequest struct {
@@ -291,5 +319,45 @@ type IsMemberResponse struct {
 func NewIsMemberResponse(resp *pb.IsMemberResponse) IsMemberResponse {
 	return IsMemberResponse{
 		IsMember: resp.GetIsMember(),
+	}
+}
+
+type GetCourseStudentsRequest struct {
+	CourseID string `json:"course_id"`
+	Index    int32  `json:"index"`
+	Limit    int32  `json:"limit"`
+}
+
+func NewGetCourseStudentsRequest(req GetCourseStudentsRequest) *pb.GetCourseStudentsRequest {
+	return &pb.GetCourseStudentsRequest{
+		CourseId: req.CourseID,
+		Index:    req.Index,
+		Limit:    req.Index,
+	}
+}
+
+type GetCourseStudentsResponse struct {
+	Index   int32    `json:"index"`
+	Total   int32    `json:"total"`
+	Students []Student `json:"students"`
+}
+
+func NewGetCourseStudentsResponse(resp *pb.GetCourseStudentsResponse) GetCourseStudentsResponse {
+	return GetCourseStudentsResponse{
+		Index: resp.GetIndex(),
+		Total: resp.GetTotal(),
+		Students: func() []Student {
+			var students []Student
+			for _, m := range resp.GetStudents() {
+				students = append(students, Student{
+					UserID:    m.GetUserId(),
+					Email:     m.GetEmail(),
+					FirstName: m.GetFirstName(),
+					LastName:  m.GetLastName(),
+				})
+			}
+			
+			return students
+		}(),
 	}
 }
