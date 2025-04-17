@@ -1,197 +1,332 @@
 package service
 
 import (
-	repo "Classroom/Courses/internal/repo/postgres"
+	"Classroom/Courses/internal/domain"
+	"Classroom/Courses/internal/dto"
 	pb "Classroom/Courses/pkg/api/courses"
 	"context"
-	"fmt"
+	"errors"
+	"log/slog"
 	"time"
 
+	"github.com/go-playground/validator"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type CoursesService struct {
-	pb.UnimplementedCoursesServiceServer
-	repo *repo.CourseRepo
+type CourseRepo interface {
+	Create(ctx context.Context, dto dto.CreateCourseDTO) (domain.Course, error)
+	GetByID(ctx context.Context, courseID string) (domain.Course, error)
+	Update(ctx context.Context, dto dto.UpdateCourseDTO) (domain.Course, error)
+	Delete(ctx context.Context, courseID string) (domain.Course, error)
+
+	ListByStudentID(ctx context.Context, teacherID string) ([]domain.Course, error)
+	ListByTeacherID(ctx context.Context, teacherID string) ([]domain.Course, error)
+
+	ListCourseStudents(ctx context.Context, courseID string, index, limit int32) ([]domain.Student, int32, error)
+	EnrollUser(ctx context.Context, courseID, studentID string) (domain.Enrollment, error)
+	ExpelUser(ctx context.Context, courseID, studentID string) (domain.Enrollment, error)
+
+	IsTeacher(ctx context.Context, courseID, teacherID string) (bool, error)
+	IsMember(ctx context.Context, courseID, userID string) (bool, error)
 }
 
-func NewCoursesService(repo *repo.CourseRepo) *CoursesService {
-	return &CoursesService{repo: repo}
+type CoursesService struct {
+	pb.UnimplementedCoursesServiceServer
+	logger   *slog.Logger
+	validate *validator.Validate
+	repo     CourseRepo
+}
+
+func NewCoursesService(logger *slog.Logger, repo CourseRepo) *CoursesService {
+	validate := validator.New()
+	return &CoursesService{repo: repo, logger: logger, validate: validate}
 }
 
 func (s *CoursesService) CreateCourse(ctx context.Context, req *pb.CreateCourseRequest) (*pb.CreateCourseResponse, error) {
-	startTime := req.GetStartTime().AsTime()
-	endTime := req.GetEndTime().AsTime()
-
-	id, err := s.repo.CreateCourse(
-		ctx,
-		req.GetUserId(),
-		req.GetTitle(),
-		req.GetDescription(),
-		req.GetVisibility(),
-		&startTime,
-		&endTime,
-	)
-	if err != nil {
-		return nil, err
+	dto := dto.CreateCourseDTO{
+		TeacherID:   req.UserId,
+		Title:       req.Title,
+		Description: req.Description,
+		Visibility:  req.Visibility,
+		StartTime:   timestampToTime(req.StartTime),
+		EndTime:     timestampToTime(req.EndTime),
 	}
 
-	return &pb.CreateCourseResponse{CourseId: id}, nil
+	if err := s.validate.Struct(dto); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid request: %v", err.Error())
+	}
+
+	course, err := s.repo.Create(ctx, dto)
+	if err != nil {
+		s.logger.Error("failed to create course", "error", err)
+		return nil, status.Error(codes.Internal, "failed to create course")
+	}
+
+	s.logger.Info("course created", "id", course.ID, "title", course.Title)
+	return &pb.CreateCourseResponse{Course: courseToPb(course)}, nil
 }
 
 func (s *CoursesService) GetCourse(ctx context.Context, req *pb.GetCourseRequest) (*pb.GetCourseResponse, error) {
-	c, err := s.repo.GetCourse(ctx, req.GetCourseId())
+	if err := s.validate.Var(req.CourseId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid course id")
+	}
+	course, err := s.repo.GetByID(ctx, req.CourseId)
+	if errors.Is(err, domain.ErrNotFound) {
+		return nil, status.Error(codes.NotFound, "course not found")
+	}
 	if err != nil {
-		return nil, err
+		s.logger.Error("failed to get course", "error", err)
+		return nil, status.Error(codes.Internal, "failed to get course")
 	}
 
-	return &pb.GetCourseResponse{
-		Course: &pb.Course{
-			CourseId:    c.CourseID,
-			TeacherId:   c.TeacherID,
-			Title:       c.Title,
-			Description: c.Description,
-			Visibility:  c.Visibility,
-			StartTime:   timestamppb.New(c.StartTime),
-			EndTime:     timestamppb.New(c.EndTime),
+	return &pb.GetCourseResponse{Course: courseToPb(course)}, nil
+}
+
+func (s *CoursesService) UpdateCourse(ctx context.Context, req *pb.UpdateCourseRequest) (*pb.UpdateCourseResponse, error) {
+	dto := dto.UpdateCourseDTO{
+		ID:          req.CourseId,
+		Title:       req.Title,
+		Description: req.Description,
+		Visibility:  req.Visibility,
+		StartTime:   timestampToTime(req.StartTime),
+		EndTime:     timestampToTime(req.EndTime),
+	}
+
+	if err := s.validate.Struct(dto); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid request: %v", err.Error())
+	}
+
+	course, err := s.repo.Update(ctx, dto)
+	if errors.Is(err, domain.ErrNotFound) {
+		return nil, status.Error(codes.NotFound, "course not found")
+	}
+	if err != nil {
+		s.logger.Error("failed to update course", "error", err)
+		return nil, status.Error(codes.Internal, "failed to update course")
+	}
+
+	s.logger.Info("course updated", "id", course.ID, "title", course.Title)
+	return &pb.UpdateCourseResponse{Course: courseToPb(course)}, nil
+}
+
+func (s *CoursesService) DeleteCourse(ctx context.Context, req *pb.DeleteCourseRequest) (*pb.DeleteCourseResponse, error) {
+	if err := s.validate.Var(req.CourseId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid course id")
+	}
+
+	course, err := s.repo.Delete(ctx, req.CourseId)
+	if errors.Is(err, domain.ErrNotFound) {
+		return nil, status.Error(codes.NotFound, "course not found")
+	}
+	if err != nil {
+		s.logger.Error("failed to delete course", "error", err)
+		return nil, status.Error(codes.Internal, "failed to delete course")
+	}
+
+	s.logger.Info("course deleted", "id", course.ID, "title", course.Title)
+	return &pb.DeleteCourseResponse{Course: courseToPb(course)}, nil
+}
+
+func (s *CoursesService) EnrollUser(ctx context.Context, req *pb.EnrollUserRequest) (*pb.EnrollUserResponse, error) {
+	if err := s.validate.Var(req.CourseId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid course id")
+	}
+	if err := s.validate.Var(req.UserId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid user id")
+	}
+	enrollemnt, err := s.repo.EnrollUser(ctx, req.CourseId, req.UserId)
+	if err != nil {
+		s.logger.Error("failed to enroll user", "error", err)
+		return nil, status.Error(codes.Internal, "failed to enroll user")
+	}
+
+	s.logger.Info("user enrolled", "course_id", enrollemnt.CourseID, "student_id", enrollemnt.StudentID)
+	return &pb.EnrollUserResponse{
+		Enrollment: &pb.Enrollment{
+			CourseId:   enrollemnt.CourseID,
+			StudentId:  enrollemnt.StudentID,
+			EnrolledAt: timestamppb.New(enrollemnt.EnrolledAt),
 		},
 	}, nil
 }
 
-func (s *CoursesService) UpdateCourse(ctx context.Context, req *pb.UpdateCourseRequest) (*pb.UpdateCourseResponse, error) {
-	title := req.GetTitle()
-	description := req.GetDescription()
-	visibility := req.GetVisibility()
-	pb_startTime := req.GetStartTime()
-	pb_endTime := req.GetEndTime()
-
-	var startTime *time.Time
-	if pb_startTime != nil {
-		time := pb_startTime.AsTime()
-		startTime = &time
-	}
-
-	var endTime *time.Time
-	if pb_endTime != nil {
-		time := pb_endTime.AsTime()
-		endTime = &time
-	}
-
-	err := s.repo.UpdateCourse(
-		ctx,
-		req.CourseId,
-		&title,
-		&description,
-		&visibility,
-		startTime,
-		endTime,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return &pb.UpdateCourseResponse{}, nil
-}
-
-func (s *CoursesService) DeleteCourse(ctx context.Context, req *pb.DeleteCourseRequest) (*pb.DeleteCourseResponse, error) {
-	err := s.repo.DeleteCourse(ctx, req.CourseId)
-	if err != nil {
-		return nil, err
-	}
-
-	return &pb.DeleteCourseResponse{}, nil
-}
-
-func (s *CoursesService) EnrollUser(ctx context.Context, req *pb.EnrollUserRequest) (*pb.EnrollUserResponse, error) {
-	err := s.repo.EnrollUser(ctx, req.CourseId, req.UserId)
-	if err != nil {
-		return nil, err
-	}
-
-	return &pb.EnrollUserResponse{}, nil
-}
-
 func (s *CoursesService) ExpelUser(ctx context.Context, req *pb.ExpelUserRequest) (*pb.ExpelUserResponse, error) {
-	err := s.repo.EnrollUser(ctx, req.CourseId, req.UserId)
+	if err := s.validate.Var(req.CourseId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid course id")
+	}
+	if err := s.validate.Var(req.UserId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid user id")
+	}
+
+	enrollemnt, err := s.repo.ExpelUser(ctx, req.CourseId, req.UserId)
+	if errors.Is(err, domain.ErrNotFound) {
+		return nil, status.Error(codes.NotFound, "enrollment not found")
+	}
 	if err != nil {
-		return nil, err
+		s.logger.Error("failed to expel user", "error", err)
+		return nil, status.Error(codes.Internal, "failed to expel user")
 	}
 
-	return &pb.ExpelUserResponse{}, nil
-}
-
-func (s *CoursesService) GetCourses(ctx context.Context, req *pb.GetCoursesRequest) (*pb.GetCoursesResponse, error) {
-	courses, err := s.repo.GetUserCourses(ctx, req.UserId)
-	if err != nil {
-		return nil, err
-	}
-
-	var res []*pb.Course
-	for _, c := range courses {
-		course := pb.Course{
-			CourseId:    c.CourseID,
-			TeacherId:   c.TeacherID,
-			Title:       c.Title,
-			Description: c.Description,
-			Visibility:  c.Visibility,
-			StartTime:   timestamppb.New(c.StartTime),
-			EndTime:     timestamppb.New(c.EndTime),
-		}
-		res = append(res, &course)
-	}
-
-	return &pb.GetCoursesResponse{Course: res}, nil
+	s.logger.Info("user expelled", "course_id", enrollemnt.CourseID, "student_id", enrollemnt.StudentID)
+	return &pb.ExpelUserResponse{
+		Enrollment: &pb.Enrollment{
+			CourseId:   enrollemnt.CourseID,
+			StudentId:  enrollemnt.StudentID,
+			EnrolledAt: timestamppb.New(enrollemnt.EnrolledAt),
+		},
+	}, nil
 }
 
 func (s *CoursesService) IsTeacher(ctx context.Context, req *pb.IsTeacherRequest) (*pb.IsTeacherResponse, error) {
+	if err := s.validate.Var(req.CourseId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid course id")
+	}
+	if err := s.validate.Var(req.UserId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid user id")
+	}
+
 	isTeacher, err := s.repo.IsTeacher(ctx, req.CourseId, req.UserId)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, "failed to check teacher")
 	}
 
 	return &pb.IsTeacherResponse{IsTeacher: isTeacher}, nil
 }
 
 func (s *CoursesService) IsMember(ctx context.Context, req *pb.IsMemberRequest) (*pb.IsMemberResponse, error) {
+	if err := s.validate.Var(req.CourseId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid course id")
+	}
+	if err := s.validate.Var(req.UserId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid user id")
+	}
+
 	isMember, err := s.repo.IsMember(ctx, req.CourseId, req.UserId)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, "failed to check member")
 	}
 
 	return &pb.IsMemberResponse{IsMember: isMember}, nil
 }
 
-func (s *CoursesService) GetCourseMembers(ctx context.Context, req *pb.GetCourseMembersRequest) (*pb.GetCourseMembersResponse, error) {
-    if req.Limit <= 0 {
-        req.Limit = 50
-    }
-    if req.Index < 0 {
-        req.Index = 0
-    }
+func (s *CoursesService) GetCourses(ctx context.Context, req *pb.GetCoursesRequest) (*pb.GetCoursesResponse, error) {
+	if err := s.validate.Var(req.UserId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid user id")
+	}
+	studentCourses, err := s.repo.ListByStudentID(ctx, req.UserId)
+	if err != nil {
+		s.logger.Error("failed to get courses by student", "error", err)
+		return nil, status.Error(codes.Internal, "failed to get courses by student")
+	}
 
-    total, members, err := s.repo.GetCourseMembers(
-        ctx,
-        req.CourseId,
-        req.Index,
-        req.Limit,
-    )
-    if err != nil {
-        return nil, fmt.Errorf("failed to get course members: %w", err)
-    }
+	teacherCourses, err := s.repo.ListByTeacherID(ctx, req.UserId)
+	if err != nil {
+		s.logger.Error("failed to get courses by teacher", "error", err)
+		return nil, status.Error(codes.Internal, "failed to get courses by teacher")
+	}
 
-    pbMembers := []*pb.Member{}
-    for _, m := range members {
-        pbMembers = append(pbMembers, &pb.Member{
-            UserId:    m.UserID,
-            Email:     m.Email,
-            FirstName: m.FirstName,
-            LastName:  m.LastName,
-        })
-    }
+	// Чтобы не было повторений
+	courses := make(map[string]domain.Course)
+	for _, c := range studentCourses {
+		courses[c.ID] = c
+	}
+	for _, c := range teacherCourses {
+		courses[c.ID] = c
+	}
 
-    return &pb.GetCourseMembersResponse{
-        Total:   total,
-        Index:   req.Index,
-        Members: pbMembers,
-    }, nil
+	pbCourses := make([]*pb.Course, 0, len(courses))
+	for _, c := range courses {
+		pbCourses = append(pbCourses, courseToPb(c))
+	}
+
+	return &pb.GetCoursesResponse{Courses: pbCourses}, nil
+}
+
+func (s *CoursesService) GetCoursesByStudent(ctx context.Context, req *pb.GetCoursesByStudentRequest) (*pb.GetCoursesResponse, error) {
+	if err := s.validate.Var(req.StudentId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid student id")
+	}
+	courses, err := s.repo.ListByStudentID(ctx, req.StudentId)
+	if err != nil {
+		s.logger.Error("failed to get courses by student", "error", err)
+		return nil, status.Error(codes.Internal, "failed to get courses by student")
+	}
+
+	pbCourses := make([]*pb.Course, len(courses))
+	for i, c := range courses {
+		pbCourses[i] = courseToPb(c)
+	}
+
+	return &pb.GetCoursesResponse{Courses: pbCourses}, nil
+}
+
+func (s *CoursesService) GetCoursesByTeacher(ctx context.Context, req *pb.GetCoursesByTeacherRequest) (*pb.GetCoursesResponse, error) {
+	if err := s.validate.Var(req.TeacherId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid teacher id")
+	}
+	courses, err := s.repo.ListByTeacherID(ctx, req.TeacherId)
+	if err != nil {
+		s.logger.Error("failed to get courses by teacher", "error", err)
+		return nil, status.Error(codes.Internal, "failed to get courses by teacher")
+	}
+
+	pbCourses := make([]*pb.Course, len(courses))
+	for i, c := range courses {
+		pbCourses[i] = courseToPb(c)
+	}
+
+	return &pb.GetCoursesResponse{Courses: pbCourses}, nil
+}
+
+func (s *CoursesService) GetCourseStudents(ctx context.Context, req *pb.GetCourseStudentsRequest) (*pb.GetCourseStudentsResponse, error) {
+	if err := s.validate.Var(req.CourseId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid course id")
+	}
+
+	students, total, err := s.repo.ListCourseStudents(ctx, req.CourseId, req.Index, req.Limit)
+	if err != nil {
+		s.logger.Error("failed to get course students", "error", err)
+		return nil, status.Error(codes.Internal, "failed to get course students")
+	}
+
+	pbStudents := make([]*pb.Student, len(students))
+	for i, s := range students {
+		pbStudents[i] = &pb.Student{
+			UserId:    s.UserID,
+			Email:     s.Email,
+			FirstName: s.FirstName,
+			LastName:  s.LastName,
+		}
+	}
+	return &pb.GetCourseStudentsResponse{Students: pbStudents, Total: total, Index: req.Index + int32(len(pbStudents))}, nil
+}
+
+func courseToPb(c domain.Course) *pb.Course {
+	return &pb.Course{
+		CourseId:    c.ID,
+		TeacherId:   c.TeacherID,
+		Title:       c.Title,
+		Description: c.Description,
+		Visibility:  c.Visibility,
+		StartTime:   timeToTimestamp(c.StartTime),
+		EndTime:     timeToTimestamp(c.EndTime),
+		CreatedAt:   timestamppb.New(c.CreatedAt),
+	}
+}
+
+func timestampToTime(ts *timestamppb.Timestamp) *time.Time {
+	if ts == nil {
+		return nil
+	}
+	t := ts.AsTime()
+	return &t
+}
+
+func timeToTimestamp(t *time.Time) *timestamppb.Timestamp {
+	if t == nil {
+		return nil
+	}
+	return timestamppb.New(*t)
 }

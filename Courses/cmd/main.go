@@ -2,41 +2,58 @@ package main
 
 import (
 	"Classroom/Courses/internal/config"
-	repo "Classroom/Courses/internal/repo/postgres"
-	service "Classroom/Courses/internal/service"
+	"Classroom/Courses/internal/repo"
+	"Classroom/Courses/internal/service"
 	pb "Classroom/Courses/pkg/api/courses"
 	"Classroom/Courses/pkg/postgres"
+	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 )
 
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stdin, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	conf := config.MustNew()
 
-	postgres, err := postgres.MustNew(conf.PostgresURL)
+	postgres := postgres.MustNew(conf.PostgresURL)
 	defer postgres.Close()
+
+	courseRepo := repo.NewCoursesRepo(postgres)
+	courseService := service.NewCoursesService(logger, courseRepo)
+
+	server := grpc.NewServer()
+	pb.RegisterCoursesServiceServer(server, courseService)
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	logger.Info("starting grpc server", "port", conf.Port)
+	go startServer(server, conf.Port)
+
+	<-ctx.Done()
+
+	server.GracefulStop()
+	logger.Info("grpc server stopped")
+}
+
+func startServer(server *grpc.Server, port int) {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
-		log.Fatalf("Connect database error: %v", err)
-		return
+		log.Fatalf("failed to listen: %v", err)
 	}
-
-	courseRepo := repo.NewCourseRepo(postgres)
-
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", conf.Port))
-	if err != nil {
-		log.Fatalf("Listen error: %v", err)
+	if err := server.Serve(lis); err != nil {
+		log.Fatalf("failed to start grpc server: %v", err)
 	}
+}
 
-	grpcServer := grpc.NewServer()
-
-	courseService := service.NewCoursesService(courseRepo)
-	pb.RegisterCoursesServiceServer(grpcServer, courseService)
-
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
-
+func init() {
+	godotenv.Load()
 }

@@ -5,7 +5,7 @@ import (
 	"Classroom/Auth/internal/dto"
 	"Classroom/Auth/internal/entities"
 	"Classroom/Auth/internal/service"
-	"Classroom/Auth/internal/service/mocks"
+	mocks "Classroom/Auth/internal/service/mocks"
 	"context"
 	"log/slog"
 	"testing"
@@ -18,7 +18,7 @@ import (
 )
 
 func TestAuthService_Register(t *testing.T) {
-	type MockBehavior func(users *mocks.UserRepo, payload dto.RegisterDTO)
+	type MockBehavior func(users *mocks.MockUserRepo, payload dto.RegisterDTO)
 
 	testCases := []struct {
 		name         string
@@ -35,7 +35,7 @@ func TestAuthService_Register(t *testing.T) {
 				FirstName: "John",
 				LastName:  "Doe",
 			},
-			mockBehavior: func(users *mocks.UserRepo, payload dto.RegisterDTO) {
+			mockBehavior: func(users *mocks.MockUserRepo, payload dto.RegisterDTO) {
 				users.EXPECT().
 					Create(mock.Anything, mock.MatchedBy(func(dto dto.CreateUserDTO) bool {
 						return dto.Email == payload.Email &&
@@ -57,7 +57,7 @@ func TestAuthService_Register(t *testing.T) {
 				FirstName: "Jane",
 				LastName:  "Smith",
 			},
-			mockBehavior: func(users *mocks.UserRepo, payload dto.RegisterDTO) {
+			mockBehavior: func(users *mocks.MockUserRepo, payload dto.RegisterDTO) {
 				users.EXPECT().
 					Create(mock.Anything, mock.Anything).
 					Return(entities.User{}, service.ErrUserAlreadyExists)
@@ -69,8 +69,8 @@ func TestAuthService_Register(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			tokenRepo := mocks.NewTokenRepo(t)
-			userRepo := mocks.NewUserRepo(t)
+			tokenRepo := mocks.NewMockTokenRepo(t)
+			userRepo := mocks.NewMockUserRepo(t)
 			tc.mockBehavior(userRepo, tc.payload)
 			conf := config.Auth{JwtSecret: "secret", AccessTTL: time.Minute, RefreshTTL: time.Minute}
 			svc := service.NewAuthService(slog.Default(), userRepo, tokenRepo, conf)
@@ -86,7 +86,7 @@ func TestAuthService_Register(t *testing.T) {
 }
 
 func TestAuthService_Login(t *testing.T) {
-	type MockBehavior func(users *mocks.UserRepo, tokens *mocks.TokenRepo, payload dto.LoginDTO)
+	type MockBehavior func(users *mocks.MockUserRepo, tokens *mocks.MockTokenRepo, payload dto.LoginDTO)
 
 	testCases := []struct {
 		name         string
@@ -101,7 +101,7 @@ func TestAuthService_Login(t *testing.T) {
 				Email:    "user@example.com",
 				Password: "correct-password",
 			},
-			mockBehavior: func(users *mocks.UserRepo, tokens *mocks.TokenRepo, payload dto.LoginDTO) {
+			mockBehavior: func(users *mocks.MockUserRepo, tokens *mocks.MockTokenRepo, payload dto.LoginDTO) {
 				hashedPassword, err := bcrypt.GenerateFromPassword([]byte("correct-password"), bcrypt.DefaultCost)
 				require.NoError(t, err)
 				users.EXPECT().
@@ -124,7 +124,7 @@ func TestAuthService_Login(t *testing.T) {
 				Email:    "notfound@example.com",
 				Password: "password",
 			},
-			mockBehavior: func(users *mocks.UserRepo, tokens *mocks.TokenRepo, payload dto.LoginDTO) {
+			mockBehavior: func(users *mocks.MockUserRepo, tokens *mocks.MockTokenRepo, payload dto.LoginDTO) {
 				users.EXPECT().
 					GetByEmail(mock.Anything, payload.Email).
 					Return(entities.User{}, service.ErrUserNotFound)
@@ -138,7 +138,7 @@ func TestAuthService_Login(t *testing.T) {
 				Email:    "user@example.com",
 				Password: "wrong-password",
 			},
-			mockBehavior: func(users *mocks.UserRepo, tokens *mocks.TokenRepo, payload dto.LoginDTO) {
+			mockBehavior: func(users *mocks.MockUserRepo, tokens *mocks.MockTokenRepo, payload dto.LoginDTO) {
 				hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("correct-password"), bcrypt.DefaultCost)
 
 				users.EXPECT().
@@ -155,8 +155,8 @@ func TestAuthService_Login(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			tokenRepo := mocks.NewTokenRepo(t)
-			userRepo := mocks.NewUserRepo(t)
+			tokenRepo := mocks.NewMockTokenRepo(t)
+			userRepo := mocks.NewMockUserRepo(t)
 			tc.mockBehavior(userRepo, tokenRepo, tc.payload)
 			conf := config.Auth{JwtSecret: "secret", AccessTTL: time.Minute, RefreshTTL: time.Minute}
 			svc := service.NewAuthService(slog.Default(), userRepo, tokenRepo, conf)
@@ -173,7 +173,7 @@ func TestAuthService_Login(t *testing.T) {
 }
 
 func TestAuthService_Refresh(t *testing.T) {
-	type MockBehavior func(users *mocks.UserRepo, tokens *mocks.TokenRepo, refreshToken string)
+	type MockBehavior func(users *mocks.MockUserRepo, tokens *mocks.MockTokenRepo, refreshToken string)
 
 	testCases := []struct {
 		name         string
@@ -184,7 +184,7 @@ func TestAuthService_Refresh(t *testing.T) {
 		{
 			name:         "success",
 			refreshToken: "valid-refresh-token",
-			mockBehavior: func(users *mocks.UserRepo, tokens *mocks.TokenRepo, refreshToken string) {
+			mockBehavior: func(users *mocks.MockUserRepo, tokens *mocks.MockTokenRepo, refreshToken string) {
 				tokens.EXPECT().
 					GetInfoByToken(mock.Anything, refreshToken).
 					Return(entities.RefreshToken{
@@ -204,7 +204,7 @@ func TestAuthService_Refresh(t *testing.T) {
 		{
 			name:         "token expired",
 			refreshToken: "expired-refresh-token",
-			mockBehavior: func(users *mocks.UserRepo, tokens *mocks.TokenRepo, refreshToken string) {
+			mockBehavior: func(users *mocks.MockUserRepo, tokens *mocks.MockTokenRepo, refreshToken string) {
 				tokens.EXPECT().
 					GetInfoByToken(mock.Anything, refreshToken).
 					Return(entities.RefreshToken{
@@ -218,8 +218,8 @@ func TestAuthService_Refresh(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			tokenRepo := mocks.NewTokenRepo(t)
-			userRepo := mocks.NewUserRepo(t)
+			tokenRepo := mocks.NewMockTokenRepo(t)
+			userRepo := mocks.NewMockUserRepo(t)
 			tc.mockBehavior(userRepo, tokenRepo, tc.refreshToken)
 			conf := config.Auth{JwtSecret: "secret", AccessTTL: time.Minute, RefreshTTL: time.Minute}
 			svc := service.NewAuthService(slog.Default(), userRepo, tokenRepo, conf)
@@ -235,7 +235,7 @@ func TestAuthService_Refresh(t *testing.T) {
 }
 
 func TestAuthService_Logout(t *testing.T) {
-	type MockBehavior func(tokens *mocks.TokenRepo, refreshToken string)
+	type MockBehavior func(tokens *mocks.MockTokenRepo, refreshToken string)
 
 	testCases := []struct {
 		name         string
@@ -246,7 +246,7 @@ func TestAuthService_Logout(t *testing.T) {
 		{
 			name:         "success",
 			refreshToken: "valid-refresh-token",
-			mockBehavior: func(tokens *mocks.TokenRepo, refreshToken string) {
+			mockBehavior: func(tokens *mocks.MockTokenRepo, refreshToken string) {
 				tokens.EXPECT().
 					Revoke(mock.Anything, refreshToken).
 					Return(true, nil)
@@ -256,7 +256,7 @@ func TestAuthService_Logout(t *testing.T) {
 		{
 			name:         "not deleted",
 			refreshToken: "valid-refresh-token",
-			mockBehavior: func(tokens *mocks.TokenRepo, refreshToken string) {
+			mockBehavior: func(tokens *mocks.MockTokenRepo, refreshToken string) {
 				tokens.EXPECT().
 					Revoke(mock.Anything, refreshToken).
 					Return(false, nil)
@@ -266,7 +266,7 @@ func TestAuthService_Logout(t *testing.T) {
 		{
 			name:         "unknown err",
 			refreshToken: "valid-refresh-token",
-			mockBehavior: func(tokens *mocks.TokenRepo, refreshToken string) {
+			mockBehavior: func(tokens *mocks.MockTokenRepo, refreshToken string) {
 				tokens.EXPECT().
 					Revoke(mock.Anything, refreshToken).
 					Return(false, assert.AnError)
@@ -277,8 +277,8 @@ func TestAuthService_Logout(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			tokenRepo := mocks.NewTokenRepo(t)
-			userRepo := mocks.NewUserRepo(t)
+			tokenRepo := mocks.NewMockTokenRepo(t)
+			userRepo := mocks.NewMockUserRepo(t)
 			tc.mockBehavior(tokenRepo, tc.refreshToken)
 			conf := config.Auth{JwtSecret: "secret", AccessTTL: time.Minute, RefreshTTL: time.Minute}
 			svc := service.NewAuthService(slog.Default(), userRepo, tokenRepo, conf)
