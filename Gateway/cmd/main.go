@@ -22,15 +22,15 @@ func main() {
 	defer stop()
 
 	config := cfg.MustReadConfig()
+	fmt.Println(*config)
 
-	server, err := srv.NewServer(config.Host.Address, config.Host.Port, ctx)
+	server, err := srv.NewServer(ctx, config)
 	server.CtxStop = stop
-	server.Config = config
 	if err != nil {
 		slog.Error("Server ran into problem: ", slog.Any("error", err))
 		stop()
 	}
-	slog.Info(fmt.Sprintf("Server running on %s:%d", config.Host.Address, config.Host.Port))
+	slog.Info(fmt.Sprintf("Server running on 0.0.0.0:%d", config.Host.Port))
 	go server.Run()
 	
 	select {
