@@ -1,11 +1,5 @@
-with-expecter: True
 dir: '{{.InterfaceDir}}/mocks'
-outpkg: mocks
 filename: '{{.InterfaceName}}.go'
-mockname: '{{.InterfaceName}}'
-resolve-type-alias: False
-disable-version-string: True
-issue-845-fix: True
 packages:
   Classroom/Auth/internal/controller:
     interfaces:

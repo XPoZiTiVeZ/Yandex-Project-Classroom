@@ -9,6 +9,7 @@ service AuthService {
   rpc Login(LoginRequest)       returns (LoginResponse);    // Осуществление аутентификации пользователя
   rpc Refresh(RefreshRequest)   returns (RefreshResponse);  // Обновление access токена
   rpc Logout(LogoutRequest)     returns (LogoutResponse);   // Отзыв refresh токена
+  rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse); // Получение информации о пользователе
 }
 
 message RegisterRequest {
@@ -45,3 +46,15 @@ message LogoutRequest {
 }
 
 message LogoutResponse {}
+
+message GetUserInfoRequest {
+  string user_id = 1;
+}
+
+message GetUserInfoResponse {
+  string user_id = 1;
+  string email = 2;
+  string first_name = 3;
+  string last_name = 4;
+  bool is_superuser = 5;
+}

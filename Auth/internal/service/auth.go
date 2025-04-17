@@ -130,3 +130,7 @@ func (a *authService) Logout(ctx context.Context, refreshToken string) error {
 	}
 	return e.WrapIfErr(err, "failed to revoke refresh token")
 }
+
+func (a *authService) GetUserInfo(ctx context.Context, userID string) (entities.User, error) {
+	return a.users.GetByID(ctx, userID)
+}
