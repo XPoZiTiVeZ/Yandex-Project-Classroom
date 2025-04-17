@@ -74,20 +74,6 @@ func (s *CoursesServiceClient) GetCourse(ctx context.Context, req GetCourseReque
 	return NewGetCourseResponse(resp), nil
 }
 
-func (s *CoursesServiceClient) GetCourseMembers(ctx context.Context, req GetCourseMembersRequest) (GetCourseMembersResponse, error) {
-	slog.Debug("getting course members", slog.Any("request", req))
-	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
-	defer cancel()
-
-	resp, err := (*s.Client).GetCourseMembers(ctx, NewGetCourseMembersRequest(req))
-	if err != nil {
-		return GetCourseMembersResponse{}, err
-	}
-
-	slog.Debug("courses.GetCourseMembers succeed")
-	return NewGetCourseMembersResponse(resp), nil
-}
-
 func (s *CoursesServiceClient) GetCourses(ctx context.Context, req GetCoursesRequest) (GetCoursesResponse, error) {
 	slog.Debug("getting courses", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
@@ -99,6 +85,34 @@ func (s *CoursesServiceClient) GetCourses(ctx context.Context, req GetCoursesReq
 	}
 
 	slog.Debug("courses.GetCourses succeed")
+	return NewGetCoursesResponse(resp), nil
+}
+
+func (s *CoursesServiceClient) GetCoursesByStudent(ctx context.Context, req GetCoursesByStudentRequest) (GetCoursesResponse, error) {
+	slog.Debug("getting courses by student", slog.Any("request", req))
+	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
+	defer cancel()
+
+	resp, err := (*s.Client).GetCoursesByStudent(ctx, NewGetCoursesByStudentRequest(req))
+	if err != nil {
+		return GetCoursesResponse{}, err
+	}
+
+	slog.Debug("courses.GetCoursesByStudent succeed")
+	return NewGetCoursesResponse(resp), nil
+}
+
+func (s *CoursesServiceClient) GetCoursesByTeacher(ctx context.Context, req GetCoursesByTeacherRequest) (GetCoursesResponse, error) {
+	slog.Debug("getting courses by teacher", slog.Any("request", req))
+	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
+	defer cancel()
+
+	resp, err := (*s.Client).GetCoursesByTeacher(ctx, NewGetCoursesByTeacherRequest(req))
+	if err != nil {
+		return GetCoursesResponse{}, err
+	}
+
+	slog.Debug("courses.GetCoursesByTeacher succeed")
 	return NewGetCoursesResponse(resp), nil
 }
 
@@ -185,4 +199,18 @@ func (s *CoursesServiceClient) IsMember(ctx context.Context, req IsMemberRequest
 
 	slog.Debug("courses.IsMember succeed")
 	return NewIsMemberResponse(resp), nil
+}
+
+func (s *CoursesServiceClient) GetCourseStudents(ctx context.Context, req GetCourseStudentsRequest) (GetCourseStudentsResponse, error) {
+	slog.Debug("getting course students", slog.Any("request", req))
+	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
+	defer cancel()
+
+	resp, err := (*s.Client).GetCourseStudents(ctx, NewGetCourseStudentsRequest(req))
+	if err != nil {
+		return GetCourseStudentsResponse{}, err
+	}
+
+	slog.Debug("courses.GetCourseStudents succeed")
+	return NewGetCourseStudentsResponse(resp), nil
 }
