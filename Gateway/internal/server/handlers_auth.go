@@ -69,3 +69,16 @@ func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) (error, a
 
 	return err, resp
 }
+
+func (s *Server) GetUserInfoHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+	var body auth.GetUserInfoRequest = r.Context().Value("body").(auth.GetUserInfoRequest)
+
+	resp, err := s.Auth.GetUserInfo(r.Context(), body)
+	if err != nil {
+		slog.Error("auth.GetUserInfo error", slog.Any("error", err))
+
+		he.ServiceUnavailable(w)
+	}
+
+	return err, resp
+}

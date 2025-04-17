@@ -31,39 +31,44 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 
 	// Auth handlers
 	if s.Config.Auth.Enabled {
-		mux.HandleFunc("/api/auth/register", HandlerWrapper(s.RegisterHandler))
-		mux.HandleFunc("/api/auth/login", HandlerWrapper(s.LoginHandler))
-		mux.HandleFunc("/api/auth/refresh", HandlerWrapper(s.RefreshHandler))
-		mux.HandleFunc("/api/auth/logout", s.IsAuthenticated(HandlerWrapper(s.LogoutHandler)))
+		mux.HandleFunc("/api/auth/register", HandlerWrapper[auth.RegisterRequest](s.RegisterHandler))
+		mux.HandleFunc("/api/auth/login", HandlerWrapper[auth.LoginRequest](s.LoginHandler))
+		mux.HandleFunc("/api/auth/refresh", HandlerWrapper[auth.RefreshRequest](s.RefreshHandler))
+		mux.HandleFunc("/api/auth/logout", s.IsAuthenticated(HandlerWrapper[auth.LogoutRequest](s.LogoutHandler)))
+		mux.HandleFunc("/api/auth/user-info", s.IsAuthenticated(HandlerWrapper[auth.GetUserInfoRequest](s.GetUserInfoHandler)))
 	}
 
 	// Courses handlers
 	if s.Config.Auth.Enabled && s.Config.Courses.Enabled {
-		mux.HandleFunc("/api/courses/enroll", s.IsTeacher(HandlerWrapper(s.EnrollUserHandler)))
-		mux.HandleFunc("/api/courses/create", s.IsAuthenticated(HandlerWrapper(s.CreateCourseHandler)))
-		mux.HandleFunc("/api/courses/course", s.IsMember(HandlerWrapper(s.GetCourseHandler)))
-		mux.HandleFunc("/api/courses/courses", s.IsAuthenticated(HandlerWrapper(s.GetCoursesHandler)))
-		mux.HandleFunc("/api/courses/course/update", s.IsTeacher(HandlerWrapper(s.UpdateCourseHandler)))
-		mux.HandleFunc("/api/courses/course/delete", s.IsTeacher(HandlerWrapper(s.DeleteCourseHandler)))
+		mux.HandleFunc("/api/courses/create", s.IsAuthenticated(HandlerWrapper[courses.CreateCourseRequest](s.CreateCourseHandler)))
+		mux.HandleFunc("/api/courses/course", s.IsMember(HandlerWrapper[courses.GetCourseRequest](s.GetCourseHandler)))
+		mux.HandleFunc("/api/courses/courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesRequest](s.GetCoursesHandler)))
+		mux.HandleFunc("/api/courses/student-courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesByStudentRequest](s.GetCoursesByStudentHandler)))
+		mux.HandleFunc("/api/courses/teacher-courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesByTeacherRequest](s.GetCoursesByTeacherHandler)))
+		mux.HandleFunc("/api/courses/course/update", s.IsTeacher(HandlerWrapper[courses.UpdateCourseRequest](s.UpdateCourseHandler)))
+		mux.HandleFunc("/api/courses/course/delete", s.IsTeacher(HandlerWrapper[courses.DeleteCourseRequest](s.DeleteCourseHandler)))
+		mux.HandleFunc("/api/courses/course/enroll", s.IsTeacher(HandlerWrapper[courses.EnrollUserRequest](s.EnrollUserHandler)))
+		mux.HandleFunc("/api/courses/course/expel", s.IsTeacher(HandlerWrapper[courses.ExpelUserRequest](s.ExpelUserHandler)))
+		mux.HandleFunc("/api/courses/course/students", s.IsMember(HandlerWrapper[courses.GetCourseStudentsRequest](s.GetCourseStudentsHandler)))
 	}
 
 	// Lessons handlers
 	if s.Config.Auth.Enabled && s.Config.Courses.Enabled && s.Config.Lessons.Enabled {
-		mux.HandleFunc("/api/lessons/create", s.IsTeacher(HandlerWrapper(s.CreateLessonHandler)))
-		mux.HandleFunc("/api/lessons/lesson", s.IsMember(HandlerWrapper(s.GetLessonHandler)))
-		mux.HandleFunc("/api/lessons/lessons", s.IsMember(HandlerWrapper(s.GetLessonsHandler)))
-		mux.HandleFunc("/api/lessons/lesson/update", s.IsTeacher(HandlerWrapper(s.UpdateLessonHandler)))
-		mux.HandleFunc("/api/lessons/lesson/delete", s.IsTeacher(HandlerWrapper(s.DeleteLessonHandler)))
+		mux.HandleFunc("/api/lessons/create", s.IsTeacher(HandlerWrapper[lessons.CreateLessonRequest](s.CreateLessonHandler)))
+		mux.HandleFunc("/api/lessons/lesson", s.IsMember(HandlerWrapper[lessons.GetLessonRequest](s.GetLessonHandler)))
+		mux.HandleFunc("/api/lessons/lessons", s.IsMember(HandlerWrapper[lessons.GetLessonsRequest](s.GetLessonsHandler)))
+		mux.HandleFunc("/api/lessons/lesson/update", s.IsTeacher(HandlerWrapper[lessons.UpdateLessonRequest](s.UpdateLessonHandler)))
+		mux.HandleFunc("/api/lessons/lesson/delete", s.IsTeacher(HandlerWrapper[lessons.DeleteLessonRequest](s.DeleteLessonHandler)))
 	}
 
 	// Tasks handlers
 	if s.Config.Auth.Enabled && s.Config.Courses.Enabled && s.Config.Tasks.Enabled {
-		mux.HandleFunc("/api/tasks/create", s.IsTeacher(HandlerWrapper(s.CreateTaskHandler)))
-		mux.HandleFunc("/api/tasks/task", s.IsMember(HandlerWrapper(s.GetTaskHandler)))
-		mux.HandleFunc("/api/tasks/tasks", s.IsMember(HandlerWrapper(s.GetTasksHandler)))
-		mux.HandleFunc("/api/tasks/task/update", s.IsTeacher(HandlerWrapper(s.UpdateTaskHandler)))
-		mux.HandleFunc("/api/tasks/task/delete", s.IsTeacher(HandlerWrapper(s.DeleteTaskHandler)))
-		mux.HandleFunc("/api/tasks/task/changestatus", s.IsMember(HandlerWrapper(s.ChangeStatusTaskHandler)))
+		mux.HandleFunc("/api/tasks/create", s.IsTeacher(HandlerWrapper[tasks.CreateTaskRequest](s.CreateTaskHandler)))
+		mux.HandleFunc("/api/tasks/task", s.IsMember(HandlerWrapper[tasks.GetTaskRequest](s.GetTaskHandler)))
+		mux.HandleFunc("/api/tasks/tasks", s.IsMember(HandlerWrapper[tasks.GetTasksRequest](s.GetTasksHandler)))
+		mux.HandleFunc("/api/tasks/task/update", s.IsTeacher(HandlerWrapper[tasks.UpdateTaskRequest](s.UpdateTaskHandler)))
+		mux.HandleFunc("/api/tasks/task/delete", s.IsTeacher(HandlerWrapper[tasks.DeleteTaskRequest](s.DeleteTaskHandler)))
+		mux.HandleFunc("/api/tasks/task/changestatus", s.IsMember(HandlerWrapper[tasks.ChangeStatusTaskRequest](s.ChangeStatusTaskHandler)))
 	}
 }
 

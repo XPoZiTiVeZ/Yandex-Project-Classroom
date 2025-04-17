@@ -90,3 +90,31 @@ type LogoutResponse struct {
 func NewLogoutResponse(resp *pb.LogoutResponse) LogoutResponse {
 	return LogoutResponse{}
 }
+
+type GetUserInfoRequest struct {
+	UserID string `json:"user_id"`
+}
+
+func NewGetUserInfoRequest(req GetUserInfoRequest) *pb.GetUserInfoRequest {
+	return &pb.GetUserInfoRequest{
+		UserId: req.UserID,
+	}
+}
+
+type GetUserInfoResponse struct {
+	UserID      string `json:"user_id"`
+	Email       string `json:"email"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	IsSuperUser bool
+}
+
+func NewGetUserInfoResponse(resp *pb.GetUserInfoResponse) GetUserInfoResponse {
+	return GetUserInfoResponse{
+		UserID:      resp.GetUserId(),
+		Email:       resp.GetEmail(),
+		FirstName:   resp.GetFirstName(),
+		LastName:    resp.GetLastName(),
+		IsSuperUser: resp.GetIsSuperuser(),
+	}
+}
