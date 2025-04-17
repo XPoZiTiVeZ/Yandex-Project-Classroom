@@ -23,13 +23,19 @@ type Auth struct {
 }
 
 func MustNew() *Config {
-	configPath := flag.String("config", "./config.yaml", "path to config file")
+	configPath := flag.String("config", "./config/config.yaml", "path to config file")
 	flag.Parse()
 
 	v := viper.New()
 
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.BindEnv("port")
+	v.BindEnv("postgres_url")
+	v.BindEnv("redis_url")
+	v.BindEnv("auth.jwt_secret")
+	v.BindEnv("auth.access_ttl")
+	v.BindEnv("auth.refresh_ttl")
 
 	v.SetConfigFile(*configPath)
 
