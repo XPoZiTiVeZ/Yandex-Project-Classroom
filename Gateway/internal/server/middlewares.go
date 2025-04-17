@@ -73,7 +73,7 @@ func (s *Server) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 
 		claims := &AuthClaims{}
 		token, err := jwt.ParseWithClaims(authHeader, claims, func(token *jwt.Token) (any, error) {
-			return s.Config.Env.AuthJWTSecret, nil
+			return s.Config.Common.AuthJWTSecret, nil
 		})
 
 		if err != nil || !token.Valid {

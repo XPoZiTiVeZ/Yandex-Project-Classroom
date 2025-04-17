@@ -14,7 +14,7 @@ import (
 
 type Server struct {
 	CtxStop context.CancelFunc
-	Config  config.Config
+	Config  *config.Config
 	Server  *http.Server
 	Auth    *auth.AuthServiceClient
 	Courses *courses.CoursesServiceClient
@@ -67,14 +67,15 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 	}
 }
 
-func NewServer(address string, port int, ctx context.Context) (*Server, error) {
+func NewServer(ctx context.Context, cfg *config.Config) (*Server, error) {
 	var server Server
+	server.Config = cfg
 
 	mux := http.NewServeMux()
 	server.RegisterMux(mux)
 
 	server.Server = &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", address, port),
+		Addr:    fmt.Sprintf("0.0.0.0:%d", cfg.Host.Port),
 		Handler: mux,
 	}
 
