@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"Classroom/Auth/internal/dto"
+	"Classroom/Auth/internal/entities"
 	"Classroom/Auth/internal/service"
 	pb "Classroom/Auth/pkg/api/auth"
 
@@ -20,6 +21,7 @@ type AuthService interface {
 	Login(ctx context.Context, dto dto.LoginDTO) (dto.TokensDTO, error)
 	Refresh(ctx context.Context, refreshToken string) (string, error)
 	Logout(ctx context.Context, refreshToken string) error
+	GetUserInfo(ctx context.Context, userID string) (entities.User, error)
 }
 
 type authController struct {
@@ -132,4 +134,26 @@ func (c *authController) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb
 	}
 
 	return &pb.LogoutResponse{}, nil
+}
+
+func (c *authController) GetUserInfo(ctx context.Context, req *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
+	if err := c.validate.Var(req.UserId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid user id")
+	}
+	user, err := c.svc.GetUserInfo(ctx, req.UserId)
+	if errors.Is(err, service.ErrUserNotFound) {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+	if err != nil {
+		c.logger.Error("failed to get user info", "err", err, "id", req.UserId)
+		return nil, status.Error(codes.Internal, "failed to get user info")
+	}
+
+	return &pb.GetUserInfoResponse{
+		UserId:      user.ID,
+		Email:       user.Email,
+		FirstName:   user.FirstName,
+		LastName:    user.LastName,
+		IsSuperuser: user.IsSuperUser,
+	}, nil
 }

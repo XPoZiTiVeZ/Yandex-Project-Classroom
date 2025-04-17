@@ -2,7 +2,7 @@ package controller_test
 
 import (
 	"Classroom/Auth/internal/controller"
-	"Classroom/Auth/internal/controller/mocks"
+	mocks "Classroom/Auth/internal/controller/mocks"
 	"Classroom/Auth/internal/dto"
 	"Classroom/Auth/internal/service"
 	pb "Classroom/Auth/pkg/api/auth"
@@ -18,7 +18,7 @@ import (
 )
 
 func TestAuthController_Register(t *testing.T) {
-	type MockBehavior func(svc *mocks.AuthService, req *pb.RegisterRequest)
+	type MockBehavior func(svc *mocks.MockAuthService, req *pb.RegisterRequest)
 
 	testCases := []struct {
 		name         string
@@ -29,7 +29,7 @@ func TestAuthController_Register(t *testing.T) {
 	}{
 		{
 			name: "success",
-			mockBehavior: func(svc *mocks.AuthService, req *pb.RegisterRequest) {
+			mockBehavior: func(svc *mocks.MockAuthService, req *pb.RegisterRequest) {
 				svc.EXPECT().Register(mock.Anything, dto.RegisterDTO{
 					Email:     req.Email,
 					Password:  req.Password,
@@ -47,7 +47,7 @@ func TestAuthController_Register(t *testing.T) {
 		},
 		{
 			name:         "invalid email",
-			mockBehavior: func(svc *mocks.AuthService, req *pb.RegisterRequest) {},
+			mockBehavior: func(svc *mocks.MockAuthService, req *pb.RegisterRequest) {},
 			req: &pb.RegisterRequest{
 				Email:     "email@e",
 				Password:  "password",
@@ -58,7 +58,7 @@ func TestAuthController_Register(t *testing.T) {
 		},
 		{
 			name: "user already exists",
-			mockBehavior: func(svc *mocks.AuthService, req *pb.RegisterRequest) {
+			mockBehavior: func(svc *mocks.MockAuthService, req *pb.RegisterRequest) {
 				svc.EXPECT().Register(mock.Anything, dto.RegisterDTO{
 					Email:     req.Email,
 					Password:  req.Password,
@@ -78,7 +78,7 @@ func TestAuthController_Register(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc := mocks.NewAuthService(t)
+			svc := mocks.NewMockAuthService(t)
 			tc.mockBehavior(svc, tc.req)
 			c := controller.NewAuthController(slog.Default(), svc)
 			got, err := c.Register(context.Background(), tc.req)
@@ -93,7 +93,7 @@ func TestAuthController_Register(t *testing.T) {
 }
 
 func TestAuthController_Login(t *testing.T) {
-	type MockBehavior func(svc *mocks.AuthService, req *pb.LoginRequest)
+	type MockBehavior func(svc *mocks.MockAuthService, req *pb.LoginRequest)
 
 	testCases := []struct {
 		name         string
@@ -104,7 +104,7 @@ func TestAuthController_Login(t *testing.T) {
 	}{
 		{
 			name: "success",
-			mockBehavior: func(svc *mocks.AuthService, req *pb.LoginRequest) {
+			mockBehavior: func(svc *mocks.MockAuthService, req *pb.LoginRequest) {
 				svc.EXPECT().Login(mock.Anything, dto.LoginDTO{
 					Email:    req.Email,
 					Password: req.Password,
@@ -121,7 +121,7 @@ func TestAuthController_Login(t *testing.T) {
 		},
 		{
 			name:         "invalid email",
-			mockBehavior: func(svc *mocks.AuthService, req *pb.LoginRequest) {},
+			mockBehavior: func(svc *mocks.MockAuthService, req *pb.LoginRequest) {},
 			req: &pb.LoginRequest{
 				Email:    "email@e",
 				Password: "password",
@@ -130,7 +130,7 @@ func TestAuthController_Login(t *testing.T) {
 		},
 		{
 			name: "invalid credentials",
-			mockBehavior: func(svc *mocks.AuthService, req *pb.LoginRequest) {
+			mockBehavior: func(svc *mocks.MockAuthService, req *pb.LoginRequest) {
 				svc.EXPECT().Login(mock.Anything, dto.LoginDTO{
 					Email:    req.Email,
 					Password: req.Password,
@@ -146,7 +146,7 @@ func TestAuthController_Login(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc := mocks.NewAuthService(t)
+			svc := mocks.NewMockAuthService(t)
 			tc.mockBehavior(svc, tc.req)
 			c := controller.NewAuthController(slog.Default(), svc)
 			got, err := c.Login(context.Background(), tc.req)
@@ -161,7 +161,7 @@ func TestAuthController_Login(t *testing.T) {
 }
 
 func TestAuthController_Refresh(t *testing.T) {
-	type MockBehavior func(svc *mocks.AuthService, req *pb.RefreshRequest)
+	type MockBehavior func(svc *mocks.MockAuthService, req *pb.RefreshRequest)
 
 	testCases := []struct {
 		name         string
@@ -172,7 +172,7 @@ func TestAuthController_Refresh(t *testing.T) {
 	}{
 		{
 			name: "success",
-			mockBehavior: func(svc *mocks.AuthService, req *pb.RefreshRequest) {
+			mockBehavior: func(svc *mocks.MockAuthService, req *pb.RefreshRequest) {
 				svc.EXPECT().Refresh(mock.Anything, req.RefreshToken).Return("token", nil)
 			},
 			req: &pb.RefreshRequest{
@@ -184,7 +184,7 @@ func TestAuthController_Refresh(t *testing.T) {
 		},
 		{
 			name: "invalid token",
-			mockBehavior: func(svc *mocks.AuthService, req *pb.RefreshRequest) {
+			mockBehavior: func(svc *mocks.MockAuthService, req *pb.RefreshRequest) {
 				svc.EXPECT().Refresh(mock.Anything, req.RefreshToken).Return("", service.ErrInvalidToken)
 			},
 			req: &pb.RefreshRequest{
@@ -196,7 +196,7 @@ func TestAuthController_Refresh(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc := mocks.NewAuthService(t)
+			svc := mocks.NewMockAuthService(t)
 			tc.mockBehavior(svc, tc.req)
 			c := controller.NewAuthController(slog.Default(), svc)
 			got, err := c.Refresh(context.Background(), tc.req)
@@ -211,7 +211,7 @@ func TestAuthController_Refresh(t *testing.T) {
 }
 
 func TestAuthController_Logout(t *testing.T) {
-	type MockBehavior func(svc *mocks.AuthService, req *pb.LogoutRequest)
+	type MockBehavior func(svc *mocks.MockAuthService, req *pb.LogoutRequest)
 
 	testCases := []struct {
 		name         string
@@ -222,7 +222,7 @@ func TestAuthController_Logout(t *testing.T) {
 	}{
 		{
 			name: "success",
-			mockBehavior: func(svc *mocks.AuthService, req *pb.LogoutRequest) {
+			mockBehavior: func(svc *mocks.MockAuthService, req *pb.LogoutRequest) {
 				svc.EXPECT().Logout(mock.Anything, req.RefreshToken).Return(nil)
 			},
 			req: &pb.LogoutRequest{
@@ -234,7 +234,7 @@ func TestAuthController_Logout(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc := mocks.NewAuthService(t)
+			svc := mocks.NewMockAuthService(t)
 			tc.mockBehavior(svc, tc.req)
 			c := controller.NewAuthController(slog.Default(), svc)
 			got, err := c.Logout(context.Background(), tc.req)
