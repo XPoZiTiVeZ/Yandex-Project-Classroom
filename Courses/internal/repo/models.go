@@ -33,6 +33,7 @@ func (c Course) ToDomain() domain.Course {
 		Visibility:  c.Visibility,
 		StartTime:   startTime,
 		EndTime:     endTime,
+		CreatedAt:   c.CreatedAt,
 	}
 }
 

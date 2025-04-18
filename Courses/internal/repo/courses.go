@@ -94,12 +94,16 @@ func (r *courseRepo) GetByID(ctx context.Context, courseID string) (domain.Cours
 	return course.ToDomain(), nil
 }
 
+// Делает фильтрацию по visibility, start_time, end_time и teacher_id
 func (r *courseRepo) ListByStudentID(ctx context.Context, studentID string) ([]domain.Course, error) {
 	query, args := r.qb.
 		Select("c.course_id", "c.teacher_id", "c.title", "c.description", "c.visibility", "c.start_time", "c.end_time", "c.created_at").
 		From("enrollments e").
 		Join("courses c ON e.course_id = c.course_id").
-		Where(sq.Eq{"e.student_id": studentID}).
+		Where(sq.Eq{"e.student_id": studentID, "c.visibility": true}).
+		Where(sq.Expr("c.teacher_id <> e.student_id")).
+		Where(sq.Or{sq.Expr("c.start_time IS NULL"), sq.Expr("c.start_time <= NOW()")}).
+		Where(sq.Or{sq.Expr("c.end_time IS NULL"), sq.Expr("c.end_time >= NOW()")}).
 		MustSql()
 
 	var courses []Course
