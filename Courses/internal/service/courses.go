@@ -6,7 +6,6 @@ import (
 	pb "Classroom/Courses/pkg/api/courses"
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"slices"
 	"time"
@@ -88,19 +87,17 @@ func (s *CoursesService) GetCourse(ctx context.Context, req *pb.GetCourseRequest
 		return nil, status.Error(codes.Internal, "failed to get course")
 	}
 
-	fmt.Println(course.CreatedAt, course.StartTime)
-
 	if course.TeacherID == req.UserId {
 		return &pb.GetCourseResponse{Course: courseToPb(course)}, nil
 	}
 	if !course.Visibility {
-		return nil, status.Error(codes.NotFound, "course not found")
+		return nil, status.Error(codes.NotFound, "course is hidden")
 	}
 	if course.StartTime != nil && course.StartTime.Before(time.Now()) {
-		return nil, status.Error(codes.NotFound, "course not found")
+		return nil, status.Error(codes.NotFound, "course is not started yet")
 	}
 	if course.EndTime != nil && course.EndTime.After(time.Now()) {
-		return nil, status.Error(codes.NotFound, "course not found")
+		return nil, status.Error(codes.NotFound, "course is over")
 	}
 
 	return &pb.GetCourseResponse{Course: courseToPb(course)}, nil
@@ -228,6 +225,17 @@ func (s *CoursesService) IsMember(ctx context.Context, req *pb.IsMemberRequest) 
 	isMember, err := s.repo.IsMember(ctx, req.CourseId, req.UserId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to check member")
+	}
+
+	if !isMember {
+		isTeacher, err := s.repo.IsTeacher(ctx, req.CourseId, req.UserId)
+		if err != nil {
+			return nil, status.Error(codes.Internal, "failed to check teacher")
+		}
+
+		if isTeacher {
+			return &pb.IsMemberResponse{IsMember: true}, nil
+		}
 	}
 
 	return &pb.IsMemberResponse{IsMember: isMember}, nil
