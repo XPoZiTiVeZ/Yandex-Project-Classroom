@@ -6,7 +6,9 @@ import (
 	pb "Classroom/Courses/pkg/api/courses"
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
+	"slices"
 	"time"
 
 	"github.com/go-playground/validator"
@@ -21,6 +23,7 @@ type CourseRepo interface {
 	Update(ctx context.Context, dto dto.UpdateCourseDTO) (domain.Course, error)
 	Delete(ctx context.Context, courseID string) (domain.Course, error)
 
+	// Делает фильтрацию по visibility, start_time, end_time и teacher_id
 	ListByStudentID(ctx context.Context, teacherID string) ([]domain.Course, error)
 	ListByTeacherID(ctx context.Context, teacherID string) ([]domain.Course, error)
 
@@ -72,6 +75,10 @@ func (s *CoursesService) GetCourse(ctx context.Context, req *pb.GetCourseRequest
 	if err := s.validate.Var(req.CourseId, "required,uuid"); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid course id")
 	}
+	if err := s.validate.Var(req.UserId, "required,uuid"); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid user id")
+	}
+
 	course, err := s.repo.GetByID(ctx, req.CourseId)
 	if errors.Is(err, domain.ErrNotFound) {
 		return nil, status.Error(codes.NotFound, "course not found")
@@ -79,6 +86,21 @@ func (s *CoursesService) GetCourse(ctx context.Context, req *pb.GetCourseRequest
 	if err != nil {
 		s.logger.Error("failed to get course", "error", err)
 		return nil, status.Error(codes.Internal, "failed to get course")
+	}
+
+	fmt.Println(course.CreatedAt, course.StartTime)
+
+	if course.TeacherID == req.UserId {
+		return &pb.GetCourseResponse{Course: courseToPb(course)}, nil
+	}
+	if !course.Visibility {
+		return nil, status.Error(codes.NotFound, "course not found")
+	}
+	if course.StartTime != nil && course.StartTime.Before(time.Now()) {
+		return nil, status.Error(codes.NotFound, "course not found")
+	}
+	if course.EndTime != nil && course.EndTime.After(time.Now()) {
+		return nil, status.Error(codes.NotFound, "course not found")
 	}
 
 	return &pb.GetCourseResponse{Course: courseToPb(course)}, nil
@@ -227,19 +249,20 @@ func (s *CoursesService) GetCourses(ctx context.Context, req *pb.GetCoursesReque
 		return nil, status.Error(codes.Internal, "failed to get courses by teacher")
 	}
 
-	// Чтобы не было повторений
-	courses := make(map[string]domain.Course)
-	for _, c := range studentCourses {
-		courses[c.ID] = c
-	}
+	pbCourses := make([]*pb.Course, 0, len(teacherCourses)+len(studentCourses))
 	for _, c := range teacherCourses {
-		courses[c.ID] = c
-	}
-
-	pbCourses := make([]*pb.Course, 0, len(courses))
-	for _, c := range courses {
 		pbCourses = append(pbCourses, courseToPb(c))
 	}
+	for _, c := range studentCourses {
+		pbCourses = append(pbCourses, courseToPb(c))
+	}
+
+	slices.SortFunc(pbCourses, func(a, b *pb.Course) int {
+		if a.CreatedAt.AsTime().Before(b.CreatedAt.AsTime()) {
+			return 1
+		}
+		return -1
+	})
 
 	return &pb.GetCoursesResponse{Courses: pbCourses}, nil
 }
