@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"slices"
 	"time"
 
 	"github.com/go-playground/validator"
@@ -255,6 +256,13 @@ func (s *CoursesService) GetCourses(ctx context.Context, req *pb.GetCoursesReque
 	for _, c := range studentCourses {
 		pbCourses = append(pbCourses, courseToPb(c))
 	}
+
+	slices.SortFunc(pbCourses, func(a, b *pb.Course) int {
+		if a.CreatedAt.AsTime().Before(b.CreatedAt.AsTime()) {
+			return 1
+		}
+		return -1
+	})
 
 	return &pb.GetCoursesResponse{Courses: pbCourses}, nil
 }

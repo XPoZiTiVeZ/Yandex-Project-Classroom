@@ -104,6 +104,7 @@ func (r *courseRepo) ListByStudentID(ctx context.Context, studentID string) ([]d
 		Where(sq.Expr("c.teacher_id <> e.student_id")).
 		Where(sq.Or{sq.Expr("c.start_time IS NULL"), sq.Expr("c.start_time <= NOW()")}).
 		Where(sq.Or{sq.Expr("c.end_time IS NULL"), sq.Expr("c.end_time >= NOW()")}).
+		OrderBy("c.created_at DESC").
 		MustSql()
 
 	var courses []Course
@@ -127,6 +128,7 @@ func (r *courseRepo) ListByTeacherID(ctx context.Context, teacherID string) ([]d
 		Select("course_id", "teacher_id", "title", "description", "visibility", "start_time", "end_time", "created_at").
 		From("courses").
 		Where(sq.Eq{"teacher_id": teacherID}).
+		OrderBy("created_at DESC").
 		MustSql()
 
 	var courses []Course
