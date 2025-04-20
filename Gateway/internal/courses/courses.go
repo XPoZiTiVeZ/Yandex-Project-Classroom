@@ -15,7 +15,7 @@ import (
 
 type CoursesServiceClient struct {
 	Conn           *grpc.ClientConn
-	Client         *pb.CoursesServiceClient
+	Client         pb.CoursesServiceClient
 	DefaultTimeout time.Duration
 }
 
@@ -30,18 +30,22 @@ func NewCoursesServiceClient(ctx context.Context, config *config.Config) (*Cours
 
 	conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", address, port), opts...)
 	if err != nil {
-		logger.Error(ctx, "Fail to dial: %v", slog.Any("error", err))
-		return nil, err
+		return nil, fmt.Errorf("failed to dial: %w", err)
 	}
 
 	state := conn.GetState()
+	// if !conn.WaitForStateChange(ctx, state) {
+	// 	return nil, fmt.Errorf("failed to wait for state change")
+	// }
+	// state = conn.GetState()
+
 	logger.Info(ctx, "Connected to gRPC Courses", slog.String("address", address), slog.Int("port", port), slog.String("state", state.String()))
 
 	client := pb.NewCoursesServiceClient(conn)
 
 	return &CoursesServiceClient{
 		Conn:           conn,
-		Client:         &client,
+		Client:         client,
 		DefaultTimeout: timeout,
 	}, nil
 }
@@ -51,7 +55,7 @@ func (s *CoursesServiceClient) CreateCourse(ctx context.Context, req CreateCours
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).CreateCourse(ctx, NewCreateCourseRequest(req))
+	resp, err := s.Client.CreateCourse(ctx, NewCreateCourseRequest(req))
 	if err != nil {
 		return CreateCourseResponse{}, err
 	}
@@ -65,7 +69,7 @@ func (s *CoursesServiceClient) GetCourse(ctx context.Context, req GetCourseReque
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).GetCourse(ctx, NewGetCourseRequest(req))
+	resp, err := s.Client.GetCourse(ctx, NewGetCourseRequest(req))
 	if err != nil {
 		return GetCourseResponse{}, err
 	}
@@ -79,7 +83,7 @@ func (s *CoursesServiceClient) GetCourses(ctx context.Context, req GetCoursesReq
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).GetCourses(ctx, NewGetCoursesRequest(req))
+	resp, err := s.Client.GetCourses(ctx, NewGetCoursesRequest(req))
 	if err != nil {
 		return GetCoursesResponse{}, err
 	}
@@ -93,7 +97,7 @@ func (s *CoursesServiceClient) GetCoursesByStudent(ctx context.Context, req GetC
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).GetCoursesByStudent(ctx, NewGetCoursesByStudentRequest(req))
+	resp, err := s.Client.GetCoursesByStudent(ctx, NewGetCoursesByStudentRequest(req))
 	if err != nil {
 		return GetCoursesResponse{}, err
 	}
@@ -107,7 +111,7 @@ func (s *CoursesServiceClient) GetCoursesByTeacher(ctx context.Context, req GetC
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).GetCoursesByTeacher(ctx, NewGetCoursesByTeacherRequest(req))
+	resp, err := s.Client.GetCoursesByTeacher(ctx, NewGetCoursesByTeacherRequest(req))
 	if err != nil {
 		return GetCoursesResponse{}, err
 	}
@@ -121,7 +125,7 @@ func (s *CoursesServiceClient) UpdateCourse(ctx context.Context, req UpdateCours
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).UpdateCourse(ctx, NewUpdateCourseRequest(req))
+	resp, err := s.Client.UpdateCourse(ctx, NewUpdateCourseRequest(req))
 	if err != nil {
 		return UpdateCourseResponse{}, err
 	}
@@ -135,7 +139,7 @@ func (s *CoursesServiceClient) DeleteCourse(ctx context.Context, req DeleteCours
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).DeleteCourse(ctx, NewDeleteCourseRequest(req))
+	resp, err := s.Client.DeleteCourse(ctx, NewDeleteCourseRequest(req))
 	if err != nil {
 		return DeleteCourseResponse{}, err
 	}
@@ -149,7 +153,7 @@ func (s *CoursesServiceClient) EnrollUser(ctx context.Context, req EnrollUserReq
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).EnrollUser(ctx, NewEnrollUserRequest(req))
+	resp, err := s.Client.EnrollUser(ctx, NewEnrollUserRequest(req))
 	if err != nil {
 		return EnrollUserResponse{}, err
 	}
@@ -163,7 +167,7 @@ func (s *CoursesServiceClient) ExpelUser(ctx context.Context, req ExpelUserReque
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).ExpelUser(ctx, NewExpelUserRequest(req))
+	resp, err := s.Client.ExpelUser(ctx, NewExpelUserRequest(req))
 	if err != nil {
 		return ExpelUserResponse{}, err
 	}
@@ -177,7 +181,7 @@ func (s *CoursesServiceClient) IsTeacher(ctx context.Context, req IsTeacherReque
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).IsTeacher(ctx, NewIsTeacherRequest(req))
+	resp, err := s.Client.IsTeacher(ctx, NewIsTeacherRequest(req))
 	if err != nil {
 		return IsTeacherResponse{}, err
 	}
@@ -191,7 +195,7 @@ func (s *CoursesServiceClient) IsMember(ctx context.Context, req IsMemberRequest
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).IsMember(ctx, NewIsMemberRequest(req))
+	resp, err := s.Client.IsMember(ctx, NewIsMemberRequest(req))
 	if err != nil {
 		return IsMemberResponse{}, err
 	}
@@ -205,7 +209,7 @@ func (s *CoursesServiceClient) GetCourseStudents(ctx context.Context, req GetCou
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).GetCourseStudents(ctx, NewGetCourseStudentsRequest(req))
+	resp, err := s.Client.GetCourseStudents(ctx, NewGetCourseStudentsRequest(req))
 	if err != nil {
 		return GetCourseStudentsResponse{}, err
 	}

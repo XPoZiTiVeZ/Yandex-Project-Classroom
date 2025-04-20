@@ -30,11 +30,15 @@ func NewTasksServiceClient(ctx context.Context, config *config.Config) (*TasksSe
 
 	conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", address, port), opts...)
 	if err != nil {
-		logger.Error(ctx, "Fail to dial", slog.Any("error", err))
-		return nil, err
+		return nil, fmt.Errorf("failed to dial: %w", err)
 	}
 
 	state := conn.GetState()
+	// if !conn.WaitForStateChange(ctx, state) {
+	// 	return nil, fmt.Errorf("failed to wait for state change")
+	// }
+	// state = conn.GetState()
+
 	logger.Info(ctx, "Connected to gRPC Tasks", slog.String("address", address), slog.Int("port", port), slog.String("state", state.String()))
 
 	client := pb.NewTasksServiceClient(conn)
