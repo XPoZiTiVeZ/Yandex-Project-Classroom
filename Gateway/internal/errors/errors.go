@@ -10,7 +10,7 @@ func InternalError(w http.ResponseWriter) {
 	)
 }
 
-func ServiceUnavailable(w http.ResponseWriter) {
+func ServiceUnavailable(w http.ResponseWriter, msgs ...string) {
 	http.Error(
 		w,
 		"Service unavailable error",

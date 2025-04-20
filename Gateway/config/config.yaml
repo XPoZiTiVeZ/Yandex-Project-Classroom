@@ -1,30 +1,30 @@
 host:
-    address: 0.0.0.0
-    port: 8080
+  address: 0.0.0.0
+  port: 8080
 auth:
-    address: auth
-    port: 50051
-    enabled: false
+  address: localhost
+  port: 50051
+  enabled: true
 courses:
-    address: courses
-    port: 50052
-    enabled: false
+  address: courses
+  port: 50052
+  enabled: false
 lessons:
-    address: lessons
-    port: 50053
-    enabled: false
+  address: lessons
+  port: 50053
+  enabled: false
 tasks:
-    address: tasks
-    port: 50054
-    enabled: false
+  address: tasks
+  port: 50054
+  enabled: false
 notifications:
-    address: notifications
-    port: 50055
-    enabled: false
+  address: notifications
+  port: 50055
+  enabled: false
 chat:
-    address: chat
-    port: 50056
-    enabled: false
+  address: chat
+  port: 50056
+  enabled: false
 
 common:
-    auth_jwt_secret: secret
+  auth_jwt_secret: secret

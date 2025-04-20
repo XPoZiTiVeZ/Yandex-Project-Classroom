@@ -20,6 +20,7 @@ type Server struct {
 	Courses *courses.CoursesServiceClient
 	Lessons *lessons.LessonsServiceClient
 	Tasks   *tasks.TasksServiceClient
+	logger  *slog.Logger
 }
 
 func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
@@ -39,42 +40,45 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 	}
 
 	// Courses handlers
-	if s.Config.Auth.Enabled && s.Config.Courses.Enabled {
-		mux.HandleFunc("/api/courses/create", s.IsAuthenticated(HandlerWrapper[courses.CreateCourseRequest](s.CreateCourseHandler)))
-		mux.HandleFunc("/api/courses/course", s.IsMember(HandlerWrapper[courses.GetCourseRequest](s.GetCourseHandler)))
-		mux.HandleFunc("/api/courses/courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesRequest](s.GetCoursesHandler)))
-		mux.HandleFunc("/api/courses/student-courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesByStudentRequest](s.GetCoursesByStudentHandler)))
-		mux.HandleFunc("/api/courses/teacher-courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesByTeacherRequest](s.GetCoursesByTeacherHandler)))
-		mux.HandleFunc("/api/courses/course/update", s.IsTeacher(HandlerWrapper[courses.UpdateCourseRequest](s.UpdateCourseHandler)))
-		mux.HandleFunc("/api/courses/course/delete", s.IsTeacher(HandlerWrapper[courses.DeleteCourseRequest](s.DeleteCourseHandler)))
-		mux.HandleFunc("/api/courses/course/enroll", s.IsTeacher(HandlerWrapper[courses.EnrollUserRequest](s.EnrollUserHandler)))
-		mux.HandleFunc("/api/courses/course/expel", s.IsTeacher(HandlerWrapper[courses.ExpelUserRequest](s.ExpelUserHandler)))
-		mux.HandleFunc("/api/courses/course/students", s.IsMember(HandlerWrapper[courses.GetCourseStudentsRequest](s.GetCourseStudentsHandler)))
-	}
+	// if s.Config.Auth.Enabled && s.Config.Courses.Enabled {
+	// 	mux.HandleFunc("/api/courses/create", s.IsAuthenticated(HandlerWrapper[courses.CreateCourseRequest](s.CreateCourseHandler)))
+	// 	mux.HandleFunc("/api/courses/course", s.IsMember(HandlerWrapper[courses.GetCourseRequest](s.GetCourseHandler)))
+	// 	mux.HandleFunc("/api/courses/courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesRequest](s.GetCoursesHandler)))
+	// 	mux.HandleFunc("/api/courses/student-courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesByStudentRequest](s.GetCoursesByStudentHandler)))
+	// 	mux.HandleFunc("/api/courses/teacher-courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesByTeacherRequest](s.GetCoursesByTeacherHandler)))
+	// 	mux.HandleFunc("/api/courses/course/update", s.IsTeacher(HandlerWrapper[courses.UpdateCourseRequest](s.UpdateCourseHandler)))
+	// 	mux.HandleFunc("/api/courses/course/delete", s.IsTeacher(HandlerWrapper[courses.DeleteCourseRequest](s.DeleteCourseHandler)))
+	// 	mux.HandleFunc("/api/courses/course/enroll", s.IsTeacher(HandlerWrapper[courses.EnrollUserRequest](s.EnrollUserHandler)))
+	// 	mux.HandleFunc("/api/courses/course/expel", s.IsTeacher(HandlerWrapper[courses.ExpelUserRequest](s.ExpelUserHandler)))
+	// 	mux.HandleFunc("/api/courses/course/students", s.IsMember(HandlerWrapper[courses.GetCourseStudentsRequest](s.GetCourseStudentsHandler)))
+	// }
 
 	// Lessons handlers
-	if s.Config.Auth.Enabled && s.Config.Courses.Enabled && s.Config.Lessons.Enabled {
-		mux.HandleFunc("/api/lessons/create", s.IsTeacher(HandlerWrapper[lessons.CreateLessonRequest](s.CreateLessonHandler)))
-		mux.HandleFunc("/api/lessons/lesson", s.IsMember(HandlerWrapper[lessons.GetLessonRequest](s.GetLessonHandler)))
-		mux.HandleFunc("/api/lessons/lessons", s.IsMember(HandlerWrapper[lessons.GetLessonsRequest](s.GetLessonsHandler)))
-		mux.HandleFunc("/api/lessons/lesson/update", s.IsTeacher(HandlerWrapper[lessons.UpdateLessonRequest](s.UpdateLessonHandler)))
-		mux.HandleFunc("/api/lessons/lesson/delete", s.IsTeacher(HandlerWrapper[lessons.DeleteLessonRequest](s.DeleteLessonHandler)))
-	}
+	// if s.Config.Auth.Enabled && s.Config.Courses.Enabled && s.Config.Lessons.Enabled {
+	// 	mux.HandleFunc("/api/lessons/create", s.IsTeacher(HandlerWrapper[lessons.CreateLessonRequest](s.CreateLessonHandler)))
+	// 	mux.HandleFunc("/api/lessons/lesson", s.IsMember(HandlerWrapper[lessons.GetLessonRequest](s.GetLessonHandler)))
+	// 	mux.HandleFunc("/api/lessons/lessons", s.IsMember(HandlerWrapper[lessons.GetLessonsRequest](s.GetLessonsHandler)))
+	// 	mux.HandleFunc("/api/lessons/lesson/update", s.IsTeacher(HandlerWrapper[lessons.UpdateLessonRequest](s.UpdateLessonHandler)))
+	// 	mux.HandleFunc("/api/lessons/lesson/delete", s.IsTeacher(HandlerWrapper[lessons.DeleteLessonRequest](s.DeleteLessonHandler)))
+	// }
 
 	// Tasks handlers
-	if s.Config.Auth.Enabled && s.Config.Courses.Enabled && s.Config.Tasks.Enabled {
-		mux.HandleFunc("/api/tasks/create", s.IsTeacher(HandlerWrapper[tasks.CreateTaskRequest](s.CreateTaskHandler)))
-		mux.HandleFunc("/api/tasks/task", s.IsMember(HandlerWrapper[tasks.GetTaskRequest](s.GetTaskHandler)))
-		mux.HandleFunc("/api/tasks/tasks", s.IsMember(HandlerWrapper[tasks.GetTasksRequest](s.GetTasksHandler)))
-		mux.HandleFunc("/api/tasks/task/update", s.IsTeacher(HandlerWrapper[tasks.UpdateTaskRequest](s.UpdateTaskHandler)))
-		mux.HandleFunc("/api/tasks/task/delete", s.IsTeacher(HandlerWrapper[tasks.DeleteTaskRequest](s.DeleteTaskHandler)))
-		mux.HandleFunc("/api/tasks/task/changestatus", s.IsMember(HandlerWrapper[tasks.ChangeStatusTaskRequest](s.ChangeStatusTaskHandler)))
-	}
+	// if s.Config.Auth.Enabled && s.Config.Courses.Enabled && s.Config.Tasks.Enabled {
+	// 	mux.HandleFunc("/api/tasks/create", s.IsTeacher(HandlerWrapper[tasks.CreateTaskRequest](s.CreateTaskHandler)))
+	// 	mux.HandleFunc("/api/tasks/task", s.IsMember(HandlerWrapper[tasks.GetTaskRequest](s.GetTaskHandler)))
+	// 	mux.HandleFunc("/api/tasks/tasks", s.IsMember(HandlerWrapper[tasks.GetTasksRequest](s.GetTasksHandler)))
+	// 	mux.HandleFunc("/api/tasks/task/update", s.IsTeacher(HandlerWrapper[tasks.UpdateTaskRequest](s.UpdateTaskHandler)))
+	// 	mux.HandleFunc("/api/tasks/task/delete", s.IsTeacher(HandlerWrapper[tasks.DeleteTaskRequest](s.DeleteTaskHandler)))
+	// 	mux.HandleFunc("/api/tasks/task/changestatus", s.IsMember(HandlerWrapper[tasks.ChangeStatusTaskRequest](s.ChangeStatusTaskHandler)))
+	// }
 }
 
 func NewServer(ctx context.Context, cfg *config.Config) (*Server, error) {
 	var server Server
 	server.Config = cfg
+
+	// TODO: add real logger
+	server.logger = slog.Default()
 
 	mux := http.NewServeMux()
 	server.RegisterMux(mux)
@@ -89,7 +93,7 @@ func NewServer(ctx context.Context, cfg *config.Config) (*Server, error) {
 
 func (s *Server) Run() {
 	if s.Config.Auth.Enabled {
-		auth, err := auth.NewAuthServiceClient(s.Config.Auth.Address, s.Config.Auth.Port, nil)
+		auth, err := auth.NewAuthServiceClient(slog.Default(), s.Config.Auth.Address, s.Config.Auth.Port, nil)
 		if err != nil {
 			slog.Error("Auth service failed with error", slog.Any("error", err))
 			s.CtxStop()
@@ -142,6 +146,4 @@ func (s *Server) Run() {
 		slog.Error("Server failed with error", slog.Any("error", err))
 		s.CtxStop()
 	}
-
-	return
 }

@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *Server) CreateTaskHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+func (s *Server) CreateTaskHandler(w http.ResponseWriter, r *http.Request) (any, error) {
 	var body tasks.CreateTaskRequest = r.Context().Value("body").(tasks.CreateTaskRequest)
 
 	resp, err := s.Tasks.CreateTask(r.Context(), body)
@@ -27,10 +27,10 @@ func (s *Server) CreateTaskHandler(w http.ResponseWriter, r *http.Request) (erro
 		}
 	}
 
-	return err, resp
+	return resp, err
 }
 
-func (s *Server) GetTaskHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+func (s *Server) GetTaskHandler(w http.ResponseWriter, r *http.Request) (any, error) {
 	var body tasks.GetTaskRequest = r.Context().Value("body").(tasks.GetTaskRequest)
 
 	resp, err := s.Tasks.GetTask(r.Context(), body)
@@ -47,10 +47,10 @@ func (s *Server) GetTaskHandler(w http.ResponseWriter, r *http.Request) (error, 
 		}
 	}
 
-	return err, resp
+	return resp, err
 }
 
-func (s *Server) GetTasksHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+func (s *Server) GetTasksHandler(w http.ResponseWriter, r *http.Request) (any, error) {
 	var body tasks.GetTasksRequest = r.Context().Value("body").(tasks.GetTasksRequest)
 
 	resp, err := s.Tasks.GetTasks(r.Context(), body)
@@ -67,10 +67,10 @@ func (s *Server) GetTasksHandler(w http.ResponseWriter, r *http.Request) (error,
 		}
 	}
 
-	return err, resp
+	return resp, err
 }
 
-func (s *Server) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+func (s *Server) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) (any, error) {
 	var body tasks.UpdateTaskRequest = r.Context().Value("body").(tasks.UpdateTaskRequest)
 
 	resp, err := s.Tasks.UpdateTask(r.Context(), body)
@@ -87,10 +87,10 @@ func (s *Server) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) (erro
 		}
 	}
 
-	return err, resp
+	return resp, err
 }
 
-func (s *Server) ChangeStatusTaskHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+func (s *Server) ChangeStatusTaskHandler(w http.ResponseWriter, r *http.Request) (any, error) {
 	var body tasks.ChangeStatusTaskRequest = r.Context().Value("body").(tasks.ChangeStatusTaskRequest)
 
 	resp, err := s.Tasks.ChangeStatusTask(r.Context(), body)
@@ -107,10 +107,10 @@ func (s *Server) ChangeStatusTaskHandler(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
-	return err, resp
+	return resp, err
 }
 
-func (s *Server) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+func (s *Server) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) (any, error) {
 	var body tasks.DeleteTaskRequest = r.Context().Value("body").(tasks.DeleteTaskRequest)
 
 	resp, err := s.Tasks.DeleteTask(r.Context(), body)
@@ -127,5 +127,5 @@ func (s *Server) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) (erro
 		}
 	}
 
-	return err, resp
+	return resp, err
 }

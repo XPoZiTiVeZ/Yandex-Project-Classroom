@@ -4,7 +4,6 @@ import (
 	"Classroom/Gateway/internal/courses"
 	he "Classroom/Gateway/internal/errors"
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -14,45 +13,24 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func HandlerWrapper[T any](handler func(w http.ResponseWriter, r *http.Request) (error, any)) http.HandlerFunc {
+// Обработку запросов и ответов будет удобнее делать в handler, иначе будет какой то непонятный статус 200
+func HandlerWrapper[T any](handler func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var body T
 		err := json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
-			slog.Debug("unmarshal error", slog.Any("error", err))
-
-			he.InternalError(w)
+			// TODO: add error log
+			InternalError(w, "failed to decode request body")
 			return
 		}
 
-		slog.Debug("incoming", slog.Any("struct", body))
-
-		ctx := r.Context()
-		ctx = context.WithValue(ctx, "body", body)
-		err, resp := handler(w, r.WithContext(ctx))
-
-		if err != nil {
-			return
-		}
-
-		slog.Debug("outcoming", slog.Any("struct", resp))
-
-		err = json.NewEncoder(w).Encode(resp)
-		if err != nil {
-			slog.Debug("marshal error", slog.Any("error", err))
-
-			he.InternalError(w)
-			return
-		}
-
-		w.WriteHeader(http.StatusOK)
+		handler(w, r.WithContext(WithBody(r.Context(), body)))
 	}
 }
 
 type AuthClaims struct {
 	UserID      string `json:"user_id"`
 	IsSuperUser bool   `json:"is_superuser"`
-
 	jwt.RegisteredClaims
 }
 
@@ -60,36 +38,38 @@ func (s *Server) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			http.Error(w, "Authorization header required", http.StatusUnauthorized)
+			Unauthorized(w, "authorization header required")
 			return
 		}
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			http.Error(w, "Invalid format of authorization header", http.StatusUnauthorized)
+			Unauthorized(w, "invalid format of authorization header")
 			return
 		}
 
-		claims := &AuthClaims{}
-		token, err := jwt.ParseWithClaims(authHeader, claims, func(token *jwt.Token) (any, error) {
-			return s.Config.Common.AuthJWTSecret, nil
+		var claims AuthClaims
+		token, err := jwt.ParseWithClaims(authHeader, &claims, func(token *jwt.Token) (any, error) {
+			// тут нужен обязательно массив байтов, иначе будет паника
+			return []byte(s.Config.Common.AuthJWTSecret), nil
 		})
 
 		if err != nil || !token.Valid {
-			http.Error(w, "Invalid access token", http.StatusUnauthorized)
+			Unauthorized(w, "invalid access token")
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "claims", claims)
-		next.ServeHTTP(w, r.WithContext(ctx))
+		next.ServeHTTP(w, r.WithContext(WithClaims(r.Context(), claims)))
 	}
 }
 
+// в методах проверки роли, лучше не писать явную причину, достаточно просто forbidden
+// TODO: пересмотреть
 func (s *Server) IsTeacher(next http.HandlerFunc) http.HandlerFunc {
 	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		claims, ok := r.Context().Value("claims").(*AuthClaims)
+		claims, ok := GetClaims(r.Context())
 		if !ok {
-			he.NotAuthenticated(w)
+			Forbidden(w)
 			return
 		}
 
@@ -125,11 +105,13 @@ func (s *Server) IsTeacher(next http.HandlerFunc) http.HandlerFunc {
 	}))
 }
 
+// в методах проверки роли, лучше не писать явную причину, достаточно просто forbidden
+// TODO: пересмотреть
 func (s *Server) IsMember(next http.HandlerFunc) http.HandlerFunc {
 	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		claims, ok := r.Context().Value("claims").(*AuthClaims)
+		claims, ok := GetClaims(r.Context())
 		if !ok {
-			he.NotAuthenticated(w)
+			Forbidden(w)
 			return
 		}
 
@@ -165,16 +147,17 @@ func (s *Server) IsMember(next http.HandlerFunc) http.HandlerFunc {
 	}))
 }
 
+// в методах проверки роли, лучше не писать явную причину, достаточно просто forbidden
 func (s *Server) IsSuperUser(next http.HandlerFunc) http.HandlerFunc {
 	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		claims, ok := r.Context().Value("claims").(*AuthClaims)
+		claims, ok := GetClaims(r.Context())
 		if !ok {
-			he.NotAuthenticated(w)
+			Forbidden(w)
 			return
 		}
 
 		if !claims.IsSuperUser {
-			he.NotSuperUser(w)
+			Forbidden(w)
 			return
 		}
 

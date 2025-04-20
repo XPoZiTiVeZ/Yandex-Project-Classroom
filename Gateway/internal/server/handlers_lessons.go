@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *Server) CreateLessonHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+func (s *Server) CreateLessonHandler(w http.ResponseWriter, r *http.Request) (any, error) {
 	var body lessons.CreateLessonRequest = r.Context().Value("body").(lessons.CreateLessonRequest)
 
 	resp, err := s.Lessons.CreateLesson(r.Context(), body)
@@ -27,10 +27,10 @@ func (s *Server) CreateLessonHandler(w http.ResponseWriter, r *http.Request) (er
 		}
 	}
 
-	return err, resp
+	return resp, err
 }
 
-func (s *Server) GetLessonHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+func (s *Server) GetLessonHandler(w http.ResponseWriter, r *http.Request) (any, error) {
 	var body lessons.GetLessonRequest = r.Context().Value("body").(lessons.GetLessonRequest)
 
 	resp, err := s.Lessons.GetLesson(r.Context(), body)
@@ -47,10 +47,10 @@ func (s *Server) GetLessonHandler(w http.ResponseWriter, r *http.Request) (error
 		}
 	}
 
-	return err, resp
+	return resp, err
 }
 
-func (s *Server) GetLessonsHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+func (s *Server) GetLessonsHandler(w http.ResponseWriter, r *http.Request) (any, error) {
 	var body lessons.GetLessonsRequest = r.Context().Value("body").(lessons.GetLessonsRequest)
 
 	resp, err := s.Lessons.GetLessons(r.Context(), body)
@@ -67,10 +67,10 @@ func (s *Server) GetLessonsHandler(w http.ResponseWriter, r *http.Request) (erro
 		}
 	}
 
-	return err, resp
+	return resp, err
 }
 
-func (s *Server) UpdateLessonHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+func (s *Server) UpdateLessonHandler(w http.ResponseWriter, r *http.Request) (any, error) {
 	var body lessons.UpdateLessonRequest = r.Context().Value("body").(lessons.UpdateLessonRequest)
 
 	resp, err := s.Lessons.UpdateLesson(r.Context(), body)
@@ -87,10 +87,10 @@ func (s *Server) UpdateLessonHandler(w http.ResponseWriter, r *http.Request) (er
 		}
 	}
 
-	return err, resp
+	return resp, err
 }
 
-func (s *Server) DeleteLessonHandler(w http.ResponseWriter, r *http.Request) (error, any) {
+func (s *Server) DeleteLessonHandler(w http.ResponseWriter, r *http.Request) (any, error) {
 	var body lessons.DeleteLessonRequest = r.Context().Value("body").(lessons.DeleteLessonRequest)
 
 	resp, err := s.Lessons.DeleteLesson(r.Context(), body)
@@ -107,5 +107,5 @@ func (s *Server) DeleteLessonHandler(w http.ResponseWriter, r *http.Request) (er
 		}
 	}
 
-	return err, resp
+	return resp, err
 }
