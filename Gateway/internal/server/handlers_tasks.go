@@ -56,6 +56,30 @@ func (s *Server) GetTaskHandler(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, resp, http.StatusOK)
 }
 
+func (s *Server) GetStudentStatuses(w http.ResponseWriter, r *http.Request) {
+	body := GetBody[tasks.GetStudentStatusesRequest](r.Context())
+
+	resp, err := s.Tasks.GetStudentStatuses(r.Context(), body)
+	if err != nil {
+		logger.Error(r.Context(), "Handler tasks.GetStudentStatuses error", slog.Any("error", err))
+
+		if e, ok := status.FromError(err); ok {
+			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.NotFound:
+				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
+			}
+		} else {
+			InternalError(w)
+		}
+	}
+
+	WriteJSON(w, resp, http.StatusOK)
+}
+
 func (s *Server) GetTasksHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.GetTasksRequest](r.Context())
 
@@ -65,11 +89,39 @@ func (s *Server) GetTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
 				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
+		}
+	}
+
+	WriteJSON(w, resp, http.StatusOK)
+}
+
+func (s *Server) GetTasksForStudentHandler(w http.ResponseWriter, r *http.Request) {
+	body := GetBody[tasks.GetTasksForStudentRequest](r.Context())
+
+	resp, err := s.Tasks.GetTasksForStudent(r.Context(), body)
+	if err != nil {
+		logger.Error(r.Context(), "Handler tasks.GetTasksForStudent error", slog.Any("error", err))
+
+		if e, ok := status.FromError(err); ok {
+			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.NotFound:
+				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
+			}
+		} else {
+			InternalError(w)
 		}
 	}
 

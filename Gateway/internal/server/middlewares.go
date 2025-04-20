@@ -70,7 +70,7 @@ func (s *Server) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func (s *Server) IsMember(next http.HandlerFunc) http.HandlerFunc {
+func (s *Server) IsStudent(next http.HandlerFunc) http.HandlerFunc {
 	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := app.NewLogger(r.Context(), true)
 
@@ -114,7 +114,7 @@ func (s *Server) IsMember(next http.HandlerFunc) http.HandlerFunc {
 	}))
 }
 
-func (s *Server) IsMemberOrTeacher(next http.HandlerFunc) http.HandlerFunc {
+func (s *Server) IsMember(next http.HandlerFunc) http.HandlerFunc {
 	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := app.NewLogger(r.Context(), true)
 

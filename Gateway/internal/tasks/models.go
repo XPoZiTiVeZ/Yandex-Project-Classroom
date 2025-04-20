@@ -14,6 +14,21 @@ type Task struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
+type StudentTask struct {
+	TaskID      string `json:"task_id"`
+	CourseID    string `json:"course_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Completed   bool   `json:"completed"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+type TaskStatus struct {
+	TaskID    string `json:"task_id"`
+	StudentID string `json:"student_id"`
+	Completed bool   `json:"completed"`
+}
+
 type CreateTaskRequest struct {
 	CourseID    string `json:"course_id"`
 	Title       string `json:"title"`
@@ -61,6 +76,37 @@ func NewGetTaskResponse(resp *pb.GetTaskResponse) GetTaskResponse {
 	}
 }
 
+type GetStudentStatusesRequest struct {
+	CourseID string `json:"course_id"`
+	TaskID   string `json:"task_id"`
+}
+
+func NewGetStudentStatusesRequest(req GetStudentStatusesRequest) *pb.GetStudentStatusesRequest {
+	return &pb.GetStudentStatusesRequest{
+		TaskId: req.TaskID,
+	}
+}
+
+type GetStudentStatusesResponse struct {
+	Statuses []TaskStatus `json:"statuses"`
+}
+
+func NewGetStudentStatusesResponse(resp *pb.GetStudentStatusesResponse) GetStudentStatusesResponse {
+	return GetStudentStatusesResponse{
+		Statuses: func() []TaskStatus {
+			var statuses []TaskStatus
+			for _, status := range resp.GetStatuses() {
+				statuses = append(statuses, TaskStatus{
+					TaskID:    status.GetTaskId(),
+					StudentID: status.GetStudentId(),
+					Completed: status.GetCompleted(),
+				})
+			}
+			return statuses
+		}(),
+	}
+}
+
 type GetTasksRequest struct {
 	CourseID string `json:"course_id"`
 }
@@ -78,15 +124,50 @@ type GetTasksResponse struct {
 func NewGetTasksResponse(resp *pb.GetTasksResponse) GetTasksResponse {
 	return GetTasksResponse{
 		Tasks: func() []Task {
-			tasks := make([]Task, len(resp.GetTasks()))
-			for i, task := range resp.GetTasks() {		
-				tasks[i] = Task{
+			var tasks []Task
+			for _, task := range resp.GetTasks() {		
+				tasks = append(tasks, Task{
 					TaskID:      task.GetTaskId(),
 					CourseID:    task.GetCourseId(),
 					Title:       task.GetTitle(),
 					Description: task.GetContent(),
 					CreatedAt:   task.GetCreatedAt().AsTime(),
-				}
+				})
+			}
+			return tasks
+		}(),
+	}
+}
+
+type GetTasksForStudentRequest struct {
+	CourseID  string `json:"course_id"`
+	StudentID string `json:"student_id"`
+}
+
+func NewGetTasksForStudentRequest(req GetTasksForStudentRequest) *pb.GetTasksForStudentRequest {
+	return &pb.GetTasksForStudentRequest{
+		CourseId:  req.CourseID,
+		StudentId: req.StudentID,
+	}
+}
+
+type GetTasksForStudentResponse struct {
+	Tasks []StudentTask `json:"tasks"`
+}
+
+func NewGetTasksForStudentResponse(resp *pb.GetTasksForStudentResponse) GetTasksForStudentResponse {
+	return GetTasksForStudentResponse{
+		Tasks: func() []StudentTask {
+			tasks := make([]StudentTask, len(resp.GetTasks()))
+			for _, task := range resp.GetTasks() {
+				tasks = append(tasks, StudentTask{
+					TaskID:      task.GetTaskId(),
+					CourseID:    task.GetCourseId(),
+					Title:       task.GetTitle(),
+					Description: task.GetContent(),
+					Completed:   task.GetCompleted(),
+					CreatedAt:   task.GetCreatedAt().AsTime(),
+				})
 			}
 			return tasks
 		}(),

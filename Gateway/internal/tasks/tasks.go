@@ -78,6 +78,20 @@ func (s *TasksServiceClient) GetTask(ctx context.Context, req GetTaskRequest) (G
 	return NewGetTaskResponse(resp), nil
 }
 
+func (s *TasksServiceClient) GetStudentStatuses(ctx context.Context, req GetStudentStatusesRequest) (GetStudentStatusesResponse, error) {
+	logger.Debug(ctx, "Getting student statuses", slog.Any("request", req))
+	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
+	defer cancel()
+
+	resp, err := s.Client.GetStudentStatuses(ctx, NewGetStudentStatusesRequest(req))
+	if err != nil {
+		return GetStudentStatusesResponse{}, err
+	}
+
+	logger.Debug(ctx, "Tasks.GetStudentStatuses succeed")
+	return NewGetStudentStatusesResponse(resp), nil
+}
+
 func (s *TasksServiceClient) GetTasks(ctx context.Context, req GetTasksRequest) (GetTasksResponse, error) {
 	logger.Debug(ctx, "Getting tasks", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
@@ -90,6 +104,20 @@ func (s *TasksServiceClient) GetTasks(ctx context.Context, req GetTasksRequest) 
 
 	logger.Debug(ctx, "Tasks.GetTasks succeed")
 	return NewGetTasksResponse(resp), nil
+}
+
+func (s *TasksServiceClient) GetTasksForStudent(ctx context.Context, req GetTasksForStudentRequest) (GetTasksForStudentResponse, error) {
+	logger.Debug(ctx, "Getting tasks for student", slog.Any("request", req))
+	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
+	defer cancel()
+
+	resp, err := s.Client.GetTasksForStudent(ctx, NewGetTasksForStudentRequest(req))
+	if err != nil {
+		return GetTasksForStudentResponse{}, err
+	}
+
+	logger.Debug(ctx, "Tasks.GetTasksForStudent succeed")
+	return NewGetTasksForStudentResponse(resp), nil
 }
 
 func (s *TasksServiceClient) UpdateTask(ctx context.Context, req UpdateTaskRequest) (UpdateTaskResponse, error) {
