@@ -6,6 +6,7 @@ import (
 	"Classroom/Gateway/internal/lessons"
 	"Classroom/Gateway/internal/tasks"
 	"Classroom/Gateway/pkg/config"
+	"Classroom/Gateway/pkg/logger"
 	"context"
 	"fmt"
 	"log/slog"
@@ -77,9 +78,6 @@ func NewServer(ctx context.Context, cfg *config.Config) (*Server, error) {
 	var server Server
 	server.Config = cfg
 
-	// TODO: add real logger
-	server.logger = slog.Default()
-
 	mux := http.NewServeMux()
 	server.RegisterMux(mux)
 
@@ -91,11 +89,11 @@ func NewServer(ctx context.Context, cfg *config.Config) (*Server, error) {
 	return &server, nil
 }
 
-func (s *Server) Run() {
+func (s *Server) Run(ctx context.Context) {
 	if s.Config.Auth.Enabled {
-		auth, err := auth.NewAuthServiceClient(slog.Default(), s.Config.Auth.Address, s.Config.Auth.Port, nil)
+		auth, err := auth.NewAuthServiceClient(ctx, s.Config)
 		if err != nil {
-			slog.Error("Auth service failed with error", slog.Any("error", err))
+			logger.Error(ctx, "Auth service failed with error", slog.Any("error", err))
 			s.CtxStop()
 			return
 		}
@@ -104,9 +102,9 @@ func (s *Server) Run() {
 	}
 
 	if s.Config.Auth.Enabled && s.Config.Courses.Enabled {
-		courses, err := courses.NewCoursesServiceClient(s.Config.Courses.Address, s.Config.Courses.Port, nil)
+		courses, err := courses.NewCoursesServiceClient(ctx, s.Config)
 		if err != nil {
-			slog.Error("courses service failed with error", slog.Any("error", err))
+			logger.Error(ctx, "Courses service failed with error", slog.Any("error", err))
 			s.CtxStop()
 			return
 		}
@@ -115,9 +113,9 @@ func (s *Server) Run() {
 	}
 
 	if s.Config.Auth.Enabled && s.Config.Courses.Enabled && s.Config.Lessons.Enabled {
-		lessons, err := lessons.NewLessonsServiceClient(s.Config.Lessons.Address, s.Config.Lessons.Port, nil)
+		lessons, err := lessons.NewLessonsServiceClient(ctx, s.Config)
 		if err != nil {
-			slog.Error("lessons service failed with error", slog.Any("error", err))
+			logger.Error(ctx, "Lessons service failed with error", slog.Any("error", err))
 			s.CtxStop()
 			return
 		}
@@ -126,9 +124,9 @@ func (s *Server) Run() {
 	}
 
 	if s.Config.Auth.Enabled && s.Config.Courses.Enabled && s.Config.Tasks.Enabled {
-		tasks, err := tasks.NewTasksServiceClient(s.Config.Tasks.Address, s.Config.Tasks.Port, nil)
+		tasks, err := tasks.NewTasksServiceClient(ctx, s.Config)
 		if err != nil {
-			slog.Error("tasks service failed with error", slog.Any("error", err))
+			logger.Error(ctx, "Tasks service failed with error", slog.Any("error", err))
 			s.CtxStop()
 			return
 		}
@@ -138,12 +136,12 @@ func (s *Server) Run() {
 
 	err := s.Server.ListenAndServe()
 	if err == http.ErrServerClosed {
-		slog.Info("HTTP Server closed")
+		logger.Info(ctx, "HTTP Server closed")
 		return
 	}
 
 	if err != nil {
-		slog.Error("Server failed with error", slog.Any("error", err))
+		logger.Error(ctx, "Server failed with error", slog.Any("error", err))
 		s.CtxStop()
 	}
 }

@@ -11,28 +11,30 @@ import (
 
 	srv "Classroom/Gateway/internal/server"
 	cfg "Classroom/Gateway/pkg/config"
+	"Classroom/Gateway/pkg/logger"
 )
 
 func main() {
 	// slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, nil)))
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 	ctx := context.Background()
+	ctx = logger.NewDevelopment(ctx, logger.LevelDebug, false)
 
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
 	config := cfg.MustReadConfig()
-	fmt.Println(*config)
 
 	server, err := srv.NewServer(ctx, config)
 	server.CtxStop = stop
 	if err != nil {
-		slog.Error("Server ran into problem: ", slog.Any("error", err))
+		logger.Error(ctx, "Server ran into problem: ", slog.Any("error", err))
 		stop()
 	}
-	slog.Info(fmt.Sprintf("Server running on 0.0.0.0:%d", config.Host.Port))
-	go server.Run()
-	
+
+	logger.Info(ctx, "Server running", slog.Int("port", config.Host.Port))
+	go server.Run(ctx)
+
 	select {
 	case <-ctx.Done():
 		if err := ctx.Err(); err != nil {
@@ -42,6 +44,6 @@ func main() {
 		server.Server.Shutdown(ctx)
 
 		time.Sleep(300 * time.Millisecond)
-		slog.Info("Gracefully stopped\n")
+		logger.Info(ctx, "Gracefully stopped")
 	}
 }
