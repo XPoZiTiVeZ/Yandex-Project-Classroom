@@ -21,7 +21,6 @@ type Server struct {
 	Courses *courses.CoursesServiceClient
 	Lessons *lessons.LessonsServiceClient
 	Tasks   *tasks.TasksServiceClient
-	logger  *slog.Logger
 }
 
 func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
@@ -78,13 +77,14 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 
 func NewServer(ctx context.Context, cfg *config.Config) (*Server, error) {
 	var server Server
+
 	server.Config = cfg
 
 	mux := http.NewServeMux()
 	server.RegisterMux(mux)
 
 	server.Server = &http.Server{
-		Addr:    fmt.Sprintf("0.0.0.0:%d", cfg.Host.Port),
+		Addr:    fmt.Sprintf("%s:%d", cfg.Host.Address, cfg.Host.Port),
 		Handler: mux,
 	}
 
