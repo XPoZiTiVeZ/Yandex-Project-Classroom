@@ -1,5 +1,5 @@
-host:
-  address: 0.0.0.0
+gateway:
+  address: localhost
   port: 8080
 auth:
   address: localhost

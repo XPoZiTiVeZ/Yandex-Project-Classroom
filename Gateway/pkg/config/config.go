@@ -12,7 +12,8 @@ import (
 
 type Config struct {
 	Host struct {
-		Port int `mapstructure:"port"`
+		Address string `mapstructure:"address"`
+		Port    int    `mapstructure:"port"`
 	} `mapstructure:"gateway"`
 	Auth struct {
 		Address string `mapstructure:"address"`
@@ -54,6 +55,7 @@ type Config struct {
 
 const (
 	DefaultGatewayPort int           = 8080
+	DefaultGatewayAddr string        = "0.0.0.0"
 	DefaultTimeout     time.Duration = 10 * time.Second
 	MaxRetries         int           = 5
 )
@@ -73,6 +75,7 @@ func MustReadConfig() *Config {
 
 	v := viper.New()
 	v.SetDefault("gateway.port", DefaultGatewayPort)
+	v.SetDefault("gateway.address", DefaultGatewayAddr)
 	v.SetDefault("common.timeout", DefaultTimeout)
 	v.SetDefault("common.max_retries", MaxRetries)
 
@@ -101,6 +104,7 @@ func MustReadConfig() *Config {
 
 	envToMapstructure := map[string]string{
 		"GATEWAY_PORT":    "gateway.port",
+		"GATEWAY_ADDRESS": "gateway.address",
 		"TIMEOUT":         "common.timeout",
 		"MAX_RETRIES":     "common.max_retries",
 		"AUTH_JWT_SECRET": "common.auth_jwt_secret",
