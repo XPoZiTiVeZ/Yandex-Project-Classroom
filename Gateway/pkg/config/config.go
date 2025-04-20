@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
 	Host struct {
+		Address string `mapstructure:"address"`
 		Port    int    `mapstructure:"port"`
 	} `mapstructure:"gateway"`
 	Auth struct {
@@ -39,19 +41,26 @@ type Config struct {
 		Enabled bool   `mapstructure:"enabled"`
 	} `mapstructure:"chat"`
 	Notifications struct {
-		Enabled bool   `mapstructure:"enabled"`
+		Enabled bool `mapstructure:"enabled"`
 	} `mapstructure:"notifications"`
 
 	Common struct {
-		AuthJWTSecret string `mapstructure:"auth_jwt_secret"`
-		RedisURL      string `mapstructure:"redis_url"`
-		KafkaURL      string `mapstructure:"kafka_url"`
+		Timeout       time.Duration `mapstructure:"timeout"`
+		MaxRetries    int           `mapstructure:"max_retries"`
+		AuthJWTSecret string        `mapstructure:"auth_jwt_secret"`
+		RedisURL      string        `mapstructure:"redis_url"`
+		KafkaURL      string        `mapstructure:"kafka_url"`
 	} `mapstructure:"common"`
 }
 
+const (
+	DefaultGatewayPort int           = 8080
+	DefaultGatewayAddr string        = "0.0.0.0"
+	DefaultTimeout     time.Duration = 10 * time.Second
+	MaxRetries         int           = 5
+)
 
 var (
-	DefaultGatewayPort int = 8080
 	DefaultConfig Config = func() Config {
 		var Config Config
 		Config.Host.Port = DefaultGatewayPort
@@ -61,11 +70,14 @@ var (
 )
 
 func MustReadConfig() *Config {
-	configPath := flag.String("config", "./config/config.yaml", "path to config file")
+	configPath := flag.String("config", "./configs/config.yaml", "path to config file")
 	flag.Parse()
 
 	v := viper.New()
-	v.SetDefault("Gateway.Port", DefaultGatewayPort)
+	v.SetDefault("gateway.port", DefaultGatewayPort)
+	v.SetDefault("gateway.address", DefaultGatewayAddr)
+	v.SetDefault("common.timeout", DefaultTimeout)
+	v.SetDefault("common.max_retries", MaxRetries)
 
 	var AppConfig Config
 
@@ -91,11 +103,13 @@ func MustReadConfig() *Config {
 	}
 
 	envToMapstructure := map[string]string{
-		"GATEWAY_PORT":          "gateway.port",
-		"NOTIFICATIONS_ENABLED": "notifications.enabled",
-		"AUTH_JWT_SECRET":       "common.auth_jwt_secret",
-		"REDIS_URL":             "common.redis_url",
-		"KAFKA_URL":             "common.kafka_url",
+		"GATEWAY_PORT":    "gateway.port",
+		"GATEWAY_ADDRESS": "gateway.address",
+		"TIMEOUT":         "common.timeout",
+		"MAX_RETRIES":     "common.max_retries",
+		"AUTH_JWT_SECRET": "common.auth_jwt_secret",
+		"REDIS_URL":       "common.redis_url",
+		"KAFKA_URL":       "common.kafka_url",
 	}
 
 	serviceList := []string{
@@ -107,7 +121,7 @@ func MustReadConfig() *Config {
 	}
 
 	for _, service := range serviceList {
-		for _, field := range []string{ "port", "address", "enabled" } {
+		for _, field := range []string{"port", "address", "enabled"} {
 			key := fmt.Sprintf("%s_%s", strings.ToUpper(service), strings.ToUpper(field))
 			value := fmt.Sprintf("%s.%s", service, field)
 			envToMapstructure[key] = value
@@ -124,6 +138,6 @@ func MustReadConfig() *Config {
 		slog.Debug("Couldn't unmarshal config", slog.Any("error", err))
 		return &DefaultConfig
 	}
-	
+
 	return &AppConfig
 }

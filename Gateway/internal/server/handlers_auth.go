@@ -2,7 +2,7 @@ package server
 
 import (
 	"Classroom/Gateway/internal/auth"
-	he "Classroom/Gateway/internal/errors"
+	"Classroom/Gateway/pkg/logger"
 	"log/slog"
 	"net/http"
 
@@ -10,75 +10,100 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *Server) RegisterHandler(w http.ResponseWriter, r *http.Request) (error, any) {
-	var body auth.RegisterRequest = r.Context().Value("body").(auth.RegisterRequest)
-	
+func (s *Server) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	body := GetBody[auth.RegisterRequest](r.Context())
+
 	resp, err := s.Auth.Register(r.Context(), body)
 	if err != nil {
-		slog.Error("auth.Register error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler auth.Register error", slog.Any("error", err))
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.AlreadyExists:
-				he.AlreadyExists(w)
+				AlreadyExists(w, "email already exists")
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
-
 		} else {
-			he.ServiceUnavailable(w)
+			InternalError(w)
 		}
+		return
 	}
 
-	return err, resp
+	WriteJSON(w, resp, http.StatusCreated)
 }
 
-func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) (error, any) {
-	var body auth.LoginRequest = r.Context().Value("body").(auth.LoginRequest)
-	
+func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	body := GetBody[auth.LoginRequest](r.Context())
+
 	resp, err := s.Auth.Login(r.Context(), body)
 	if err != nil {
-		slog.Error("auth.Login error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler auth.Login error", slog.Any("error", err))
 
-		he.ServiceUnavailable(w)
+		if e, ok := status.FromError(err); ok {
+			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.Unauthenticated:
+				Unauthorized(w, "invalid credentials")
+			case codes.Unavailable:
+				ServiceUnavailable(w)
+			}
+		} else {
+			InternalError(w)
+		}
+		return
 	}
 
-	return err, resp
+	WriteJSON(w, resp, http.StatusOK)
 }
 
-func (s *Server) RefreshHandler(w http.ResponseWriter, r *http.Request) (error, any) {
-	var body auth.RefreshRequest = r.Context().Value("body").(auth.RefreshRequest)
+func (s *Server) RefreshHandler(w http.ResponseWriter, r *http.Request) {
+	body := GetBody[auth.RefreshRequest](r.Context())
 
 	resp, err := s.Auth.Refresh(r.Context(), body)
 	if err != nil {
-		slog.Error("auth.Refresh error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler auth.Refresh error", slog.Any("error", err))
 
-		he.ServiceUnavailable(w)
+		if e, ok := status.FromError(err); ok {
+			switch e.Code() {
+			case codes.Unauthenticated:
+				Unauthorized(w, "invalid refresh token")
+			case codes.Unavailable:
+				ServiceUnavailable(w)
+			}
+		} else {
+			InternalError(w)
+		}
+		return
 	}
 
-	return err, resp
+	WriteJSON(w, resp, http.StatusOK)
 }
 
-func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) (error, any) {
-	var body auth.LogoutRequest = r.Context().Value("body").(auth.LogoutRequest)
+func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	body := GetBody[auth.LogoutRequest](r.Context())
 
 	resp, err := s.Auth.Logout(r.Context(), body)
 	if err != nil {
-		slog.Error("auth.Logout error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler auth.Logout error", slog.Any("error", err))
 
-		he.ServiceUnavailable(w)
+		ServiceUnavailable(w)
 	}
-
-	return err, resp
+	WriteJSON(w, resp, http.StatusOK)
 }
 
-func (s *Server) GetUserInfoHandler(w http.ResponseWriter, r *http.Request) (error, any) {
-	var body auth.GetUserInfoRequest = r.Context().Value("body").(auth.GetUserInfoRequest)
+func (s *Server) GetUserInfoHandler(w http.ResponseWriter, r *http.Request) {
+	body := GetBody[auth.GetUserInfoRequest](r.Context())
 
 	resp, err := s.Auth.GetUserInfo(r.Context(), body)
 	if err != nil {
-		slog.Error("auth.GetUserInfo error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler auth.GetUserInfo error", slog.Any("error", err))
 
-		he.ServiceUnavailable(w)
+		ServiceUnavailable(w)
 	}
 
-	return err, resp
+	WriteJSON(w, resp, http.StatusOK)
 }

@@ -2,6 +2,8 @@ package tasks
 
 import (
 	pb "Classroom/Gateway/pkg/api/tasks"
+	"Classroom/Gateway/pkg/config"
+	"Classroom/Gateway/pkg/logger"
 	"context"
 	"fmt"
 	"log/slog"
@@ -13,11 +15,14 @@ import (
 
 type TasksServiceClient struct {
 	Conn           *grpc.ClientConn
-	Client         *pb.TasksServiceClient
+	Client         pb.TasksServiceClient
 	DefaultTimeout time.Duration
 }
 
-func NewTasksServiceClient(address string, port int, DefaultTimeout *time.Duration) (*TasksServiceClient, error) {
+func NewTasksServiceClient(ctx context.Context, config *config.Config) (*TasksServiceClient, error) {
+	address, port := config.Courses.Address, config.Courses.Port
+	timeout := config.Common.Timeout
+
 	var opts []grpc.DialOption
 	opts = append(
 		opts, grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -25,107 +30,134 @@ func NewTasksServiceClient(address string, port int, DefaultTimeout *time.Durati
 
 	conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", address, port), opts...)
 	if err != nil {
-		slog.Error("fail to dial: %v", slog.Any("error", err))
-		return nil, err
+		return nil, fmt.Errorf("failed to dial: %w", err)
 	}
 
 	state := conn.GetState()
-	slog.Info("Connected to grpc Tasks", slog.String("address", address), slog.Int("port", port), slog.String("state", state.String()))
+	// if !conn.WaitForStateChange(ctx, state) {
+	// 	return nil, fmt.Errorf("failed to wait for state change")
+	// }
+	// state = conn.GetState()
+
+	logger.Info(ctx, "Connected to gRPC Tasks", slog.String("address", address), slog.Int("port", port), slog.String("state", state.String()))
 
 	client := pb.NewTasksServiceClient(conn)
 
-	timeout := 10 * time.Second
-	if DefaultTimeout != nil {
-		timeout = *DefaultTimeout
-	}
-
 	return &TasksServiceClient{
 		Conn:           conn,
-		Client:         &client,
+		Client:         client,
 		DefaultTimeout: timeout,
 	}, nil
 }
 
 func (s *TasksServiceClient) CreateTask(ctx context.Context, req CreateTaskRequest) (CreateTaskResponse, error) {
-	slog.Debug("creating task", slog.Any("request", req))
+	logger.Debug(ctx, "Creating task", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).CreateTask(ctx, NewCreateTaskRequest(req))
+	resp, err := s.Client.CreateTask(ctx, NewCreateTaskRequest(req))
 	if err != nil {
 		return CreateTaskResponse{}, err
 	}
 
-	slog.Debug("tasks.CreateTask succeed")
+	logger.Debug(ctx, "Tasks.CreateTask succeed")
 	return NewCreateTaskResponse(resp), nil
 }
 
 func (s *TasksServiceClient) GetTask(ctx context.Context, req GetTaskRequest) (GetTaskResponse, error) {
-	slog.Debug("getting task", slog.Any("request", req))
+	logger.Debug(ctx, "Getting task", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).GetTask(ctx, NewGetTaskRequest(req))
+	resp, err := s.Client.GetTask(ctx, NewGetTaskRequest(req))
 	if err != nil {
 		return GetTaskResponse{}, err
 	}
 
-	slog.Debug("tasks.GetTask succeed")
+	logger.Debug(ctx, "Tasks.GetTask succeed")
 	return NewGetTaskResponse(resp), nil
 }
 
-func (s *TasksServiceClient) GetTasks(ctx context.Context, req GetTasksRequest) (GetTasksResponse, error) {
-	slog.Debug("getting tasks", slog.Any("request", req))
+func (s *TasksServiceClient) GetStudentStatuses(ctx context.Context, req GetStudentStatusesRequest) (GetStudentStatusesResponse, error) {
+	logger.Debug(ctx, "Getting student statuses", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).GetTasks(ctx, NewGetTasksRequest(req))
+	resp, err := s.Client.GetStudentStatuses(ctx, NewGetStudentStatusesRequest(req))
+	if err != nil {
+		return GetStudentStatusesResponse{}, err
+	}
+
+	logger.Debug(ctx, "Tasks.GetStudentStatuses succeed")
+	return NewGetStudentStatusesResponse(resp), nil
+}
+
+func (s *TasksServiceClient) GetTasks(ctx context.Context, req GetTasksRequest) (GetTasksResponse, error) {
+	logger.Debug(ctx, "Getting tasks", slog.Any("request", req))
+	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
+	defer cancel()
+
+	resp, err := s.Client.GetTasks(ctx, NewGetTasksRequest(req))
 	if err != nil {
 		return GetTasksResponse{}, err
 	}
 
-	slog.Debug("tasks.GetTasks succeed")
+	logger.Debug(ctx, "Tasks.GetTasks succeed")
 	return NewGetTasksResponse(resp), nil
 }
 
-func (s *TasksServiceClient) UpdateTask(ctx context.Context, req UpdateTaskRequest) (UpdateTaskResponse, error) {
-	slog.Debug("updating task", slog.Any("request", req))
+func (s *TasksServiceClient) GetTasksForStudent(ctx context.Context, req GetTasksForStudentRequest) (GetTasksForStudentResponse, error) {
+	logger.Debug(ctx, "Getting tasks for student", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).UpdateTask(ctx, NewUpdateTaskRequest(req))
+	resp, err := s.Client.GetTasksForStudent(ctx, NewGetTasksForStudentRequest(req))
+	if err != nil {
+		return GetTasksForStudentResponse{}, err
+	}
+
+	logger.Debug(ctx, "Tasks.GetTasksForStudent succeed")
+	return NewGetTasksForStudentResponse(resp), nil
+}
+
+func (s *TasksServiceClient) UpdateTask(ctx context.Context, req UpdateTaskRequest) (UpdateTaskResponse, error) {
+	logger.Debug(ctx, "Updating task", slog.Any("request", req))
+	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
+	defer cancel()
+
+	resp, err := s.Client.UpdateTask(ctx, NewUpdateTaskRequest(req))
 	if err != nil {
 		return UpdateTaskResponse{}, err
 	}
 
-	slog.Debug("tasks.UpdateTask succeed")
+	logger.Debug(ctx, "Tasks.UpdateTask succeed")
 	return NewUpdateTaskResponse(resp), nil
 }
 
 func (s *TasksServiceClient) ChangeStatusTask(ctx context.Context, req ChangeStatusTaskRequest) (ChangeStatusTaskResponse, error) {
-	slog.Debug("changing task status", slog.Any("request", req))
+	logger.Debug(ctx, "Changing task status", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).ChangeStatusTask(ctx, NewChangeStatusTaskRequest(req))
+	resp, err := s.Client.ChangeStatusTask(ctx, NewChangeStatusTaskRequest(req))
 	if err != nil {
 		return ChangeStatusTaskResponse{}, err
 	}
 
-	slog.Debug("tasks.ChangeStatusTask succeed")
+	logger.Debug(ctx, "Tasks.ChangeStatusTask succeed")
 	return NewChangeStatusTaskResponse(resp), nil
 }
 
 func (s *TasksServiceClient) DeleteTask(ctx context.Context, req DeleteTaskRequest) (DeleteTaskResponse, error) {
-	slog.Debug("deleting task", slog.Any("request", req))
+	logger.Debug(ctx, "Deleting task", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).DeleteTask(ctx, NewDeleteTaskRequest(req))
+	resp, err := s.Client.DeleteTask(ctx, NewDeleteTaskRequest(req))
 	if err != nil {
 		return DeleteTaskResponse{}, err
 	}
 
-	slog.Debug("tasks.DeleteTask succeed")
+	logger.Debug(ctx, "Tasks.DeleteTask succeed")
 	return NewDeleteTaskResponse(resp), nil
 }

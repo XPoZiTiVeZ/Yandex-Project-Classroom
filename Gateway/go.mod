@@ -3,6 +3,7 @@ module Classroom/Gateway
 go 1.22.2
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/spf13/viper v1.20.1
 	google.golang.org/grpc v1.71.1
 	google.golang.org/protobuf v1.36.6
@@ -19,8 +20,7 @@ require (
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	go.uber.org/atomic v1.9.0 // indirect
-	go.uber.org/multierr v1.9.0 // indirect
+	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect

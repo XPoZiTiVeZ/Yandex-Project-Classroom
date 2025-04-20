@@ -381,6 +381,7 @@ func (x *CreateCourseResponse) GetCourse() *Course {
 type GetCourseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CourseId      string                 `protobuf:"bytes,1,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -418,6 +419,13 @@ func (*GetCourseRequest) Descriptor() ([]byte, []int) {
 func (x *GetCourseRequest) GetCourseId() string {
 	if x != nil {
 		return x.CourseId
+	}
+	return ""
+}
+
+func (x *GetCourseRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -1409,9 +1417,10 @@ const file_Common_Proto_courses_proto_rawDesc = "" +
 	"\v_start_timeB\v\n" +
 	"\t_end_time\"?\n" +
 	"\x14CreateCourseResponse\x12'\n" +
-	"\x06course\x18\x01 \x01(\v2\x0f.courses.CourseR\x06course\"/\n" +
+	"\x06course\x18\x01 \x01(\v2\x0f.courses.CourseR\x06course\"H\n" +
 	"\x10GetCourseRequest\x12\x1b\n" +
-	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\"<\n" +
+	"\tcourse_id\x18\x01 \x01(\tR\bcourseId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"<\n" +
 	"\x11GetCourseResponse\x12'\n" +
 	"\x06course\x18\x01 \x01(\v2\x0f.courses.CourseR\x06course\",\n" +
 	"\x11GetCoursesRequest\x12\x17\n" +

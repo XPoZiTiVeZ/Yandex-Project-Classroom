@@ -1,8 +1,8 @@
 package server
 
 import (
-	he "Classroom/Gateway/internal/errors"
 	"Classroom/Gateway/internal/lessons"
+	"Classroom/Gateway/pkg/logger"
 	"log/slog"
 	"net/http"
 
@@ -10,102 +10,118 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *Server) CreateLessonHandler(w http.ResponseWriter, r *http.Request) (error, any) {
-	var body lessons.CreateLessonRequest = r.Context().Value("body").(lessons.CreateLessonRequest)
+func (s *Server) CreateLessonHandler(w http.ResponseWriter, r *http.Request) {
+	body := GetBody[lessons.CreateLessonRequest](r.Context())
 
 	resp, err := s.Lessons.CreateLesson(r.Context(), body)
 	if err != nil {
-		slog.Error("handler lessons.CreateLesson error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler lessons.CreateLesson error", slog.Any("error", err))
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-			case codes.AlreadyExists:
-				he.AlreadyExists(w)
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			he.ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
-	return err, resp
+	WriteJSON(w, resp, http.StatusCreated)
 }
 
-func (s *Server) GetLessonHandler(w http.ResponseWriter, r *http.Request) (error, any) {
-	var body lessons.GetLessonRequest = r.Context().Value("body").(lessons.GetLessonRequest)
+func (s *Server) GetLessonHandler(w http.ResponseWriter, r *http.Request) {
+	body := GetBody[lessons.GetLessonRequest](r.Context())
 
 	resp, err := s.Lessons.GetLesson(r.Context(), body)
 	if err != nil {
-		slog.Error("handler lessons.GetLesson error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler lessons.GetLesson error", slog.Any("error", err))
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
-				he.NotFound(w)
+				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			he.ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
-	return err, resp
+	WriteJSON(w, resp, http.StatusOK)
 }
 
-func (s *Server) GetLessonsHandler(w http.ResponseWriter, r *http.Request) (error, any) {
-	var body lessons.GetLessonsRequest = r.Context().Value("body").(lessons.GetLessonsRequest)
+func (s *Server) GetLessonsHandler(w http.ResponseWriter, r *http.Request) {
+	body := GetBody[lessons.GetLessonsRequest](r.Context())
 
 	resp, err := s.Lessons.GetLessons(r.Context(), body)
 	if err != nil {
-		slog.Error("handler lessons.GetLessons error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler lessons.GetLessons error", slog.Any("error", err))
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-			case codes.NotFound:
-				he.NotFound(w)
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			he.ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
-	return err, resp
+	WriteJSON(w, resp, http.StatusOK)
 }
 
-func (s *Server) UpdateLessonHandler(w http.ResponseWriter, r *http.Request) (error, any) {
-	var body lessons.UpdateLessonRequest = r.Context().Value("body").(lessons.UpdateLessonRequest)
+func (s *Server) UpdateLessonHandler(w http.ResponseWriter, r *http.Request) {
+	body := GetBody[lessons.UpdateLessonRequest](r.Context())
 
 	resp, err := s.Lessons.UpdateLesson(r.Context(), body)
 	if err != nil {
-		slog.Error("handler lessons.UpdateLesson error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler lessons.UpdateLesson error", slog.Any("error", err))
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
-				he.NotFound(w)
+				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			he.ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
-	return err, resp
+	WriteJSON(w, resp, http.StatusOK)
 }
 
-func (s *Server) DeleteLessonHandler(w http.ResponseWriter, r *http.Request) (error, any) {
-	var body lessons.DeleteLessonRequest = r.Context().Value("body").(lessons.DeleteLessonRequest)
+func (s *Server) DeleteLessonHandler(w http.ResponseWriter, r *http.Request) {
+	body := GetBody[lessons.DeleteLessonRequest](r.Context())
 
 	resp, err := s.Lessons.DeleteLesson(r.Context(), body)
 	if err != nil {
-		slog.Error("handler lessons.DeleteLesson error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler lessons.DeleteLesson error", slog.Any("error", err))
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
-				he.NotFound(w)
+				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			he.ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
-	return err, resp
+	WriteJSON(w, resp, http.StatusOK)
 }

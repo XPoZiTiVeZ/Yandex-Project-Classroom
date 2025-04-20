@@ -7,41 +7,35 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
+	app "Classroom/Gateway/internal/logger"
 	srv "Classroom/Gateway/internal/server"
 	cfg "Classroom/Gateway/pkg/config"
+	"Classroom/Gateway/pkg/logger"
 )
 
 func main() {
-	// slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, nil)))
-	slog.SetLogLoggerLevel(slog.LevelDebug)
 	ctx := context.Background()
+	ctx = app.NewLogger(ctx, false)
 
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
 	config := cfg.MustReadConfig()
-	fmt.Println(*config)
+	//TODO: не забыть убрать, пока что пусть будет для дебага
+	fmt.Printf("%+v\n", config)
 
 	server, err := srv.NewServer(ctx, config)
 	server.CtxStop = stop
 	if err != nil {
-		slog.Error("Server ran into problem: ", slog.Any("error", err))
+		logger.Error(ctx, "Server ran into problem: ", slog.Any("error", err))
 		stop()
 	}
-	slog.Info(fmt.Sprintf("Server running on 0.0.0.0:%d", config.Host.Port))
-	go server.Run()
-	
-	select {
-	case <-ctx.Done():
-		if err := ctx.Err(); err != nil {
-			fmt.Println()
-		}
 
-		server.Server.Shutdown(ctx)
+	logger.Info(ctx, "Server running", slog.Int("port", config.Host.Port))
+	go server.Run(ctx)
 
-		time.Sleep(300 * time.Millisecond)
-		slog.Info("Gracefully stopped\n")
-	}
+	<-ctx.Done()
+	server.Server.Shutdown(ctx)
+	logger.Info(ctx, "Gracefully stopped")
 }
