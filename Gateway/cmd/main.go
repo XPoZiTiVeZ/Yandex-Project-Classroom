@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	app "Classroom/Gateway/internal/logger"
 	srv "Classroom/Gateway/internal/server"
@@ -23,6 +22,8 @@ func main() {
 	defer stop()
 
 	config := cfg.MustReadConfig()
+	//TODO: не забыть убрать, пока что пусть будет для дебага
+	fmt.Printf("%+v\n", config)
 
 	server, err := srv.NewServer(ctx, config)
 	server.CtxStop = stop
@@ -34,15 +35,7 @@ func main() {
 	logger.Info(ctx, "Server running", slog.Int("port", config.Host.Port))
 	go server.Run(ctx)
 
-	select {
-	case <-ctx.Done():
-		if err := ctx.Err(); err != nil {
-			fmt.Println()
-		}
-
-		server.Server.Shutdown(ctx)
-
-		time.Sleep(300 * time.Millisecond)
-		logger.Info(ctx, "Gracefully stopped")
-	}
+	<-ctx.Done()
+	server.Server.Shutdown(ctx)
+	logger.Info(ctx, "Gracefully stopped")
 }

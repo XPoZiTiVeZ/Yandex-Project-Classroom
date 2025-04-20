@@ -15,7 +15,7 @@ import (
 
 type LessonsServiceClient struct {
 	Conn           *grpc.ClientConn
-	Client         *pb.LessonsServiceClient
+	Client         pb.LessonsServiceClient
 	DefaultTimeout time.Duration
 }
 
@@ -30,18 +30,22 @@ func NewLessonsServiceClient(ctx context.Context, config *config.Config) (*Lesso
 
 	conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", address, port), opts...)
 	if err != nil {
-		logger.Error(ctx, "Fail to dial: %v", slog.Any("error", err))
-		return nil, err
+		return nil, fmt.Errorf("failed to dial: %w", err)
 	}
 
 	state := conn.GetState()
+	// if !conn.WaitForStateChange(ctx, state) {
+	// 	return nil, fmt.Errorf("failed to wait for state change")
+	// }
+	// state = conn.GetState()
+
 	logger.Info(ctx, "Connected to gRPC Lessons", slog.String("address", address), slog.Int("port", port), slog.String("state", state.String()))
 
 	client := pb.NewLessonsServiceClient(conn)
 
 	return &LessonsServiceClient{
 		Conn:           conn,
-		Client:         &client,
+		Client:         client,
 		DefaultTimeout: timeout,
 	}, nil
 }
@@ -51,7 +55,7 @@ func (s *LessonsServiceClient) CreateLesson(ctx context.Context, req CreateLesso
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).CreateLesson(ctx, NewCreateLessonRequest(req))
+	resp, err := s.Client.CreateLesson(ctx, NewCreateLessonRequest(req))
 	if err != nil {
 		return CreateLessonResponse{}, err
 	}
@@ -65,7 +69,7 @@ func (s *LessonsServiceClient) GetLesson(ctx context.Context, req GetLessonReque
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).GetLesson(ctx, NewGetLessonRequest(req))
+	resp, err := s.Client.GetLesson(ctx, NewGetLessonRequest(req))
 	if err != nil {
 		return GetLessonResponse{}, err
 	}
@@ -79,7 +83,7 @@ func (s *LessonsServiceClient) GetLessons(ctx context.Context, req GetLessonsReq
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).GetLessons(ctx, NewGetLessonsRequest(req))
+	resp, err := s.Client.GetLessons(ctx, NewGetLessonsRequest(req))
 	if err != nil {
 		return GetLessonsResponse{}, err
 	}
@@ -93,7 +97,7 @@ func (s *LessonsServiceClient) UpdateLesson(ctx context.Context, req UpdateLesso
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).UpdateLesson(ctx, NewUpdateLessonRequest(req))
+	resp, err := s.Client.UpdateLesson(ctx, NewUpdateLessonRequest(req))
 	if err != nil {
 		return UpdateLessonResponse{}, err
 	}
@@ -107,7 +111,7 @@ func (s *LessonsServiceClient) DeleteLesson(ctx context.Context, req DeleteLesso
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := (*s.Client).DeleteLesson(ctx, NewDeleteLessonRequest(req))
+	resp, err := s.Client.DeleteLesson(ctx, NewDeleteLessonRequest(req))
 	if err != nil {
 		return DeleteLessonResponse{}, err
 	}
