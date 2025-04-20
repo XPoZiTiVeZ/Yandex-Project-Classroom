@@ -19,11 +19,13 @@ func (s *Server) CreateLessonHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-			case codes.AlreadyExists:
-				AlreadyExists(w)
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -39,11 +41,15 @@ func (s *Server) GetLessonHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
 				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -59,11 +65,13 @@ func (s *Server) GetLessonsHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-			case codes.NotFound:
-				NotFound(w)
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -79,11 +87,15 @@ func (s *Server) UpdateLessonHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
 				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -99,11 +111,15 @@ func (s *Server) DeleteLessonHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
 				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 

@@ -19,12 +19,13 @@ func (s *Server) CreateCourseHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-			case codes.AlreadyExists:
-				AlreadyExists(w)
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
-
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -40,12 +41,15 @@ func (s *Server) GetCourseHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
-				NotFound(w)
+				NotFound(w, e.Message())
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
-
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -61,12 +65,13 @@ func (s *Server) GetCoursesHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-			case codes.NotFound:
-				NotFound(w)
+				case codes.InvalidArgument:
+					BadRequest(w, e.Message())
+				case codes.Unavailable:
+					ServiceUnavailable(w)
 			}
-
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -82,12 +87,13 @@ func (s *Server) GetCoursesByStudentHandler(w http.ResponseWriter, r *http.Reque
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-			case codes.NotFound:
-				NotFound(w)
+				case codes.InvalidArgument:
+					BadRequest(w, e.Message())
+				case codes.Unavailable:
+					ServiceUnavailable(w)
 			}
-
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -103,12 +109,13 @@ func (s *Server) GetCoursesByTeacherHandler(w http.ResponseWriter, r *http.Reque
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-			case codes.NotFound:
-				NotFound(w)
+				case codes.InvalidArgument:
+					BadRequest(w, e.Message())
+				case codes.Unavailable:
+					ServiceUnavailable(w)
 			}
-
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -124,12 +131,15 @@ func (s *Server) UpdateCourseHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
 				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
-
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -145,12 +155,15 @@ func (s *Server) DeleteCourseHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
 				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
-
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -166,12 +179,15 @@ func (s *Server) EnrollUserHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
 				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
-
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -187,12 +203,15 @@ func (s *Server) ExpelUserHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
 				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
-
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -208,12 +227,15 @@ func (s *Server) GetCourseStudentsHandler(w http.ResponseWriter, r *http.Request
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
 				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
-
 		} else {
-			ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 

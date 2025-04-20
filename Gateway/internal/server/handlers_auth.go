@@ -2,7 +2,6 @@ package server
 
 import (
 	"Classroom/Gateway/internal/auth"
-	he "Classroom/Gateway/internal/errors"
 	"Classroom/Gateway/pkg/logger"
 	"log/slog"
 	"net/http"
@@ -21,7 +20,7 @@ func (s *Server) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
 			case codes.InvalidArgument:
-				BadRequest(w, "invalid arguments")
+				BadRequest(w, e.Message())
 			case codes.AlreadyExists:
 				AlreadyExists(w, "email already exists")
 			case codes.Unavailable:
@@ -46,7 +45,7 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
 			case codes.InvalidArgument:
-				BadRequest(w, "invalid arguments")
+				BadRequest(w, e.Message())
 			case codes.Unauthenticated:
 				Unauthorized(w, "invalid credentials")
 			case codes.Unavailable:
@@ -91,7 +90,7 @@ func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error(r.Context(), "Handler auth.Logout error", slog.Any("error", err))
 
-		he.ServiceUnavailable(w)
+		ServiceUnavailable(w)
 	}
 	WriteJSON(w, resp, http.StatusOK)
 }
@@ -103,7 +102,7 @@ func (s *Server) GetUserInfoHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error(r.Context(), "Handler auth.GetUserInfo error", slog.Any("error", err))
 
-		he.ServiceUnavailable(w)
+		ServiceUnavailable(w)
 	}
 
 	WriteJSON(w, resp, http.StatusOK)

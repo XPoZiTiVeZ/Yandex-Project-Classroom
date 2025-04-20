@@ -39,6 +39,7 @@ func NewCreateLessonResponse(resp *pb.CreateLessonResponse) CreateLessonResponse
 }
 
 type GetLessonRequest struct {
+	CourseID string `json:"course_id"`
 	LessonID string `json:"lesson_id"`
 }
 
@@ -97,6 +98,7 @@ func NewGetLessonsResponse(resp *pb.GetLessonsResponse) GetLessonsResponse {
 }
 
 type UpdateLessonRequest struct {
+	CourseID string `json:"course_id"`
 	LessonID string  `json:"lesson_id"`
 	Title    *string `json:"title,omitempty"`
 	Content  *string `json:"description,omitempty"`
@@ -118,6 +120,7 @@ func NewUpdateLessonResponse(resp *pb.UpdateLessonResponse) UpdateLessonResponse
 }
 
 type DeleteLessonRequest struct {
+	CourseID string `json:"course_id"`
 	LessonID string `json:"lesson_id"`
 }
 

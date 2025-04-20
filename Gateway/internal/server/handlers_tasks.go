@@ -1,7 +1,6 @@
 package server
 
 import (
-	he "Classroom/Gateway/internal/errors"
 	"Classroom/Gateway/internal/tasks"
 	"Classroom/Gateway/pkg/logger"
 	"log/slog"
@@ -20,15 +19,17 @@ func (s *Server) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-			case codes.AlreadyExists:
-				he.AlreadyExists(w)
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			he.ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
-	WriteJSON(w, resp, http.StatusOK)
+	WriteJSON(w, resp, http.StatusCreated)
 }
 
 func (s *Server) GetTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,11 +41,15 @@ func (s *Server) GetTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
-				he.NotFound(w)
+				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			he.ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -61,10 +66,10 @@ func (s *Server) GetTasksHandler(w http.ResponseWriter, r *http.Request) {
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
 			case codes.NotFound:
-				he.NotFound(w)
+				NotFound(w)
 			}
 		} else {
-			he.ServiceUnavailable(w)
+			ServiceUnavailable(w)
 		}
 	}
 
@@ -80,11 +85,15 @@ func (s *Server) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
-				he.NotFound(w)
+				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			he.ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -100,11 +109,15 @@ func (s *Server) ChangeStatusTaskHandler(w http.ResponseWriter, r *http.Request)
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
-				he.NotFound(w)
+				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			he.ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 
@@ -120,11 +133,15 @@ func (s *Server) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
 			case codes.NotFound:
-				he.NotFound(w)
+				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
-			he.ServiceUnavailable(w)
+			InternalError(w)
 		}
 	}
 

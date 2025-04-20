@@ -39,6 +39,7 @@ func NewCreateTaskResponse(resp *pb.CreateTaskResponse) CreateTaskResponse {
 }
 
 type GetTaskRequest struct {
+	CourseID string `json:"course_id"`
 	TaskID string `json:"task_id"`
 }
 
@@ -93,12 +94,15 @@ func NewGetTasksResponse(resp *pb.GetTasksResponse) GetTasksResponse {
 }
 
 type UpdateTaskRequest struct {
+	CourseID string `json:"course_id"`
+	TaskID   string `json:"task_id"`
 	Title   *string `json:"title,omitempty"`
 	Content *string `json:"description,omitempty"`
 }
 
 func NewUpdateTaskRequest(req UpdateTaskRequest) *pb.UpdateTaskRequest {
 	return &pb.UpdateTaskRequest{
+		TaskId:  req.TaskID,
 		Title:   req.Title,
 		Content: req.Content,
 	}
@@ -112,6 +116,7 @@ func NewUpdateTaskResponse(resp *pb.UpdateTaskResponse) UpdateTaskResponse {
 }
 
 type ChangeStatusTaskRequest struct {
+	CourseID string `json:"course_id"`
 	TaskID string `json:"task_id"`
 }
 
@@ -129,6 +134,7 @@ func NewChangeStatusTaskResponse(resp *pb.ChangeStatusTaskResponse) ChangeStatus
 }
 
 type DeleteTaskRequest struct {
+	CourseID string `json:"course_id"`
 	TaskID string `json:"task_id"`
 }
 
@@ -138,7 +144,8 @@ func NewDeleteTaskRequest(req DeleteTaskRequest) *pb.DeleteTaskRequest {
 	}
 }
 
-type DeleteTaskResponse struct{}
+type DeleteTaskResponse struct {
+}
 
 func NewDeleteTaskResponse(resp *pb.DeleteTaskResponse) DeleteTaskResponse {
 	return DeleteTaskResponse{}
