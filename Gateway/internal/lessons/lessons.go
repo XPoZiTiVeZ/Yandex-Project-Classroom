@@ -30,12 +30,12 @@ func NewLessonsServiceClient(ctx context.Context, config *config.Config) (*Lesso
 
 	conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", address, port), opts...)
 	if err != nil {
-		logger.Error(ctx, "fail to dial: %v", slog.Any("error", err))
+		logger.Error(ctx, "Fail to dial: %v", slog.Any("error", err))
 		return nil, err
 	}
 
 	state := conn.GetState()
-	logger.Info(ctx, "Connected to grpc Lessons", slog.String("address", address), slog.Int("port", port), slog.String("state", state.String()))
+	logger.Info(ctx, "Connected to gRPC Lessons", slog.String("address", address), slog.Int("port", port), slog.String("state", state.String()))
 
 	client := pb.NewLessonsServiceClient(conn)
 
@@ -47,7 +47,7 @@ func NewLessonsServiceClient(ctx context.Context, config *config.Config) (*Lesso
 }
 
 func (s *LessonsServiceClient) CreateLesson(ctx context.Context, req CreateLessonRequest) (CreateLessonResponse, error) {
-	logger.Debug(ctx, "creating lesson", slog.Any("request", req))
+	logger.Debug(ctx, "Creating lesson", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
@@ -56,12 +56,12 @@ func (s *LessonsServiceClient) CreateLesson(ctx context.Context, req CreateLesso
 		return CreateLessonResponse{}, err
 	}
 
-	logger.Debug(ctx, "lessons.CreateLesson succeed")
+	logger.Debug(ctx, "Lessons.CreateLesson succeed")
 	return NewCreateLessonResponse(resp), nil
 }
 
 func (s *LessonsServiceClient) GetLesson(ctx context.Context, req GetLessonRequest) (GetLessonResponse, error) {
-	logger.Debug(ctx, "getting lesson", slog.Any("request", req))
+	logger.Debug(ctx, "Getting lesson", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
@@ -70,12 +70,12 @@ func (s *LessonsServiceClient) GetLesson(ctx context.Context, req GetLessonReque
 		return GetLessonResponse{}, err
 	}
 
-	logger.Debug(ctx, "lessons.GetLesson succeed")
+	logger.Debug(ctx, "Lessons.GetLesson succeed")
 	return NewGetLessonResponse(resp), nil
 }
 
 func (s *LessonsServiceClient) GetLessons(ctx context.Context, req GetLessonsRequest) (GetLessonsResponse, error) {
-	logger.Debug(ctx, "getting lessons", slog.Any("request", req))
+	logger.Debug(ctx, "Getting lessons", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
@@ -84,12 +84,12 @@ func (s *LessonsServiceClient) GetLessons(ctx context.Context, req GetLessonsReq
 		return GetLessonsResponse{}, err
 	}
 
-	logger.Debug(ctx, "lessons.GetLessons succeed")
+	logger.Debug(ctx, "Lessons.GetLessons succeed")
 	return NewGetLessonsResponse(resp), nil
 }
 
 func (s *LessonsServiceClient) UpdateLesson(ctx context.Context, req UpdateLessonRequest) (UpdateLessonResponse, error) {
-	logger.Debug(ctx, "updating lesson", slog.Any("request", req))
+	logger.Debug(ctx, "Updating lesson", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
@@ -98,12 +98,12 @@ func (s *LessonsServiceClient) UpdateLesson(ctx context.Context, req UpdateLesso
 		return UpdateLessonResponse{}, err
 	}
 
-	logger.Debug(ctx, "lessons.UpdateLesson succeed")
+	logger.Debug(ctx, "Lessons.UpdateLesson succeed")
 	return NewUpdateLessonResponse(resp), nil
 }
 
 func (s *LessonsServiceClient) DeleteLesson(ctx context.Context, req DeleteLessonRequest) (DeleteLessonResponse, error) {
-	logger.Debug(ctx, "deleting lesson", slog.Any("request", req))
+	logger.Debug(ctx, "Deleting lesson", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
@@ -112,6 +112,6 @@ func (s *LessonsServiceClient) DeleteLesson(ctx context.Context, req DeleteLesso
 		return DeleteLessonResponse{}, err
 	}
 
-	logger.Debug(ctx, "lessons.DeleteLesson succeed")
+	logger.Debug(ctx, "Lessons.DeleteLesson succeed")
 	return NewDeleteLessonResponse(resp), nil
 }

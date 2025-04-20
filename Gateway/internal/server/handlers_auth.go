@@ -3,6 +3,7 @@ package server
 import (
 	"Classroom/Gateway/internal/auth"
 	he "Classroom/Gateway/internal/errors"
+	"Classroom/Gateway/pkg/logger"
 	"log/slog"
 	"net/http"
 
@@ -15,14 +16,14 @@ func (s *Server) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := s.Auth.Register(r.Context(), body)
 	if err != nil {
-		s.logger.Error("auth.Register error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler auth.Register error", slog.Any("error", err))
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-			case codes.AlreadyExists:
-				AlreadyExists(w, "email already exists")
 			case codes.InvalidArgument:
 				BadRequest(w, "invalid arguments")
+			case codes.AlreadyExists:
+				AlreadyExists(w, "email already exists")
 			case codes.Unavailable:
 				ServiceUnavailable(w)
 			}
@@ -40,14 +41,14 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := s.Auth.Login(r.Context(), body)
 	if err != nil {
-		s.logger.Error("auth.Login error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler auth.Login error", slog.Any("error", err))
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-			case codes.Unauthenticated:
-				Unauthorized(w, "invalid credentials")
 			case codes.InvalidArgument:
 				BadRequest(w, "invalid arguments")
+			case codes.Unauthenticated:
+				Unauthorized(w, "invalid credentials")
 			case codes.Unavailable:
 				ServiceUnavailable(w)
 			}
@@ -65,7 +66,7 @@ func (s *Server) RefreshHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := s.Auth.Refresh(r.Context(), body)
 	if err != nil {
-		slog.Error("auth.Refresh error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler auth.Refresh error", slog.Any("error", err))
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
@@ -80,7 +81,6 @@ func (s *Server) RefreshHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: токен надо бы в cookie сохранять
 	WriteJSON(w, resp, http.StatusOK)
 }
 
@@ -89,7 +89,7 @@ func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := s.Auth.Logout(r.Context(), body)
 	if err != nil {
-		slog.Error("auth.Logout error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler auth.Logout error", slog.Any("error", err))
 
 		he.ServiceUnavailable(w)
 	}
@@ -101,7 +101,7 @@ func (s *Server) GetUserInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := s.Auth.GetUserInfo(r.Context(), body)
 	if err != nil {
-		slog.Error("auth.GetUserInfo error", slog.Any("error", err))
+		logger.Error(r.Context(), "Handler auth.GetUserInfo error", slog.Any("error", err))
 
 		he.ServiceUnavailable(w)
 	}

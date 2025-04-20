@@ -3,6 +3,8 @@ package server
 import (
 	"Classroom/Gateway/internal/courses"
 	he "Classroom/Gateway/internal/errors"
+	app "Classroom/Gateway/internal/logger"
+	"Classroom/Gateway/pkg/logger"
 	"bytes"
 	"encoding/json"
 	"io"
@@ -13,18 +15,20 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Обработку запросов и ответов будет удобнее делать в handler, иначе будет какой то непонятный статус 200
-func HandlerWrapper[T any](handler func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
+func HandlerWrapper[T any](handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := app.NewLogger(r.Context(), true)
+
 		var body T
 		err := json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
-			// TODO: add error log
+			logger.Debug(ctx, "Failed to decode request body", slog.Any("error", err))
+
 			InternalError(w, "failed to decode request body")
 			return
 		}
 
-		handler(w, r.WithContext(WithBody(r.Context(), body)))
+		handler.ServeHTTP(w, r.WithContext(WithBody(ctx, body)))
 	}
 }
 
@@ -36,6 +40,8 @@ type AuthClaims struct {
 
 func (s *Server) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := app.NewLogger(r.Context(), true)
+
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			Unauthorized(w, "authorization header required")
@@ -44,14 +50,16 @@ func (s *Server) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
+			logger.Debug(ctx, "Invalid format of authorization header", slog.String("header", authHeader))
+
 			Unauthorized(w, "invalid format of authorization header")
 			return
 		}
 
 		var claims AuthClaims
+		authJWTSecret := s.Config.Common.AuthJWTSecret
 		token, err := jwt.ParseWithClaims(authHeader, &claims, func(token *jwt.Token) (any, error) {
-			// тут нужен обязательно массив байтов, иначе будет паника
-			return []byte(s.Config.Common.AuthJWTSecret), nil
+			return []byte(authJWTSecret), nil
 		})
 
 		if err != nil || !token.Valid {
@@ -59,15 +67,15 @@ func (s *Server) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		next.ServeHTTP(w, r.WithContext(WithClaims(r.Context(), claims)))
+		next.ServeHTTP(w, r.WithContext(WithClaims(ctx, claims)))
 	}
 }
 
-// в методах проверки роли, лучше не писать явную причину, достаточно просто forbidden
-// TODO: пересмотреть
 func (s *Server) IsTeacher(next http.HandlerFunc) http.HandlerFunc {
 	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		claims, ok := GetClaims(r.Context())
+		ctx := app.NewLogger(r.Context(), true)
+
+		claims, ok := GetClaims(ctx)
 		if !ok {
 			Forbidden(w)
 			return
@@ -75,6 +83,8 @@ func (s *Server) IsTeacher(next http.HandlerFunc) http.HandlerFunc {
 
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
+			logger.Debug(ctx, "Internal error while reading a body", slog.Any("error", err))
+
 			he.InternalError(w)
 			return
 		}
@@ -89,26 +99,26 @@ func (s *Server) IsTeacher(next http.HandlerFunc) http.HandlerFunc {
 
 		resp, err := s.Courses.IsTeacher(r.Context(), req)
 		if err != nil {
-			slog.Debug("courses.IsTeacher error", slog.Any("error", err))
+			logger.Debug(ctx, "Method courses.IsTeacher error", slog.Any("error", err))
 
 			he.InternalError(w)
 			return
 		}
 
 		if resp.IsTeacher || claims.IsSuperUser {
-			he.NotTacher(w)
+			Forbidden(w)
 			return
 		}
 
 		r.Body = io.NopCloser(bytes.NewReader(body))
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}))
 }
 
-// в методах проверки роли, лучше не писать явную причину, достаточно просто forbidden
-// TODO: пересмотреть
 func (s *Server) IsMember(next http.HandlerFunc) http.HandlerFunc {
 	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := app.NewLogger(r.Context(), true)
+
 		claims, ok := GetClaims(r.Context())
 		if !ok {
 			Forbidden(w)
@@ -117,6 +127,8 @@ func (s *Server) IsMember(next http.HandlerFunc) http.HandlerFunc {
 
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
+			logger.Debug(ctx, "Internal error while reading a body", slog.Any("error", err))
+
 			he.InternalError(w)
 			return
 		}
@@ -131,26 +143,27 @@ func (s *Server) IsMember(next http.HandlerFunc) http.HandlerFunc {
 
 		resp, err := s.Courses.IsMember(r.Context(), req)
 		if err != nil {
-			slog.Debug("courses.IsMember error", slog.Any("error", err))
+			slog.Debug("Method Courses.IsMember error", slog.Any("error", err))
 
 			he.InternalError(w)
 			return
 		}
 
 		if !resp.IsMember && !claims.IsSuperUser {
-			he.NotMember(w)
+			Forbidden(w)
 			return
 		}
 
 		r.Body = io.NopCloser(bytes.NewReader(body))
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}))
 }
 
-// в методах проверки роли, лучше не писать явную причину, достаточно просто forbidden
 func (s *Server) IsSuperUser(next http.HandlerFunc) http.HandlerFunc {
 	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		claims, ok := GetClaims(r.Context())
+		ctx := app.NewLogger(r.Context(), true)
+
+		claims, ok := GetClaims(ctx)
 		if !ok {
 			Forbidden(w)
 			return
@@ -161,6 +174,6 @@ func (s *Server) IsSuperUser(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}))
 }

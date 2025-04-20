@@ -17,10 +17,15 @@ const (
 )
 
 func NewDevelopment(ctx context.Context, level slog.Level, request bool) context.Context {
+	logger, ok := ctx.Value(LoggerCtxKey).(*slog.Logger)
+	if ok {
+		return ctx
+	}
+
 	opts := &slog.HandlerOptions{
 		Level: level,
 	}
-	logger := slog.New(slog.NewTextHandler(os.Stdout, opts))
+	logger = slog.New(slog.NewTextHandler(os.Stdout, opts))
 
 	ctx = context.WithValue(ctx, LoggerCtxKey, logger)
 	ctx = context.WithValue(ctx, RequestIDKey, request)
@@ -29,10 +34,15 @@ func NewDevelopment(ctx context.Context, level slog.Level, request bool) context
 }
 
 func NewProduction(ctx context.Context, request bool) context.Context {
+	logger, ok := ctx.Value(LoggerCtxKey).(*slog.Logger)
+	if ok {
+		return ctx
+	}
+
 	opts := &slog.HandlerOptions{
 		Level: slog.LevelInfo,
 	}
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, opts))
+	logger = slog.New(slog.NewJSONHandler(os.Stdout, opts))
 
 	ctx = context.WithValue(ctx, LoggerCtxKey, logger)
 	ctx = context.WithValue(ctx, RequestIDKey, request)
@@ -58,7 +68,7 @@ func Info(ctx context.Context, msg string, fields ...any) {
 		requestID = uuid.New().String()
 	}
 
-	fields = append(fields, slog.String("request_id", requestID))
+	fields = append(fields, slog.String("flow", requestID))
 
 	logger.Info(msg, fields...)
 }
@@ -72,7 +82,7 @@ func Error(ctx context.Context, msg string, fields ...any) {
 		requestID = uuid.New().String()
 	}
 
-	fields = append(fields, slog.String("request_id", requestID))
+	fields = append(fields, slog.String("flow", requestID))
 
 	logger.Info(msg, fields...)
 }
@@ -86,7 +96,7 @@ func Debug(ctx context.Context, msg string, fields ...any) {
 		requestID = uuid.New().String()
 	}
 
-	fields = append(fields, slog.String("request_id", requestID))
+	fields = append(fields, slog.String("flow", requestID))
 
 	logger.Info(msg, fields...)
 }

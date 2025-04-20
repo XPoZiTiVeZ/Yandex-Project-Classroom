@@ -16,8 +16,6 @@ func mergeMsgs(message string, msgs []string) string {
 	return message
 }
 
-// Так как у нас REST api, нужно чтобы сервис отдавал json, а http.Error пишет просто строку, и эти методы сделаем более общими, с возможностью дописать какое то сообщение
-
 func InternalError(w http.ResponseWriter, msgs ...string) error {
 	message := mergeMsgs("Internal server error", msgs)
 	return WriteJSON(

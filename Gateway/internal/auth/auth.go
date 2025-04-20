@@ -30,7 +30,7 @@ func NewAuthServiceClient(ctx context.Context, config *config.Config) (*AuthServ
 
 	conn, err := grpc.NewClient(fmt.Sprintf("%s:%d", address, port), opts...)
 	if err != nil {
-		logger.Error(ctx, "fail to dial: %v", slog.Any("error", err))
+		logger.Error(ctx, "Fail to dial: %v", slog.Any("error", err))
 		return nil, err
 	}
 
@@ -39,7 +39,7 @@ func NewAuthServiceClient(ctx context.Context, config *config.Config) (*AuthServ
 	// 	return nil, fmt.Errorf("connection is not ready, state: %v", state)
 	// }
 
-	logger.Info(ctx, "Connected to grpc Auth", slog.String("address", address), slog.Int("port", port), slog.String("state", state.String()))
+	logger.Info(ctx, "Connected to gRPC auth", slog.String("address", address), slog.Int("port", port), slog.String("state", state.String()))
 
 	client := pb.NewAuthServiceClient(conn)
 
@@ -51,7 +51,7 @@ func NewAuthServiceClient(ctx context.Context, config *config.Config) (*AuthServ
 }
 
 func (s *AuthServiceClient) Register(ctx context.Context, req RegisterRequest) (RegisterResponse, error) {
-	logger.Debug(ctx, "registering user", slog.Any("request", req))
+	logger.Debug(ctx, "Registering user", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
@@ -60,12 +60,12 @@ func (s *AuthServiceClient) Register(ctx context.Context, req RegisterRequest) (
 		return RegisterResponse{}, err
 	}
 
-	logger.Debug(ctx, "auth.Register succeed")
+	logger.Debug(ctx, "Auth.Register succeed")
 	return NewRegisterResponse(resp), nil
 }
 
 func (s *AuthServiceClient) Login(ctx context.Context, req LoginRequest) (LoginResponse, error) {
-	logger.Debug(ctx, "logging in user", slog.Any("request", req))
+	logger.Debug(ctx, "Logging in user", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
@@ -74,12 +74,12 @@ func (s *AuthServiceClient) Login(ctx context.Context, req LoginRequest) (LoginR
 		return LoginResponse{}, err
 	}
 
-	logger.Debug(ctx, "auth.Login succeed")
+	logger.Debug(ctx, "Auth.Login succeed")
 	return NewLoginResponse(resp), nil
 }
 
 func (s *AuthServiceClient) Refresh(ctx context.Context, req RefreshRequest) (RefreshResponse, error) {
-	logger.Debug(ctx, "refreshing user token", slog.Any("request", req))
+	logger.Debug(ctx, "Refreshing user token", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -88,12 +88,12 @@ func (s *AuthServiceClient) Refresh(ctx context.Context, req RefreshRequest) (Re
 		return RefreshResponse{}, err
 	}
 
-	logger.Debug(ctx, "auth.Refresh succeed")
+	logger.Debug(ctx, "Auth.Refresh succeed")
 	return NewRefreshResponse(resp), nil
 }
 
 func (s *AuthServiceClient) Logout(ctx context.Context, req LogoutRequest) (LogoutResponse, error) {
-	logger.Debug(ctx, "logging out user", slog.Any("request", req))
+	logger.Debug(ctx, "Logging out user", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -102,12 +102,12 @@ func (s *AuthServiceClient) Logout(ctx context.Context, req LogoutRequest) (Logo
 		return LogoutResponse{}, err
 	}
 
-	logger.Debug(ctx, "auth.Logout succeed")
+	logger.Debug(ctx, "Auth.Logout succeed")
 	return NewLogoutResponse(resp), nil
 }
 
 func (s *AuthServiceClient) GetUserInfo(ctx context.Context, req GetUserInfoRequest) (GetUserInfoResponse, error) {
-	logger.Debug(ctx, "getting user info", slog.Any("request", req))
+	logger.Debug(ctx, "Getting user info", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -116,6 +116,6 @@ func (s *AuthServiceClient) GetUserInfo(ctx context.Context, req GetUserInfoRequ
 		return GetUserInfoResponse{}, err
 	}
 
-	logger.Debug(ctx, "auth.GetUserInfo succeed")
+	logger.Debug(ctx, "Auth.GetUserInfo succeed")
 	return NewGetUserInfoResponse(resp), nil
 }

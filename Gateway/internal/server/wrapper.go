@@ -8,7 +8,6 @@ type (
 	claimsKey struct{}
 )
 
-// Это для более удобной работы, вместо ctx.Value("body").(T)
 func WithBody[T any](ctx context.Context, body T) context.Context {
 	return context.WithValue(ctx, bodyKey{}, body)
 }

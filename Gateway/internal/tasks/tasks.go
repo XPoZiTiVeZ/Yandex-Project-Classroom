@@ -35,7 +35,7 @@ func NewTasksServiceClient(ctx context.Context, config *config.Config) (*TasksSe
 	}
 
 	state := conn.GetState()
-	logger.Info(ctx, "Connected to grpc Tasks", slog.String("address", address), slog.Int("port", port), slog.String("state", state.String()))
+	logger.Info(ctx, "Connected to gRPC Tasks", slog.String("address", address), slog.Int("port", port), slog.String("state", state.String()))
 
 	client := pb.NewTasksServiceClient(conn)
 

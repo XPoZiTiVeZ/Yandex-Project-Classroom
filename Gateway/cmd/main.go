@@ -9,16 +9,15 @@ import (
 	"syscall"
 	"time"
 
+	app "Classroom/Gateway/internal/logger"
 	srv "Classroom/Gateway/internal/server"
 	cfg "Classroom/Gateway/pkg/config"
 	"Classroom/Gateway/pkg/logger"
 )
 
 func main() {
-	// slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, nil)))
-	slog.SetLogLoggerLevel(slog.LevelDebug)
 	ctx := context.Background()
-	ctx = logger.NewDevelopment(ctx, logger.LevelDebug, false)
+	ctx = app.NewLogger(ctx, false)
 
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
