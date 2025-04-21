@@ -7,11 +7,11 @@ import (
 // ErrorResponse стандартизированный формат для возврата ошибок API
 // @description Cтандартизированный формат всех ошибок в API.
 type ErrorResponse struct {
-    // Код ошибки (HTTP статус код)
-    Code    int    `json:"code" example:"400"`
-    
-    // Сообщение об ошибке
-    Message string `json:"message" example:"Некорректный запрос"`
+	// Код ошибки (HTTP статус код)
+	Code int `json:"code" example:"400"`
+
+	// Сообщение об ошибке
+	Message string `json:"message" example:"Bad request"`
 } // @name ErrorResponse
 // @schema(title=ErrorResponse,required=["code","message"],order=["code","message"])
 
