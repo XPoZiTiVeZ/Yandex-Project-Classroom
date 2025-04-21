@@ -19,7 +19,7 @@ import (
 // @title Classroom Gateway API
 // @version 1.0
 // @description Gateway service for Classroom microservices. Handles authentication, routing, and request aggregation.
-// @host 127.0.0.1:8080
+// @host localhost
 // @BasePath /api
 // @schemes http
 // @produce json

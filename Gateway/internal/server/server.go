@@ -49,7 +49,7 @@ type Pong struct {
 	// Сообщение-ответ сервера
 	Message string `json:"msg" example:"Pong!" extensions:"x-order=0"`
 	// HTTP статус код ответа
-	Status  int    `json:"status" example:"200" extensions:"x-order=1"`
+	Status int `json:"status" example:"200" extensions:"x-order=1"`
 } // @name Pong
 
 // Ping обрабатывает запрос проверки работоспособности сервера
@@ -70,23 +70,24 @@ func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) RegisterMux(mux *http.ServeMux) {
 	mux.Handle("/api/swagger/", httpSwagger.Handler(
-		httpSwagger.URL("http://127.0.0.1:80/files/swagger.json"),
+		// TODO: можно вынести в конфиг
+		httpSwagger.URL("http://localhost/files/swagger.json"),
 	))
 
-    mux.HandleFunc("GET /api/ping", s.Ping)
+	mux.HandleFunc("GET /api/ping", s.Ping)
 
-    // Auth handlers
-    if s.Config.Auth.Enabled {
+	// Auth handlers
+	if s.Config.Auth.Enabled {
 
-        mux.HandleFunc("POST /api/auth/register", HandlerWrapper[auth.RegisterRequest](s.RegisterHandler))
-        mux.HandleFunc("POST /api/auth/login", HandlerWrapper[auth.LoginRequest](s.LoginHandler))
-        mux.HandleFunc("POST /api/auth/refresh", HandlerWrapper[auth.RefreshRequest](s.RefreshHandler))
-        mux.HandleFunc("POST /api/auth/logout", s.IsAuthenticated(HandlerWrapper[auth.LogoutRequest](s.LogoutHandler)))
-        mux.HandleFunc("POST /api/auth/user-info", s.IsAuthenticated(HandlerWrapper[auth.GetUserInfoRequest](s.GetUserInfoHandler)))
-    }
+		mux.HandleFunc("POST /api/auth/register", HandlerWrapper[auth.RegisterRequest](s.RegisterHandler))
+		mux.HandleFunc("POST /api/auth/login", HandlerWrapper[auth.LoginRequest](s.LoginHandler))
+		mux.HandleFunc("POST /api/auth/refresh", HandlerWrapper[auth.RefreshRequest](s.RefreshHandler))
+		mux.HandleFunc("POST /api/auth/logout", s.IsAuthenticated(HandlerWrapper[auth.LogoutRequest](s.LogoutHandler)))
+		mux.HandleFunc("POST /api/auth/user-info", s.IsAuthenticated(HandlerWrapper[auth.GetUserInfoRequest](s.GetUserInfoHandler)))
+	}
 
-    // Courses handlers
-    if s.Config.Auth.Enabled && s.Config.Courses.Enabled {
+	// Courses handlers
+	if s.Config.Auth.Enabled && s.Config.Courses.Enabled {
 		mux.HandleFunc("POST /api/courses/create", s.IsAuthenticated(HandlerWrapper[courses.CreateCourseRequest](s.CreateCourseHandler)))
 		mux.HandleFunc("POST /api/courses/course", s.IsMember(HandlerWrapper[courses.GetCourseRequest](s.GetCourseHandler)))
 		mux.HandleFunc("POST /api/courses/courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesRequest](s.GetCoursesHandler)))
