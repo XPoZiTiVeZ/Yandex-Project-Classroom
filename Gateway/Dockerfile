@@ -12,6 +12,6 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /app/bin/app ./app
+COPY --from=builder /app/bin/app ./gateway
 
-CMD [ "./app" ]
+ENTRYPOINT [ "./gateway" ]

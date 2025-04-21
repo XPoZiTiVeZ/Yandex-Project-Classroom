@@ -27,6 +27,22 @@ type Server struct {
 	Tasks   *tasks.TasksServiceClient
 }
 
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Разрешаем запросы с любого origin (можно указать конкретные домены)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		// Пропускаем OPTIONS запросы (preflight)
+		if r.Method == "OPTIONS" {
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 // Pong - структура ответа для проверки работоспособности API
 // @Description Используется для health-check и проверки доступности сервера
 type Pong struct {
@@ -53,9 +69,11 @@ func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) RegisterMux(mux *http.ServeMux) {
-	mux.Handle("GET /api/swagger/", httpSwagger.WrapHandler)
+	mux.Handle("/api/swagger/", httpSwagger.Handler(
+		httpSwagger.URL("http://127.0.0.1:80/files/swagger.json"),
+	))
 
-    mux.HandleFunc("/api/ping", s.Ping)
+    mux.HandleFunc("GET /api/ping", s.Ping)
 
     // Auth handlers
     if s.Config.Auth.Enabled {
@@ -113,7 +131,7 @@ func NewServer(ctx context.Context, cfg *config.Config) (*Server, error) {
 
 	server.Server = &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", cfg.Host.Address, cfg.Host.Port),
-		Handler: mux,
+		Handler: enableCORS(mux),
 	}
 
 	return &server, nil
