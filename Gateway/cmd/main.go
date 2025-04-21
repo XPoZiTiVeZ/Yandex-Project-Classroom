@@ -14,6 +14,8 @@ import (
 	"Classroom/Gateway/pkg/logger"
 
 	_ "Classroom/Gateway/docs"
+
+	"github.com/joho/godotenv"
 )
 
 // @title Classroom Gateway API
@@ -53,4 +55,8 @@ func main() {
 	<-ctx.Done()
 	server.Server.Shutdown(ctx)
 	logger.Info(ctx, "Gracefully stopped")
+}
+
+func init() {
+	godotenv.Load()
 }

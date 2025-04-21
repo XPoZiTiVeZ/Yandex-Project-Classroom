@@ -6,13 +6,14 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/app ./cmd
+RUN go build -o courses cmd/main.go
 
-FROM alpine:latest
+FROM gcr.io/distroless/base-debian12
 
 WORKDIR /app
 
-COPY --from=builder /app/config/config.yaml ./config.yaml
-COPY --from=builder /app/bin/app ./app
+COPY --from=builder /app/courses ./courses
 
-CMD ["./app", "-config", "./config.yaml"]
+USER nonroot:nonroot
+
+ENTRYPOINT ["./courses"]

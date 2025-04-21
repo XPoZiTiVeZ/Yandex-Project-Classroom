@@ -16,4 +16,4 @@ COPY --from=builder /app/lessons ./lessons
 
 USER nonroot:nonroot
 
-CMD ["./lessons"]
+ENTRYPOINT ["./lessons"]
