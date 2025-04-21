@@ -6,34 +6,59 @@ import (
 	pb "Classroom/Gateway/pkg/api/tasks"
 )
 
+// Task - основная информация о задании
+// @Description Полная информация о задании в курсе
 type Task struct {
-	TaskID      string    `json:"task_id"`
-	CourseID    string    `json:"course_id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
-}
+    // Уникальный идентификатор задания
+    TaskID string `json:"task_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    // Идентификатор курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=1"`
+    // Название задания
+    Title string `json:"title" example:"Домашнее задание 1" extensions:"x-order=2"`
+    // Описание задания
+    Description string `json:"description" example:"Решить задачи по алгоритмам" extensions:"x-order=3"`
+    // Дата создания
+    CreatedAt time.Time `json:"created_at" example:"2023-01-15T10:00:00Z" extensions:"x-order=4"`
+} // @name Task
 
+// StudentTask - информация о задании для студента
+// @Description Расширенная информация о задании с указанием статуса выполнения
 type StudentTask struct {
-	TaskID      string `json:"task_id"`
-	CourseID    string `json:"course_id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Completed   bool   `json:"completed"`
-	CreatedAt   time.Time `json:"created_at"`
-}
+    // Уникальный идентификатор задания
+    TaskID string `json:"task_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    // Идентификатор курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=1"`
+    // Название задания
+    Title string `json:"title" example:"Домашнее задание 1" extensions:"x-order=2"`
+    // Описание задания
+    Description string `json:"description" example:"Решить задачи по алгоритмам" extensions:"x-order=3"`
+    // Статус выполнения
+    Completed bool `json:"completed" example:"false" extensions:"x-order=4"`
+    // Дата создания
+    CreatedAt time.Time `json:"created_at" example:"2023-01-15T10:00:00Z" extensions:"x-order=5"`
+} // @name StudentTask
 
+// TaskStatus - статус выполнения задания
+// @Description Информация о выполнении задания конкретным студентом
 type TaskStatus struct {
-	TaskID    string `json:"task_id"`
-	StudentID string `json:"student_id"`
-	Completed bool   `json:"completed"`
-}
+    // ID задания
+    TaskID string `json:"task_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    // ID студента
+    StudentID string `json:"student_id" example:"708f1f77bcf86cd799439033" extensions:"x-order=1"`
+    // Статус выполнения
+    Completed bool `json:"completed" example:"true" extensions:"x-order=2"`
+} // @name TaskStatus
 
+// CreateTaskRequest - запрос на создание задания
+// @Description Параметры для создания нового задания в курсе
 type CreateTaskRequest struct {
-	CourseID    string `json:"course_id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    // Название задания
+    Title string `json:"title" example:"Лабораторная работа 1" extensions:"x-order=1"`
+    // Описание задания
+    Description string `json:"description" example:"Реализовать алгоритм сортировки" extensions:"x-order=2"`
+} // @name CreateTaskRequest
 
 func NewCreateTaskRequest(req CreateTaskRequest) *pb.CreateTaskRequest {
 	return &pb.CreateTaskRequest{
@@ -43,9 +68,12 @@ func NewCreateTaskRequest(req CreateTaskRequest) *pb.CreateTaskRequest {
 	}
 }
 
+// CreateTaskResponse - ответ после создания задания
+// @Description Возвращает ID созданного задания
 type CreateTaskResponse struct {
-	TaskID string `json:"task_id"`
-}
+    // ID созданного задания
+    TaskID string `json:"task_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+} // @name CreateTaskResponse
 
 func NewCreateTaskResponse(resp *pb.CreateTaskResponse) CreateTaskResponse {
 	return CreateTaskResponse{
@@ -53,10 +81,14 @@ func NewCreateTaskResponse(resp *pb.CreateTaskResponse) CreateTaskResponse {
 	}
 }
 
+// GetTaskRequest - запрос информации о задании
+// @Description Требует ID курса и задания для получения данных
 type GetTaskRequest struct {
-	CourseID string `json:"course_id"`
-	TaskID string `json:"task_id"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    // ID задания
+    TaskID string `json:"task_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=1"`
+} // @name GetTaskRequest
 
 func NewGetTaskRequest(req GetTaskRequest) *pb.GetTaskRequest {
 	return &pb.GetTaskRequest{
@@ -64,9 +96,12 @@ func NewGetTaskRequest(req GetTaskRequest) *pb.GetTaskRequest {
 	}
 }
 
+// GetTaskResponse - информация о задании
+// @Description Возвращает полные данные задания
 type GetTaskResponse struct {
-	Task Task `json:"task"`
-}
+    // Объект задания
+    Task Task `json:"task" extensions:"x-order=0"`
+} // @name GetTaskResponse
 
 func NewGetTaskResponse(resp *pb.GetTaskResponse) GetTaskResponse {
 	return GetTaskResponse{
@@ -76,10 +111,14 @@ func NewGetTaskResponse(resp *pb.GetTaskResponse) GetTaskResponse {
 	}
 }
 
+// GetStudentStatusesRequest - запрос статусов студентов
+// @Description Возвращает статусы выполнения задания для студентов курса
 type GetStudentStatusesRequest struct {
-	CourseID string `json:"course_id"`
-	TaskID   string `json:"task_id"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    // ID задания
+    TaskID string `json:"task_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=1"`
+} // @name GetStudentStatusesRequest
 
 func NewGetStudentStatusesRequest(req GetStudentStatusesRequest) *pb.GetStudentStatusesRequest {
 	return &pb.GetStudentStatusesRequest{
@@ -87,9 +126,12 @@ func NewGetStudentStatusesRequest(req GetStudentStatusesRequest) *pb.GetStudentS
 	}
 }
 
+// GetStudentStatusesResponse - статусы студентов
+// @Description Содержит статусы выполнения задания студентами
 type GetStudentStatusesResponse struct {
-	Statuses []TaskStatus `json:"statuses"`
-}
+    // Массив статусов
+    Statuses []TaskStatus `json:"statuses" extensions:"x-order=0"`
+} // @name GetStudentStatusesResponse
 
 func NewGetStudentStatusesResponse(resp *pb.GetStudentStatusesResponse) GetStudentStatusesResponse {
 	return GetStudentStatusesResponse{
@@ -107,9 +149,12 @@ func NewGetStudentStatusesResponse(resp *pb.GetStudentStatusesResponse) GetStude
 	}
 }
 
+// GetTasksRequest - запрос списка заданий
+// @Description Возвращает все задания в указанном курсе
 type GetTasksRequest struct {
-	CourseID string `json:"course_id"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+} // @name GetTasksRequest
 
 func NewGetTasksRequest(req GetTasksRequest) *pb.GetTasksRequest {
 	return &pb.GetTasksRequest{
@@ -117,9 +162,12 @@ func NewGetTasksRequest(req GetTasksRequest) *pb.GetTasksRequest {
 	}
 }
 
+// GetTasksResponse - список заданий
+// @Description Содержит массив заданий в курсе
 type GetTasksResponse struct {
-	Tasks []Task `json:"tasks"`
-}
+    // Массив заданий
+    Tasks []Task `json:"tasks" extensions:"x-order=0"`
+} // @name GetTasksResponse
 
 func NewGetTasksResponse(resp *pb.GetTasksResponse) GetTasksResponse {
 	return GetTasksResponse{
@@ -139,10 +187,14 @@ func NewGetTasksResponse(resp *pb.GetTasksResponse) GetTasksResponse {
 	}
 }
 
+// GetTasksForStudentRequest - запрос заданий для студента
+// @Description Возвращает задания с информацией о статусе выполнения
 type GetTasksForStudentRequest struct {
-	CourseID  string `json:"course_id"`
-	StudentID string `json:"student_id"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    // ID студента
+    StudentID string `json:"student_id" example:"708f1f77bcf86cd799439033" extensions:"x-order=1"`
+} // @name GetTasksForStudentRequest
 
 func NewGetTasksForStudentRequest(req GetTasksForStudentRequest) *pb.GetTasksForStudentRequest {
 	return &pb.GetTasksForStudentRequest{
@@ -151,9 +203,12 @@ func NewGetTasksForStudentRequest(req GetTasksForStudentRequest) *pb.GetTasksFor
 	}
 }
 
+// GetTasksForStudentResponse - ответ с заданиями для студента
+// @Description Содержит задания с информацией о статусе выполнения
 type GetTasksForStudentResponse struct {
-	Tasks []StudentTask `json:"tasks"`
-}
+    // Массив заданий со статусами
+    Tasks []StudentTask `json:"tasks" extensions:"x-order=0"`
+} // @name GetTasksForStudentResponse
 
 func NewGetTasksForStudentResponse(resp *pb.GetTasksForStudentResponse) GetTasksForStudentResponse {
 	return GetTasksForStudentResponse{
@@ -174,12 +229,18 @@ func NewGetTasksForStudentResponse(resp *pb.GetTasksForStudentResponse) GetTasks
 	}
 }
 
+// UpdateTaskRequest - запрос обновления задания
+// @Description Позволяет обновить данные задания
 type UpdateTaskRequest struct {
-	CourseID string `json:"course_id"`
-	TaskID   string `json:"task_id"`
-	Title   *string `json:"title,omitempty"`
-	Content *string `json:"description,omitempty"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    // ID задания
+    TaskID string `json:"task_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=1"`
+    // Новое название (опционально)
+    Title *string `json:"title,omitempty" example:"Обновленное название" extensions:"x-order=2"`
+    // Новое описание (опционально)
+    Content *string `json:"description,omitempty" example:"Новые требования" extensions:"x-order=3"`
+} // @name UpdateTaskRequest
 
 func NewUpdateTaskRequest(req UpdateTaskRequest) *pb.UpdateTaskRequest {
 	return &pb.UpdateTaskRequest{
@@ -189,17 +250,23 @@ func NewUpdateTaskRequest(req UpdateTaskRequest) *pb.UpdateTaskRequest {
 	}
 }
 
+// UpdateTaskResponse - результат обновления
+// @Description Пустой ответ при успешном обновлении
 type UpdateTaskResponse struct {
-}
+} // @name UpdateTaskResponse
 
 func NewUpdateTaskResponse(resp *pb.UpdateTaskResponse) UpdateTaskResponse {
 	return UpdateTaskResponse{}
 }
 
+// ChangeStatusTaskRequest - запрос изменения статуса
+// @Description Позволяет изменить статус выполнения задания
 type ChangeStatusTaskRequest struct {
-	CourseID string `json:"course_id"`
-	TaskID string `json:"task_id"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    // ID задания
+    TaskID string `json:"task_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=1"`
+} // @name ChangeStatusTaskRequest
 
 func NewChangeStatusTaskRequest(req ChangeStatusTaskRequest) *pb.ChangeStatusTaskRequest {
 	return &pb.ChangeStatusTaskRequest{
@@ -207,17 +274,23 @@ func NewChangeStatusTaskRequest(req ChangeStatusTaskRequest) *pb.ChangeStatusTas
 	}
 }
 
+// ChangeStatusTaskResponse - результат изменения статуса
+// @Description Пустой ответ при успешном изменении
 type ChangeStatusTaskResponse struct {
-}
+} // @name ChangeStatusTaskResponse
 
 func NewChangeStatusTaskResponse(resp *pb.ChangeStatusTaskResponse) ChangeStatusTaskResponse {
 	return ChangeStatusTaskResponse{}
 }
 
+// DeleteTaskRequest - запрос удаления задания
+// @Description Требует ID курса и задания для удаления
 type DeleteTaskRequest struct {
-	CourseID string `json:"course_id"`
-	TaskID string `json:"task_id"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    // ID задания
+    TaskID string `json:"task_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=1"`
+} // @name DeleteTaskRequest
 
 func NewDeleteTaskRequest(req DeleteTaskRequest) *pb.DeleteTaskRequest {
 	return &pb.DeleteTaskRequest{
@@ -225,8 +298,10 @@ func NewDeleteTaskRequest(req DeleteTaskRequest) *pb.DeleteTaskRequest {
 	}
 }
 
+// DeleteTaskResponse - результат удаления
+// @Description Пустой ответ при успешном удалении
 type DeleteTaskResponse struct {
-}
+} // @name DeleteTaskResponse
 
 func NewDeleteTaskResponse(resp *pb.DeleteTaskResponse) DeleteTaskResponse {
 	return DeleteTaskResponse{}

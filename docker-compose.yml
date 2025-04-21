@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   postgres:
     container_name: postgres
@@ -10,14 +8,14 @@ services:
     env_file:
       - .env
     ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} || exit 1"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} || exit 1']
       interval: 10s
       timeout: 1s
       retries: 3
     volumes:
-      - ./Postgres/postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
 
@@ -30,100 +28,100 @@ services:
     env_file:
       - .env
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - '${REDIS_PORT}:${REDIS_PORT}'
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 1s
       retries: 3
     volumes:
-      - ./Redis/redis_data:/data
+      - redis_data:/data
     networks:
       - app-network
 
-  service-auth:
-    container_name: auth
-    restart: unless-stopped
-    build:
-      context: ./Auth
-      dockerfile: Dockerfile
-    volumes:
-      - ./Auth/config/config.yaml:/app/config/config.yaml
-    env_file:
-      - .env
-    ports:
-      - "${SERVICE_AUTH_PORT}:${SERVICE_AUTH_PORT}"
-    command: ["--config", "/app/config/config.yaml"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - app-network
+  # service-auth:
+  #   container_name: auth
+  #   restart: unless-stopped
+  #   build:
+  #     context: ./Auth
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./Auth/config/config.yaml:/app/config/config.yaml
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "${SERVICE_AUTH_PORT}:${SERVICE_AUTH_PORT}"
+  #   command: ["--config", "/app/config/config.yaml"]
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - app-network
 
-  service-courses:
-    container_name: courses
-    restart: unless-stopped
-    build:
-      context: ./Courses
-      dockerfile: Dockerfile
-    volumes:
-      - ./Courses/config/config.yaml:/app/config/config.yaml
-    env_file:
-      - .env
-    ports:
-      - "${SERVICE_COURSES_PORT}:${SERVICE_COURSES_PORT}"
-    command: ["--config", "/app/config/config.yaml"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - app-network
+  # service-courses:
+  #   container_name: courses
+  #   restart: unless-stopped
+  #   build:
+  #     context: ./Courses
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./Courses/config/config.yaml:/app/config/config.yaml
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "${SERVICE_COURSES_PORT}:${SERVICE_COURSES_PORT}"
+  #   command: ["--config", "/app/config/config.yaml"]
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - app-network
 
-  service-lessons:
-    container_name: lessons
-    restart: unless-stopped
-    build:
-      context: ./Lessons
-      dockerfile: Dockerfile
-    volumes:
-      - ./Lessons/config/config.yaml:/app/config/config.yaml
-    env_file:
-      - .env
-    ports:
-      - "${SERVICE_LESSONS_PORT}:${SERVICE_LESSONS_PORT}"
-    command: ["--config", "/app/config/config.yaml"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - app-network
+  # service-lessons:
+  #   container_name: lessons
+  #   restart: unless-stopped
+  #   build:
+  #     context: ./Lessons
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./Lessons/config/config.yaml:/app/config/config.yaml
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "${SERVICE_LESSONS_PORT}:${SERVICE_LESSONS_PORT}"
+  #   command: ["--config", "/app/config/config.yaml"]
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - app-network
 
-  service-tasks:
-    container_name: tasks
-    restart: unless-stopped
-    build:
-      context: ./Tasks
-      dockerfile: Dockerfile
-    volumes:
-      - ./Tasks/config/config.yaml:/app/config/config.yaml
-    env_file:
-      - .env
-    ports:
-      - "${SERVICE_TASKS_PORT}:${SERVICE_TASKS_PORT}"
-    command: ["--config", "/app/config/config.yaml"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - app-network
+  # service-tasks:
+  #   container_name: tasks
+  #   restart: unless-stopped
+  #   build:
+  #     context: ./Tasks
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./Tasks/config/config.yaml:/app/config/config.yaml
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "${SERVICE_TASKS_PORT}:${SERVICE_TASKS_PORT}"
+  #   command: ["--config", "/app/config/config.yaml"]
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - app-network
 
   # service-notifications:
   #   container_name: notifications
@@ -168,29 +166,30 @@ services:
       context: ./Gateway
       dockerfile: Dockerfile
     volumes:
-      - ./Gateway/config/config.yaml:/app/config/config.yaml
+      - ./Gateway/configs/config.yaml:/app/configs/config.yaml
     env_file:
       - .env
-    ports:
-      - "${API_GATEWAY_PORT}:${API_GATEWAY_PORT}"
-    command: ["--config", "/app/config/config.yaml"]
+      - ./Gateway/.env
+    command: ['--config', '/app/configs/config.yaml']
     networks:
       - app-network
 
   nginx:
     container_name: nginx
     restart: unless-stopped
-    build:
-      context: ./Nginx
-      dockerfile: Dockerfile
+    image: nginx:1.27-alpine
+    volumes:
+      - ./Nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./Gateway/docs/swagger.json:/var/www/classroom/swagger.json
     ports:
-      - "${NGINX_PORT}:${NGINX_PORT}"
-    depends_on:
-      service-gateway:
-        condition: service_healthy
+      - '${NGINX_PORT}:${NGINX_PORT}'
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

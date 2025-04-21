@@ -10,6 +10,7 @@
 	proto-gen-tasks
 	proto-gen-notifications
 	proto-gen-chat
+	generate-doc
 	build
 	run
 	clean
@@ -91,6 +92,11 @@ proto-gen-notifications:
 proto-gen-chat:
 	@mkdir -p $(CHAT_GEN_DIR)
 	@protoc --go_out=$(CHAT_GEN_DIR) --go-grpc_out=$(CHAT_GEN_DIR)  -I. $(PROTO_DIR)/chat.proto
+
+generate-doc:
+	cd Gateway/ && \
+	swag init -g ./cmd/main.go --output ./docs --parseDependency --parseInternal --outputTypes json && \
+	cd ..
 
 build:
 	if [ ! -f "go.mod" ]; then \

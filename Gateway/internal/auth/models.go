@@ -4,117 +4,156 @@ import (
 	pb "Classroom/Gateway/pkg/api/auth"
 )
 
+// RegisterRequest - запрос на регистрацию пользователя
+// @Description Содержит данные, необходимые для создания нового пользователя
 type RegisterRequest struct {
-	Email          string `json:"email"`
-	FirstName      string `json:"first_name"`
-	LastName       string `json:"last_name"`
-	Password       string `json:"password"`
-}
+    // Email пользователя
+    Email string `json:"email" example:"user@example.com" extensions:"x-order=0"`
+    // Имя пользователя
+    FirstName string `json:"first_name" example:"Иван" extensions:"x-order=1"`
+    // Фамилия пользователя
+    LastName string `json:"last_name" example:"Иванов" extensions:"x-order=2"`
+    // Пароль (минимум 8 символов, должен содержать цифры и спецсимволы)
+    Password string `json:"password" example:"Qwerty123!" extensions:"x-order=3"`
+} // @name AuthRegisterRequest
 
 func NewRegisterRequest(req RegisterRequest) *pb.RegisterRequest {
-	return &pb.RegisterRequest{
-		Email:          req.Email,
-		Password:       req.Password,
-		FirstName:      req.FirstName,
-		LastName:       req.LastName,
-	}
+    return &pb.RegisterRequest{
+        Email:          req.Email,
+        Password:       req.Password,
+        FirstName:      req.FirstName,
+        LastName:       req.LastName,
+    }
 }
 
+// RegisterResponse - ответ на успешную регистрацию
+// @Description Возвращает ID созданного пользователя
 type RegisterResponse struct {
-	UserID string `json:"user_id"`
-}
+    // Уникальный идентификатор пользователя
+    UserID string `json:"user_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+} // @name AuthRegisterResponse
 
 func NewRegisterResponse(resp *pb.RegisterResponse) RegisterResponse {
-	return RegisterResponse{
-		resp.GetUserId(),
-	}
+    return RegisterResponse{
+        resp.GetUserId(),
+    }
 }
 
+// LoginRequest - запрос на аутентификацию
+// @Description Содержит учетные данные для входа в систему
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
+    // Email пользователя
+    Email string `json:"email" example:"user@example.com" extensions:"x-order=0"`
+    // Пароль пользователя
+    Password string `json:"password" example:"Qwerty123!" extensions:"x-order=1"`
+} // @name AuthLoginRequest
 
 func NewLoginRequest(req LoginRequest) *pb.LoginRequest {
-	return &pb.LoginRequest{
-		Email:    req.Email,
-		Password: req.Password,
-	}
+    return &pb.LoginRequest{
+        Email:    req.Email,
+        Password: req.Password,
+    }
 }
 
+// LoginResponse - ответ с токенами доступа
+// @Description Возвращает пару access/refresh токенов для аутентификации
 type LoginResponse struct {
-	RefreshToken string `json:"refresh_token"`
-	AccessToken  string `json:"access_token"`
-}
+    // Токен для обновления access токена
+    RefreshToken string `json:"refresh_token" example:"eyJhbG..." extensions:"x-order=0"`
+    // Токен для доступа к API
+    AccessToken string `json:"access_token" example:"eyJhbG..." extensions:"x-order=1"`
+} // @name AuthLoginResponse
 
 func NewLoginResponse(resp *pb.LoginResponse) LoginResponse {
-	return LoginResponse{
-		resp.GetAccessToken(),
-		resp.GetRefreshToken(),
-	}
+    return LoginResponse{
+        resp.GetAccessToken(),
+        resp.GetRefreshToken(),
+    }
 }
 
+// RefreshRequest - запрос на обновление токена
+// @Description Содержит refresh токен для получения нового access токена
 type RefreshRequest struct {
-	RefreshToken string `json:"refresh_token"`
-}
+    // Действующий refresh токен
+    RefreshToken string `json:"refresh_token" example:"eyJhbG..." extensions:"x-order=0"`
+} // @name AuthRefreshRequest
 
 func NewRefreshRequest(req RefreshRequest) *pb.RefreshRequest {
-	return &pb.RefreshRequest{
-		RefreshToken: req.RefreshToken,
-	}
+    return &pb.RefreshRequest{
+        RefreshToken: req.RefreshToken,
+    }
 }
 
+// RefreshResponse - ответ с новым токеном доступа
+// @Description Возвращает новый access токен
 type RefreshResponse struct {
-	AccessToken string `json:"access_token"`
-}
+    // Новый access токен
+    AccessToken string `json:"access_token" example:"eyJhbG..." extensions:"x-order=0"`
+} // @name AuthRefreshResponse
 
 func NewRefreshResponse(resp *pb.RefreshResponse) RefreshResponse {
-	return RefreshResponse{
-		resp.GetAccessToken(),
-	}
+    return RefreshResponse{
+        resp.GetAccessToken(),
+    }
 }
 
+// LogoutRequest - запрос на выход из системы
+// @Description Содержит refresh токен для инвалидации сессии
 type LogoutRequest struct {
-	RefreshToken string `json:"refresh_token"`
-}
+    // Refresh токен для удаления
+    RefreshToken string `json:"refresh_token" example:"eyJhbG..." extensions:"x-order=0"`
+} // @name AuthLogoutRequest
 
 func NewLogoutRequest(req LogoutRequest) *pb.LogoutRequest {
-	return &pb.LogoutRequest{
-		RefreshToken: req.RefreshToken,
-	}
+    return &pb.LogoutRequest{
+        RefreshToken: req.RefreshToken,
+    }
 }
 
-type LogoutResponse struct {
-}
+// LogoutResponse - подтверждение выхода
+// @Description Пустой ответ, указывающий на успешный выход
+type LogoutResponse struct{
+
+} // @name AuthLogoutResponse
 
 func NewLogoutResponse(resp *pb.LogoutResponse) LogoutResponse {
-	return LogoutResponse{}
+    return LogoutResponse{}
 }
 
+// UserInfoRequest - запрос информации о пользователе
+// @Description Содержит ID пользователя для получения данных
 type GetUserInfoRequest struct {
-	UserID string `json:"user_id"`
-}
+    // Уникальный идентификатор пользователя
+    UserID string `json:"user_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+} // @name AuthUserInfoRequest
 
 func NewGetUserInfoRequest(req GetUserInfoRequest) *pb.GetUserInfoRequest {
-	return &pb.GetUserInfoRequest{
-		UserId: req.UserID,
-	}
+    return &pb.GetUserInfoRequest{
+        UserId: req.UserID,
+    }
 }
 
+// UserInfoResponse - полная информация о пользователе
+// @Description Возвращает все доступные данные пользователя
 type GetUserInfoResponse struct {
-	UserID      string `json:"user_id"`
-	Email       string `json:"email"`
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	IsSuperUser bool
-}
+    // Уникальный идентификатор
+    UserID string `json:"user_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    // Email адрес
+    Email string `json:"email" example:"user@example.com" extensions:"x-order=1"`
+    // Имя
+    FirstName string `json:"first_name" example:"Иван" extensions:"x-order=2"`
+    // Фамилия
+    LastName string `json:"last_name" example:"Иванов" extensions:"x-order=3"`
+    // Признак администратора
+    IsSuperUser bool `json:"is_superuser" example:"false" extensions:"x-order=4"`
+} // @name AuthUserInfoResponse
 
 func NewGetUserInfoResponse(resp *pb.GetUserInfoResponse) GetUserInfoResponse {
-	return GetUserInfoResponse{
-		UserID:      resp.GetUserId(),
-		Email:       resp.GetEmail(),
-		FirstName:   resp.GetFirstName(),
-		LastName:    resp.GetLastName(),
-		IsSuperUser: resp.GetIsSuperuser(),
-	}
+    return GetUserInfoResponse{
+        UserID:      resp.GetUserId(),
+        Email:       resp.GetEmail(),
+        FirstName:   resp.GetFirstName(),
+        LastName:    resp.GetLastName(),
+        IsSuperUser: resp.GetIsSuperuser(),
+    }
 }

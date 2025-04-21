@@ -1,3 +1,5 @@
+// +swaggo
+
 package server
 
 import (
@@ -11,6 +13,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Server struct {
@@ -23,23 +27,58 @@ type Server struct {
 	Tasks   *tasks.TasksServiceClient
 }
 
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Разрешаем запросы с любого origin (можно указать конкретные домены)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		// Пропускаем OPTIONS запросы (preflight)
+		if r.Method == "OPTIONS" {
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// Pong - структура ответа для проверки работоспособности API
+// @Description Используется для health-check и проверки доступности сервера
+type Pong struct {
+	// Сообщение-ответ сервера
+	Message string `json:"msg" example:"Pong!" extensions:"x-order=0"`
+	// HTTP статус код ответа
+	Status int `json:"status" example:"200" extensions:"x-order=1"`
+} // @name Pong
+
+// Ping обрабатывает запрос проверки работоспособности сервера
+// @Summary Проверка работоспособности
+// @Description Возвращает ответ "Pong!" для проверки доступности сервера
+// @Tags Service
+// @Produce json
+// @Success 200 {object} server.Pong "Успешный ответ"
+// @Router /ping [get]
 func (s *Server) Ping(w http.ResponseWriter, r *http.Request) {
-	pong := struct{
-		Message string `json:"msg"`
-		Status  int    `json:"status"`
-	}{
+	pong := Pong{
 		Message: "Pong!",
-		Status: 200,
+		Status:  200,
 	}
 
 	WriteJSON(w, pong, http.StatusOK)
 }
 
 func (s *Server) RegisterMux(mux *http.ServeMux) {
-	mux.HandleFunc("/api/ping", s.Ping)
+	mux.Handle("/api/swagger/", httpSwagger.Handler(
+		// TODO: можно вынести в конфиг
+		httpSwagger.URL("http://localhost/files/swagger.json"),
+	))
+
+	mux.HandleFunc("GET /api/ping", s.Ping)
 
 	// Auth handlers
 	if s.Config.Auth.Enabled {
+
 		mux.HandleFunc("POST /api/auth/register", HandlerWrapper[auth.RegisterRequest](s.RegisterHandler))
 		mux.HandleFunc("POST /api/auth/login", HandlerWrapper[auth.LoginRequest](s.LoginHandler))
 		mux.HandleFunc("POST /api/auth/refresh", HandlerWrapper[auth.RefreshRequest](s.RefreshHandler))
@@ -93,7 +132,7 @@ func NewServer(ctx context.Context, cfg *config.Config) (*Server, error) {
 
 	server.Server = &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", cfg.Host.Address, cfg.Host.Port),
-		Handler: mux,
+		Handler: enableCORS(mux),
 	}
 
 	return &server, nil
