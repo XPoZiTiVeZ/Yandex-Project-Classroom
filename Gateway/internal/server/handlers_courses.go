@@ -102,10 +102,10 @@ func (s *Server) GetCoursesHandler(w http.ResponseWriter, r *http.Request) {
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-				case codes.InvalidArgument:
-					BadRequest(w, e.Message())
-				case codes.Unavailable:
-					ServiceUnavailable(w)
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
 			InternalError(w)
@@ -136,10 +136,10 @@ func (s *Server) GetCoursesByStudentHandler(w http.ResponseWriter, r *http.Reque
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-				case codes.InvalidArgument:
-					BadRequest(w, e.Message())
-				case codes.Unavailable:
-					ServiceUnavailable(w)
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
 			InternalError(w)
@@ -170,10 +170,10 @@ func (s *Server) GetCoursesByTeacherHandler(w http.ResponseWriter, r *http.Reque
 
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
-				case codes.InvalidArgument:
-					BadRequest(w, e.Message())
-				case codes.Unavailable:
-					ServiceUnavailable(w)
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.Unavailable:
+				ServiceUnavailable(w)
 			}
 		} else {
 			InternalError(w)
@@ -195,7 +195,7 @@ func (s *Server) GetCoursesByTeacherHandler(w http.ResponseWriter, r *http.Reque
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 404 {object} ErrorResponse "Курс не найден"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /courses/course/update [patch]
+// @Router /courses/course/update [put]
 func (s *Server) UpdateCourseHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[courses.UpdateCourseRequest](r.Context())
 

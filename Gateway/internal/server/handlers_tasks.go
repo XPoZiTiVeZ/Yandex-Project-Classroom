@@ -204,7 +204,7 @@ func (s *Server) GetTasksForStudentHandler(w http.ResponseWriter, r *http.Reques
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 404 {object} ErrorResponse "Задача не найдена"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /tasks/task/update [patch]
+// @Router /tasks/task/update [put]
 func (s *Server) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.UpdateTaskRequest](r.Context())
 
@@ -241,7 +241,7 @@ func (s *Server) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 404 {object} ErrorResponse "Задача не найдена"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /tasks/task/status [patch]
+// @Router /tasks/task/status [put]
 func (s *Server) ChangeStatusTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.ChangeStatusTaskRequest](r.Context())
 
