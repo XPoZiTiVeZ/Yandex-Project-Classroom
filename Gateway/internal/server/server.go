@@ -118,7 +118,7 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 		mux.HandleFunc("POST /api/tasks/tasks-statuses", s.IsTeacher(HandlerWrapper[tasks.GetTasksRequest](s.GetTasksHandler)))
 		mux.HandleFunc("PUT /api/tasks/task/update", s.IsTeacher(HandlerWrapper[tasks.UpdateTaskRequest](s.UpdateTaskHandler)))
 		mux.HandleFunc("DELETE /api/tasks/task/delete", s.IsTeacher(HandlerWrapper[tasks.DeleteTaskRequest](s.DeleteTaskHandler)))
-		mux.HandleFunc("PUT /api/tasks/task/changestatus", s.IsStudent(HandlerWrapper[tasks.ChangeStatusTaskRequest](s.ChangeStatusTaskHandler)))
+		mux.HandleFunc("PATCH /api/tasks/task/changestatus", s.IsStudent(HandlerWrapper[tasks.ChangeStatusTaskRequest](s.ChangeStatusTaskHandler)))
 	}
 }
 
