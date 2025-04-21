@@ -157,6 +157,9 @@ func (c *taskController) ChangeStatusTask(ctx context.Context, req *pb.ChangeSta
 	}
 
 	taskStatus, err := c.svc.ToggleTaskStatus(ctx, req.TaskId, req.StudentId)
+	if errors.Is(err, domain.ErrNotFound) {
+		return nil, status.Error(codes.NotFound, "task not found")
+	}
 	if err != nil {
 		c.logger.Error("failed to update task status", "err", err, "task_id", req.TaskId, "student_id", req.StudentId)
 		return nil, status.Error(codes.Internal, "failed to update task status")
@@ -179,7 +182,7 @@ func (c *taskController) DeleteTask(ctx context.Context, req *pb.DeleteTaskReque
 	}
 	return &pb.DeleteTaskResponse{Success: true}, nil
 }
-	
+
 func (c *taskController) GetTasksForStudent(ctx context.Context, req *pb.GetTasksForStudentRequest) (*pb.GetTasksForStudentResponse, error) {
 	if err := c.validate.Var(req.CourseId, "required,uuid"); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid course id")
@@ -215,6 +218,9 @@ func (c *taskController) GetStudentStatuses(ctx context.Context, req *pb.GetStud
 	}
 
 	statuses, err := c.svc.ListTaskStatuses(ctx, req.TaskId)
+	if errors.Is(err, domain.ErrNotFound) {
+		return nil, status.Error(codes.NotFound, "task not found")
+	}
 	if err != nil {
 		c.logger.Error("failed to get student statuses", "err", err, "task_id", req.TaskId)
 		return nil, status.Error(codes.Internal, "failed to get student statuses")
