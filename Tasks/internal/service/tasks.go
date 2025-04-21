@@ -81,7 +81,12 @@ func (s *taskService) Delete(ctx context.Context, id string) error {
 }
 
 func (s *taskService) ToggleTaskStatus(ctx context.Context, taskID, userID string) (domain.TaskStatus, error) {
-	currentStatus, err := s.statuses.Get(ctx, taskID, userID)
+	task, err := s.tasks.GetByID(ctx, taskID)
+	if err != nil {
+		return domain.TaskStatus{}, fmt.Errorf("failed to get task: %w", err)
+	}
+
+	currentStatus, err := s.statuses.Get(ctx, task.ID, userID)
 	if err != nil && !errors.Is(err, domain.ErrNotFound) {
 		return domain.TaskStatus{}, fmt.Errorf("failed to get task status: %w", err)
 	}
@@ -90,14 +95,14 @@ func (s *taskService) ToggleTaskStatus(ctx context.Context, taskID, userID strin
 	if errors.Is(err, domain.ErrNotFound) {
 		currentStatus = domain.TaskStatus{
 			UserID:    userID,
-			TaskID:    taskID,
+			TaskID:    task.ID,
 			Completed: true,
 		}
 		if err := s.statuses.Create(ctx, currentStatus); err != nil {
 			return domain.TaskStatus{}, fmt.Errorf("failed to create task status: %w", err)
 		}
 
-		s.logger.Info("task status created", "task_id", taskID, "user_id", userID, "status", currentStatus.Completed)
+		s.logger.Info("task status created", "task_id", task.ID, "user_id", userID, "status", currentStatus.Completed)
 		return currentStatus, nil
 	}
 
