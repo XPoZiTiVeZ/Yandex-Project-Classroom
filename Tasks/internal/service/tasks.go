@@ -112,8 +112,12 @@ func (s *taskService) ToggleTaskStatus(ctx context.Context, taskID, userID strin
 }
 
 func (s *taskService) ListTaskStatuses(ctx context.Context, taskID string) ([]domain.TaskStatus, error) {
+	task, err := s.tasks.GetByID(ctx, taskID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get task: %w", err)
+	}
 	// Берутся все пользователи с курса, и если записи по статусу нет, то ставится false
-	return s.statuses.ListByTaskID(ctx, taskID)
+	return s.statuses.ListByTaskID(ctx, task.ID)
 }
 
 func (s *taskService) ListByStudentID(ctx context.Context, studentID, courseID string) ([]domain.StudentTask, error) {
