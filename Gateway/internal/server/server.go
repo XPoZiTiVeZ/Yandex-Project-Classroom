@@ -106,7 +106,7 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 		mux.HandleFunc("POST /api/lessons/lesson", s.IsMember(HandlerWrapper[lessons.GetLessonRequest](s.GetLessonHandler)))
 		mux.HandleFunc("POST /api/lessons/lessons", s.IsMember(HandlerWrapper[lessons.GetLessonsRequest](s.GetLessonsHandler)))
 		mux.HandleFunc("PUT /api/lessons/lesson/update", s.IsTeacher(HandlerWrapper[lessons.UpdateLessonRequest](s.UpdateLessonHandler)))
-		mux.HandleFunc("DELET /api/lessons/lesson/delete", s.IsTeacher(HandlerWrapper[lessons.DeleteLessonRequest](s.DeleteLessonHandler)))
+		mux.HandleFunc("DELETE /api/lessons/lesson/delete", s.IsTeacher(HandlerWrapper[lessons.DeleteLessonRequest](s.DeleteLessonHandler)))
 	}
 
 	// Tasks handlers
