@@ -140,6 +140,7 @@ func TestTaskService_ToggleTaskStatus(t *testing.T) {
 		{
 			name: "need to create status",
 			mockBehavior: func(tasks *mocks.MockTaskRepo, statuses *mocks.MockStatusRepo, args args) {
+				tasks.EXPECT().GetByID(mock.Anything, args.TaskID).Return(domain.Task{ID: args.TaskID}, nil)
 				statuses.EXPECT().Get(mock.Anything, args.TaskID, args.UserID).Return(domain.TaskStatus{}, domain.ErrNotFound)
 				statuses.EXPECT().Create(mock.Anything, domain.TaskStatus{
 					TaskID:    args.TaskID,
@@ -160,6 +161,7 @@ func TestTaskService_ToggleTaskStatus(t *testing.T) {
 		{
 			name: "need to update status",
 			mockBehavior: func(tasks *mocks.MockTaskRepo, statuses *mocks.MockStatusRepo, args args) {
+				tasks.EXPECT().GetByID(mock.Anything, args.TaskID).Return(domain.Task{ID: args.TaskID}, nil)
 				statuses.EXPECT().Get(mock.Anything, args.TaskID, args.UserID).Return(domain.TaskStatus{
 					TaskID:    args.TaskID,
 					UserID:    args.UserID,
