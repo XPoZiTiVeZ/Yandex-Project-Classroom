@@ -1,24 +1,27 @@
-include .env
-MIGRATIONS_PATH=./migrations
+.PHONY:
+	run
+	build
+	clean
+	help
 
-migrate-create:
-	@name=$(name);
-	@migrate create -seq -ext sql -dir $(MIGRATIONS_PATH) $(name)
+GO=go
 
-migrate-up:
-	@migrate -path=$(MIGRATIONS_PATH) -database=$(POSTGRES_URL) up
+help:
+	@echo "Доступные команды:"
+	@echo "  dev-run  - Запустить проект без сборки"
+	@echo "  build    - Собрать проект"
+	@echo "  run      - Запустить проект"
+	@echo "  clean    - Очистить скомпилированные файлы"
 
-migrate-down:
-	@name=$(name);
-	@migrate -path=$(MIGRATIONS_PATH) -database=$(POSTGRES_URL) down $(name)
+dev-run:
+	$(GO) run ./cmd
 
-gen-proto:
-	@protoc --proto_path=pkg/api/auth \
-	  --go_out=pkg/api/auth --go_opt=paths=source_relative \
-		--go-grpc_out=pkg/api/auth --go-grpc_opt=paths=source_relative pkg/api/auth/auth.proto
-		
-run:
-	@go run cmd/main.go
+build: 
+	$(GO) build -o ./bin/app ./cmd
+	
+run: build
+	./bin/app
 
-test:
-	@go test ./... -cover
+clean:
+	$(GO) clean
+	rm -rf ./bin

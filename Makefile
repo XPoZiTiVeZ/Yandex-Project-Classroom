@@ -15,6 +15,7 @@
 	run
 	clean
 	help
+	install
 
 # Опционально загружаем переменные из .env, если файл существует, для POSTGRES_URL
 ifneq (,$(wildcard .env))
@@ -98,6 +99,12 @@ generate-doc:
 	swag init -g ./cmd/main.go --output ./docs --parseDependency --parseInternal --outputTypes json && \
 	cd ..
 
+install:
+	$(GO) install github.com/vektra/mockery/v3@v3.2.3
+	$(GO) install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	$(GO) install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	$(GO) install github.com/swaggo/swag/cmd/swag@latest
+
 build:
 	if [ ! -f "go.mod" ]; then \
 		go mod init app; \
@@ -122,6 +129,7 @@ help:
 	@echo "  proto-gen-<сервис> - Сгенерировать go файлы из proto для <сервис>\n\
                 !!! должен быть установлен protobuf-compiler"
 	@echo "  build    - Собрать проект"
+	@echo "  install  - Установить зависимости"
 	@echo "  run      - Запустить проект"
 	@echo "  clean    - Очистить скомпилированные файлы"
 	@echo "  migrate-create name=<название миграции> - Создание миграций"
