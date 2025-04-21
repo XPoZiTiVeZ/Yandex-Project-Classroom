@@ -12,7 +12,22 @@ import (
 	srv "Classroom/Gateway/internal/server"
 	cfg "Classroom/Gateway/pkg/config"
 	"Classroom/Gateway/pkg/logger"
+
+	_ "Classroom/Gateway/docs"
 )
+
+// @title Classroom Gateway API
+// @version 1.0
+// @description Gateway service for Classroom microservices. Handles authentication, routing, and request aggregation.
+// @host 127.0.0.1:8080
+// @BasePath /api
+// @schemes http
+// @produce json
+// @consumes json
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Enter JWT token in format: "Bearer {token}"
 
 func main() {
 	ctx := context.Background()

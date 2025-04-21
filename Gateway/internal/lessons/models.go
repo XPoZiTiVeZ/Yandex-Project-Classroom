@@ -6,19 +6,31 @@ import (
 	pb "Classroom/Gateway/pkg/api/lessons"
 )
 
+// Lesson - информация о занятии
+// @Description Полная информация о занятии в курсе
 type Lesson struct {
-	LessonID    string    `json:"lesson_id"`
-	CourseID    string    `json:"course_id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
-}
+    // Уникальный идентификатор занятия
+    LessonID string `json:"lesson_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    // Идентификатор курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=1"`
+    // Название занятия
+    Title string `json:"title" example:"Введение в программирование" extensions:"x-order=2"`
+    // Содержание занятия
+    Description string `json:"description" example:"Базовые понятия и термины" extensions:"x-order=3"`
+    // Дата создания
+    CreatedAt time.Time `json:"created_at" example:"2023-01-15T10:00:00Z" extensions:"x-order=4"`
+} // @name Lesson
 
+// CreateLessonRequest - запрос на создание занятия
+// @Description Параметры для создания нового занятия в курсе
 type CreateLessonRequest struct {
-	CourseID string `json:"course_id"`
-	Title    string `json:"title"`
-	Content  string `json:"content"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    // Название занятия
+    Title string `json:"title" example:"Основы алгоритмов" extensions:"x-order=1"`
+    // Содержание занятия
+    Content string `json:"content" example:"Подробное описание занятия..." extensions:"x-order=2"`
+} // @name CreateLessonRequest
 
 func NewCreateLessonRequest(req CreateLessonRequest) *pb.CreateLessonRequest {
 	return &pb.CreateLessonRequest{
@@ -28,9 +40,12 @@ func NewCreateLessonRequest(req CreateLessonRequest) *pb.CreateLessonRequest {
 	}
 }
 
+// CreateLessonResponse - ответ после создания занятия
+// @Description Возвращает ID созданного занятия
 type CreateLessonResponse struct {
-	LessonID string `json:"lesson_id"`
-}
+    // ID созданного занятия
+    LessonID string `json:"lesson_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+} // @name CreateLessonResponse
 
 func NewCreateLessonResponse(resp *pb.CreateLessonResponse) CreateLessonResponse {
 	return CreateLessonResponse{
@@ -38,10 +53,14 @@ func NewCreateLessonResponse(resp *pb.CreateLessonResponse) CreateLessonResponse
 	}
 }
 
+// GetLessonRequest - запрос информации о занятии
+// @Description Требует ID курса и ID занятия для получения данных
 type GetLessonRequest struct {
-	CourseID string `json:"course_id"`
-	LessonID string `json:"lesson_id"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    // ID занятия
+    LessonID string `json:"lesson_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=1"`
+} // @name GetLessonRequest
 
 func NewGetLessonRequest(req GetLessonRequest) *pb.GetLessonRequest {
 	return &pb.GetLessonRequest{
@@ -49,9 +68,12 @@ func NewGetLessonRequest(req GetLessonRequest) *pb.GetLessonRequest {
 	}
 }
 
+// GetLessonResponse - информация о занятии
+// @Description Возвращает полные данные занятия
 type GetLessonResponse struct {
-	Lesson Lesson `json:"lesson"`
-}
+    // Объект занятия
+    Lesson Lesson `json:"lesson" extensions:"x-order=0"`
+} // @name GetLessonResponse
 
 func NewGetLessonResponse(resp *pb.GetLessonResponse) GetLessonResponse {
 	return GetLessonResponse{
@@ -65,9 +87,12 @@ func NewGetLessonResponse(resp *pb.GetLessonResponse) GetLessonResponse {
 	}
 }
 
+// GetLessonsRequest - запрос списка занятий
+// @Description Возвращает все занятия в указанном курсе
 type GetLessonsRequest struct {
-	CourseID string `json:"course_id"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+} // @name GetLessonsRequest
 
 func NewGetLessonsRequest(req GetLessonsRequest) *pb.GetLessonsRequest {
 	return &pb.GetLessonsRequest{
@@ -75,9 +100,12 @@ func NewGetLessonsRequest(req GetLessonsRequest) *pb.GetLessonsRequest {
 	}
 }
 
+// GetLessonsResponse - список занятий
+// @Description Содержит массив занятий в курсе
 type GetLessonsResponse struct {
-	Lessons []Lesson `json:"lessons"`
-}
+    // Массив занятий
+    Lessons []Lesson `json:"lessons" extensions:"x-order=0"`
+} // @name GetLessonsResponse
 
 func NewGetLessonsResponse(resp *pb.GetLessonsResponse) GetLessonsResponse {
 	return GetLessonsResponse{
@@ -97,12 +125,18 @@ func NewGetLessonsResponse(resp *pb.GetLessonsResponse) GetLessonsResponse {
 	}
 }
 
+// UpdateLessonRequest - запрос обновления занятия
+// @Description Позволяет частично обновить данные занятия
 type UpdateLessonRequest struct {
-	CourseID string `json:"course_id"`
-	LessonID string  `json:"lesson_id"`
-	Title    *string `json:"title,omitempty"`
-	Content  *string `json:"description,omitempty"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    // ID занятия
+    LessonID string `json:"lesson_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=1"`
+    // Новое название (опционально)
+    Title *string `json:"title,omitempty" example:"Обновленное название" extensions:"x-order=2"`
+    // Новое содержание (опционально)
+    Content *string `json:"description,omitempty" example:"Обновленное содержание" extensions:"x-order=3"`
+} // @name UpdateLessonRequest
 
 func NewUpdateLessonRequest(req UpdateLessonRequest) *pb.UpdateLessonRequest {
 	return &pb.UpdateLessonRequest{
@@ -112,17 +146,24 @@ func NewUpdateLessonRequest(req UpdateLessonRequest) *pb.UpdateLessonRequest {
 	}
 }
 
+// UpdateLessonResponse - результат обновления
+// @Description Пустой ответ при успешном обновлении
 type UpdateLessonResponse struct {
-}
+	
+} // @name UpdateLessonResponse
 
 func NewUpdateLessonResponse(resp *pb.UpdateLessonResponse) UpdateLessonResponse {
 	return UpdateLessonResponse{}
 }
 
+// DeleteLessonRequest - запрос удаления занятия
+// @Description Требует ID курса и ID занятия для удаления
 type DeleteLessonRequest struct {
-	CourseID string `json:"course_id"`
-	LessonID string `json:"lesson_id"`
-}
+    // ID курса
+    CourseID string `json:"course_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    // ID занятия
+    LessonID string `json:"lesson_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=1"`
+} // @name DeleteLessonRequest
 
 func NewDeleteLessonRequest(req DeleteLessonRequest) *pb.DeleteLessonRequest {
 	return &pb.DeleteLessonRequest{
@@ -130,8 +171,11 @@ func NewDeleteLessonRequest(req DeleteLessonRequest) *pb.DeleteLessonRequest {
 	}
 }
 
+// DeleteLessonResponse - результат удаления
+// @Description Пустой ответ при успешном удалении
 type DeleteLessonResponse struct {
-}
+
+} // @name DeleteLessonResponse
 
 func NewDeleteLessonResponse(resp *pb.DeleteLessonResponse) DeleteLessonResponse {
 	return DeleteLessonResponse{}

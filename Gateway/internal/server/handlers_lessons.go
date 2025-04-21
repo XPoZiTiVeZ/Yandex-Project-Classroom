@@ -10,6 +10,18 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// CreateLessonHandler создает новый урок
+// @Summary Создание урока
+// @Description Создает новый урок в курсе
+// @Tags Lessons
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body lessons.CreateLessonRequest true "Данные для создания урока"
+// @Success 201 {object} lessons.CreateLessonResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /lessons/create [post]
 func (s *Server) CreateLessonHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[lessons.CreateLessonRequest](r.Context())
 
@@ -32,6 +44,19 @@ func (s *Server) CreateLessonHandler(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, resp, http.StatusCreated)
 }
 
+// GetLessonHandler возвращает информацию об уроке
+// @Summary Получение урока
+// @Description Возвращает детальную информацию об уроке
+// @Tags Lessons
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body lessons.GetLessonRequest true "Идентификатор урока"
+// @Success 200 {object} lessons.GetLessonResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 404 {object} ErrorResponse "Урок не найден"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /lessons/lesson [post]
 func (s *Server) GetLessonHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[lessons.GetLessonRequest](r.Context())
 
@@ -56,6 +81,18 @@ func (s *Server) GetLessonHandler(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, resp, http.StatusOK)
 }
 
+// GetLessonsHandler возвращает список уроков
+// @Summary Получение списка уроков
+// @Description Возвращает список уроков с возможностью фильтрации
+// @Tags Lessons
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body lessons.GetLessonsRequest true "Параметры фильтрации"
+// @Success 200 {object} lessons.GetLessonsResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /lessons/lessons [post]
 func (s *Server) GetLessonsHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[lessons.GetLessonsRequest](r.Context())
 
@@ -78,6 +115,19 @@ func (s *Server) GetLessonsHandler(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, resp, http.StatusOK)
 }
 
+// UpdateLessonHandler обновляет информацию об уроке
+// @Summary Обновление урока
+// @Description Обновляет информацию об уроке
+// @Tags Lessons
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body lessons.UpdateLessonRequest true "Данные для обновления"
+// @Success 200 {object} lessons.UpdateLessonResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 404 {object} ErrorResponse "Урок не найден"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /lessons/lesson/update [patch]
 func (s *Server) UpdateLessonHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[lessons.UpdateLessonRequest](r.Context())
 
@@ -102,6 +152,19 @@ func (s *Server) UpdateLessonHandler(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, resp, http.StatusOK)
 }
 
+// DeleteLessonHandler удаляет урок
+// @Summary Удаление урока
+// @Description Удаляет урок по идентификатору
+// @Tags Lessons
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body lessons.DeleteLessonRequest true "Идентификатор урока"
+// @Success 200 {object} lessons.DeleteLessonResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 404 {object} ErrorResponse "Урок не найден"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /lessons/lesson/delete [delete]
 func (s *Server) DeleteLessonHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[lessons.DeleteLessonRequest](r.Context())
 

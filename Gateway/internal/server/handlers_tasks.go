@@ -10,6 +10,18 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// CreateTaskHandler создает новую задачу
+// @Summary Создание задачи
+// @Description Создает новую задачу в курсе
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body tasks.CreateTaskRequest true "Данные для создания задачи"
+// @Success 201 {object} tasks.CreateTaskResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /tasks/create [post]
 func (s *Server) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.CreateTaskRequest](r.Context())
 
@@ -32,6 +44,19 @@ func (s *Server) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, resp, http.StatusCreated)
 }
 
+// GetTaskHandler возвращает информацию о задаче
+// @Summary Получение задачи
+// @Description Возвращает детальную информацию о задаче
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body tasks.GetTaskRequest true "Идентификатор задачи"
+// @Success 200 {object} tasks.GetTaskResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 404 {object} ErrorResponse "Задача не найдена"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /tasks/task [post]
 func (s *Server) GetTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.GetTaskRequest](r.Context())
 
@@ -56,6 +81,19 @@ func (s *Server) GetTaskHandler(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, resp, http.StatusOK)
 }
 
+// GetStudentStatuses возвращает статусы студентов для задачи
+// @Summary Получение статусов студентов
+// @Description Возвращает статусы выполнения задачи для студентов
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body tasks.GetStudentStatusesRequest true "Идентификатор задачи"
+// @Success 200 {object} tasks.GetStudentStatusesResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 404 {object} ErrorResponse "Данные не найдены"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /tasks/student-statuses [post]
 func (s *Server) GetStudentStatuses(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.GetStudentStatusesRequest](r.Context())
 
@@ -80,6 +118,19 @@ func (s *Server) GetStudentStatuses(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, resp, http.StatusOK)
 }
 
+// GetTasksHandler возвращает список задач
+// @Summary Получение списка задач
+// @Description Возвращает список задач курса
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body tasks.GetTasksRequest true "Идентификатор курса"
+// @Success 200 {object} tasks.GetTasksResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 404 {object} ErrorResponse "Курс не найден"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /tasks/tasks [post]
 func (s *Server) GetTasksHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.GetTasksRequest](r.Context())
 
@@ -104,6 +155,19 @@ func (s *Server) GetTasksHandler(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, resp, http.StatusOK)
 }
 
+// GetTasksForStudentHandler возвращает задачи для студента
+// @Summary Получение задач студента
+// @Description Возвращает список задач для конкретного студента
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body tasks.GetTasksForStudentRequest true "Идентификатор студента"
+// @Success 200 {object} tasks.GetTasksForStudentResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 404 {object} ErrorResponse "Студент не найден"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /tasks/student-tasks [post]
 func (s *Server) GetTasksForStudentHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.GetTasksForStudentRequest](r.Context())
 
@@ -128,6 +192,19 @@ func (s *Server) GetTasksForStudentHandler(w http.ResponseWriter, r *http.Reques
 	WriteJSON(w, resp, http.StatusOK)
 }
 
+// UpdateTaskHandler обновляет информацию о задаче
+// @Summary Обновление задачи
+// @Description Обновляет информацию о задаче
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body tasks.UpdateTaskRequest true "Данные для обновления"
+// @Success 200 {object} tasks.UpdateTaskResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 404 {object} ErrorResponse "Задача не найдена"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /tasks/task/update [patch]
 func (s *Server) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.UpdateTaskRequest](r.Context())
 
@@ -152,6 +229,19 @@ func (s *Server) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, resp, http.StatusOK)
 }
 
+// ChangeStatusTaskHandler изменяет статус задачи
+// @Summary Изменение статуса задачи
+// @Description Обновляет статус выполнения задачи студентом
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body tasks.ChangeStatusTaskRequest true "Данные для изменения статуса"
+// @Success 200 {object} tasks.ChangeStatusTaskResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 404 {object} ErrorResponse "Задача не найдена"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /tasks/task/status [patch]
 func (s *Server) ChangeStatusTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.ChangeStatusTaskRequest](r.Context())
 
@@ -176,6 +266,19 @@ func (s *Server) ChangeStatusTaskHandler(w http.ResponseWriter, r *http.Request)
 	WriteJSON(w, resp, http.StatusOK)
 }
 
+// DeleteTaskHandler удаляет задачу
+// @Summary Удаление задачи
+// @Description Удаляет задачу по идентификатору
+// @Tags Tasks
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body tasks.DeleteTaskRequest true "Идентификатор задачи"
+// @Success 200 {object} tasks.DeleteTaskResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 404 {object} ErrorResponse "Задача не найдена"
+// @Failure 503 {object} ErrorResponse "Сервис недоступен"
+// @Router /tasks/task/delete [delete]
 func (s *Server) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.DeleteTaskRequest](r.Context())
 

@@ -4,10 +4,16 @@ import (
 	"net/http"
 )
 
+// ErrorResponse стандартизированный формат для возврата ошибок API
+// @description Cтандартизированный формат всех ошибок в API.
 type ErrorResponse struct {
-	Code    int    `json:"code" example:"400"`
-	Message string `json:"message" example:"Некорректный запрос"`
-}
+    // Код ошибки (HTTP статус код)
+    Code    int    `json:"code" example:"400"`
+    
+    // Сообщение об ошибке
+    Message string `json:"message" example:"Некорректный запрос"`
+} // @name ErrorResponse
+// @schema(title=ErrorResponse,required=["code","message"],order=["code","message"])
 
 func mergeMsgs(message string, msgs []string) string {
 	for _, msg := range msgs {
