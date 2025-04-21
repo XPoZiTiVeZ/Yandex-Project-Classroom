@@ -94,13 +94,6 @@ func MustReadConfig() *Config {
 	}
 
 	v.AutomaticEnv()
-	// v.SetConfigFile(".env")
-	// v.SetConfigType("env")
-
-	// if err := v.ReadInConfig(); err != nil {
-	// 	slog.Debug("Couldn't read .env", slog.Any("error", err))
-	// 	return &DefaultConfig
-	// }
 
 	envToMapstructure := map[string]string{
 		"GATEWAY_PORT":    "gateway.port",
