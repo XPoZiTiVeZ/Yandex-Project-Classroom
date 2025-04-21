@@ -6,12 +6,14 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/app ./cmd
+RUN go build -o gateway cmd/main.go
 
-FROM alpine:latest
+FROM gcr.io/distroless/base-debian12
 
 WORKDIR /app
 
-COPY --from=builder /app/bin/app ./gateway
+COPY --from=builder /app/gateway ./gateway
 
-ENTRYPOINT [ "./gateway" ]
+USER nonroot:nonroot
+
+ENTRYPOINT ["./gateway"]

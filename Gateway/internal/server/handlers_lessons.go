@@ -127,7 +127,7 @@ func (s *Server) GetLessonsHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 404 {object} ErrorResponse "Урок не найден"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /lessons/lesson/update [patch]
+// @Router /lessons/lesson/update [put]
 func (s *Server) UpdateLessonHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[lessons.UpdateLessonRequest](r.Context())
 

@@ -16,4 +16,4 @@ COPY --from=builder /app/auth ./auth
 
 USER nonroot:nonroot
 
-CMD ["./auth"]
+ENTRYPOINT ["./auth"]

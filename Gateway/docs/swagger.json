@@ -541,7 +541,7 @@
             }
         },
         "/courses/course/update": {
-            "patch": {
+            "put": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -967,7 +967,7 @@
             }
         },
         "/lessons/lesson/update": {
-            "patch": {
+            "put": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -1431,7 +1431,7 @@
             }
         },
         "/tasks/task/update": {
-            "patch": {
+            "put": {
                 "security": [
                     {
                         "BearerAuth": []

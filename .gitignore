@@ -5,6 +5,7 @@
 # dirs
 Postgres/postgres_data/
 Redis/redis_data/
+bin
 
 .idea
 .vscode/

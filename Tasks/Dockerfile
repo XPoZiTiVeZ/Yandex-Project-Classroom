@@ -16,4 +16,4 @@ COPY --from=builder /app/tasks ./tasks
 
 USER nonroot:nonroot
 
-CMD ["./tasks"]
+ENTRYPOINT ["./tasks"]

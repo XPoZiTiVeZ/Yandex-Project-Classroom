@@ -3,6 +3,8 @@
 	build
 	clean
 	help
+	generate-doc
+	dev-run
 
 GO=go
 SWAG=swag
@@ -10,9 +12,9 @@ SWAG=swag
 help:
 	@echo "Доступные команды:"
 	@echo "  generate-doc - Сгенерировать документацию API"
-	@echo "  dev-run  - Запустить проект без сборки"
-	@echo "  build    - Собрать проект"
-	@echo "  run      - Запустить проект"
+	@echo "  dev-run  - Запустить сервис без сборки"
+	@echo "  build    - Собрать сервис"
+	@echo "  run      - Запустить сервис"
 	@echo "  clean    - Очистить скомпилированные файлы"
 
 generate-doc:

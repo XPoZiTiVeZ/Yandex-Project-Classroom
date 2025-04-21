@@ -93,7 +93,7 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 		mux.HandleFunc("POST /api/courses/courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesRequest](s.GetCoursesHandler)))
 		mux.HandleFunc("POST /api/courses/student-courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesByStudentRequest](s.GetCoursesByStudentHandler)))
 		mux.HandleFunc("POST /api/courses/teacher-courses", s.IsAuthenticated(HandlerWrapper[courses.GetCoursesByTeacherRequest](s.GetCoursesByTeacherHandler)))
-		mux.HandleFunc("PATCH /api/courses/course/update", s.IsTeacher(HandlerWrapper[courses.UpdateCourseRequest](s.UpdateCourseHandler)))
+		mux.HandleFunc("PUT /api/courses/course/update", s.IsTeacher(HandlerWrapper[courses.UpdateCourseRequest](s.UpdateCourseHandler)))
 		mux.HandleFunc("DELETE /api/courses/course/delete", s.IsTeacher(HandlerWrapper[courses.DeleteCourseRequest](s.DeleteCourseHandler)))
 		mux.HandleFunc("POST /api/courses/course/enroll", s.IsTeacher(HandlerWrapper[courses.EnrollUserRequest](s.EnrollUserHandler)))
 		mux.HandleFunc("POST /api/courses/course/expel", s.IsTeacher(HandlerWrapper[courses.ExpelUserRequest](s.ExpelUserHandler)))
@@ -105,8 +105,8 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 		mux.HandleFunc("POST /api/lessons/create", s.IsTeacher(HandlerWrapper[lessons.CreateLessonRequest](s.CreateLessonHandler)))
 		mux.HandleFunc("POST /api/lessons/lesson", s.IsMember(HandlerWrapper[lessons.GetLessonRequest](s.GetLessonHandler)))
 		mux.HandleFunc("POST /api/lessons/lessons", s.IsMember(HandlerWrapper[lessons.GetLessonsRequest](s.GetLessonsHandler)))
-		mux.HandleFunc("PATCH /api/lessons/lesson/update", s.IsTeacher(HandlerWrapper[lessons.UpdateLessonRequest](s.UpdateLessonHandler)))
-		mux.HandleFunc("DELET /api/lessons/lesson/delete", s.IsTeacher(HandlerWrapper[lessons.DeleteLessonRequest](s.DeleteLessonHandler)))
+		mux.HandleFunc("PUT /api/lessons/lesson/update", s.IsTeacher(HandlerWrapper[lessons.UpdateLessonRequest](s.UpdateLessonHandler)))
+		mux.HandleFunc("DELETE /api/lessons/lesson/delete", s.IsTeacher(HandlerWrapper[lessons.DeleteLessonRequest](s.DeleteLessonHandler)))
 	}
 
 	// Tasks handlers
@@ -116,7 +116,7 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 		mux.HandleFunc("POST /api/tasks/student-tasks", s.IsStudent(HandlerWrapper[tasks.GetTasksRequest](s.GetTasksHandler)))
 		mux.HandleFunc("POST /api/tasks/teacher-tasks", s.IsTeacher(HandlerWrapper[tasks.GetTasksRequest](s.GetTasksHandler)))
 		mux.HandleFunc("POST /api/tasks/tasks-statuses", s.IsTeacher(HandlerWrapper[tasks.GetTasksRequest](s.GetTasksHandler)))
-		mux.HandleFunc("PATCH /api/tasks/task/update", s.IsTeacher(HandlerWrapper[tasks.UpdateTaskRequest](s.UpdateTaskHandler)))
+		mux.HandleFunc("PUT /api/tasks/task/update", s.IsTeacher(HandlerWrapper[tasks.UpdateTaskRequest](s.UpdateTaskHandler)))
 		mux.HandleFunc("DELETE /api/tasks/task/delete", s.IsTeacher(HandlerWrapper[tasks.DeleteTaskRequest](s.DeleteTaskHandler)))
 		mux.HandleFunc("PATCH /api/tasks/task/changestatus", s.IsStudent(HandlerWrapper[tasks.ChangeStatusTaskRequest](s.ChangeStatusTaskHandler)))
 	}
