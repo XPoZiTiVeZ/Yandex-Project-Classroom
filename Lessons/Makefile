@@ -3,6 +3,7 @@
 	build
 	clean
 	help
+	dev-run
 
 GO=go
 

@@ -3,6 +3,8 @@
 	build
 	clean
 	help
+	generate-doc
+	dev-run
 
 GO=go
 SWAG=swag
