@@ -15,7 +15,7 @@ services:
       timeout: 1s
       retries: 3
     volumes:
-      - ./Postgres/postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
 
@@ -35,7 +35,7 @@ services:
       timeout: 1s
       retries: 3
     volumes:
-      - ./Redis/redis_data:/data
+      - redis_data:/data
     networks:
       - app-network
 
@@ -169,6 +169,7 @@ services:
       - ./Gateway/configs/config.yaml:/app/configs/config.yaml
     env_file:
       - .env
+      - ./Gateway/.env
     command: ['--config', '/app/configs/config.yaml']
     networks:
       - app-network
@@ -188,3 +189,7 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
