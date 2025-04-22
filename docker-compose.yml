@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     ports:
-      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+      - 5432:5432
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} || exit 1']
       interval: 10s
@@ -14,7 +14,6 @@ services:
       retries: 3
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./Postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - app-network
 
@@ -25,7 +24,7 @@ services:
     env_file:
       - .env
     ports:
-      - '${REDIS_PORT}:${REDIS_PORT}'
+      - 6379:6379
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
@@ -48,8 +47,8 @@ services:
       - ./Auth/config/config.yaml:/app/config/config.yaml
     env_file:
       - .env
-    ports:
-      - '${SERVICE_AUTH_PORT}:${SERVICE_AUTH_PORT}'
+    environment:
+      - PORT=${AUTH_PORT}
     command: ['--config', '/app/config/config.yaml']
     depends_on:
       postgres:
@@ -69,8 +68,8 @@ services:
       - ./Courses/config/config.yaml:/app/config/config.yaml
     env_file:
       - .env
-    ports:
-      - '${SERVICE_COURSES_PORT}:${SERVICE_COURSES_PORT}'
+    environment:
+      - PORT=${COURSES_PORT}
     command: ['--config', '/app/config/config.yaml']
     depends_on:
       postgres:
@@ -90,8 +89,8 @@ services:
       - ./Lessons/config/config.yaml:/app/config/config.yaml
     env_file:
       - .env
-    ports:
-      - '${SERVICE_LESSONS_PORT}:${SERVICE_LESSONS_PORT}'
+    environment:
+      - PORT=${LESSONS_PORT}
     command: ['--config', '/app/config/config.yaml']
     depends_on:
       postgres:
@@ -111,8 +110,8 @@ services:
       - ./Tasks/config/config.yaml:/app/config/config.yaml
     env_file:
       - .env
-    ports:
-      - '${SERVICE_TASKS_PORT}:${SERVICE_TASKS_PORT}'
+    environment:
+      - PORT=${TASKS_PORT}
     command: ['--config', '/app/config/config.yaml']
     depends_on:
       postgres:
@@ -122,41 +121,24 @@ services:
     networks:
       - app-network
 
-  # service-notifications:
-  #   container_name: notifications
-  #   restart: unless-stopped
-  #   build:
-  #     context: ./Notifications
-  #     dockerfile: Dockerfile
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "${SERVICE_NOTIFICATIONS_PORT}:${SERVICE_NOTIFICATIONS_PORT}"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   networks:
-  #     - app-network
-
-  # service-chat:
-  #   container_name: chat
-  #   restart: unless-stopped
-  #   build:
-  #     context: ./Chat
-  #     dockerfile: Dockerfile
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "${SERVICE_CHAT_PORT}:${SERVICE_CHAT_PORT}"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   networks:
-  #     - app-network
+  service-notifications:
+    container_name: notifications
+    restart: unless-stopped
+    build:
+      context: ./Notifications
+      dockerfile: Dockerfile
+    volumes:
+      - ./Notifications/config/config.yaml:/app/config/config.yaml
+    env_file:
+      - .env
+    command: ['--config', '/app/config/config.yaml']
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - app-network
 
   service-gateway:
     container_name: gateway
@@ -169,6 +151,8 @@ services:
     env_file:
       - .env
       - ./Gateway/.env
+    environment:
+      - PORT=${GATEWAY_PORT}
     command: ['--config', '/app/configs/config.yaml']
     networks:
       - app-network
@@ -181,7 +165,48 @@ services:
       - ./Nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./Gateway/docs/swagger.json:/var/www/classroom/swagger.json
     ports:
-      - '${NGINX_PORT}:${NGINX_PORT}'
+      - 80:80
+    networks:
+      - app-network
+
+  kafka:
+    image: apache/kafka
+    container_name: kafka
+    ports:
+      - '9092:9092'
+    environment:
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+    networks:
+      - app-network
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'bash',
+          '-c',
+          '/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - '8080:8080'
+    environment:
+      DYNAMIC_CONFIG_ENABLED: true
+    depends_on:
+      - kafka
     networks:
       - app-network
 
