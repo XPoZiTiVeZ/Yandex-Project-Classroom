@@ -70,7 +70,7 @@ func TestCoursesService_CreateCourse(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := mocks.NewMockCourseRepo(t)
-			svc := service.NewCoursesService(slog.Default(), repo)
+			svc := service.NewCoursesService(slog.Default(), repo, nil)
 			tc.mockBehavior(repo, tc.req)
 			got, err := svc.CreateCourse(context.Background(), tc.req)
 
@@ -152,7 +152,7 @@ func TestCoursesService_GetCourse(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := mocks.NewMockCourseRepo(t)
-			svc := service.NewCoursesService(slog.Default(), repo)
+			svc := service.NewCoursesService(slog.Default(), repo, nil)
 			tc.mockBehavior(repo, tc.req)
 			got, err := svc.GetCourse(context.Background(), tc.req)
 
@@ -180,7 +180,7 @@ func TestCoursesService_UpdateCourse(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := mocks.NewMockCourseRepo(t)
-			svc := service.NewCoursesService(slog.Default(), repo)
+			svc := service.NewCoursesService(slog.Default(), repo, nil)
 			tc.mockBehavior(repo, tc.req)
 			got, err := svc.UpdateCourse(context.Background(), tc.req)
 
@@ -270,7 +270,7 @@ func TestCoursesService_DeleteCourse(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := mocks.NewMockCourseRepo(t)
-			svc := service.NewCoursesService(slog.Default(), repo)
+			svc := service.NewCoursesService(slog.Default(), repo, nil)
 			tc.mockBehavior(repo, tc.req)
 			got, err := svc.DeleteCourse(context.Background(), tc.req)
 
@@ -356,7 +356,7 @@ func TestCoursesService_EnrollUser(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := mocks.NewMockCourseRepo(t)
-			svc := service.NewCoursesService(slog.Default(), repo)
+			svc := service.NewCoursesService(slog.Default(), repo, nil)
 			tc.mockBehavior(repo, tc.req)
 			got, err := svc.EnrollUser(context.Background(), tc.req)
 
@@ -448,7 +448,7 @@ func TestCoursesService_IsTeacher(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := mocks.NewMockCourseRepo(t)
-			svc := service.NewCoursesService(slog.Default(), repo)
+			svc := service.NewCoursesService(slog.Default(), repo, nil)
 			tc.mockBehavior(repo, tc.req)
 			got, err := svc.IsTeacher(context.Background(), tc.req)
 
@@ -573,7 +573,7 @@ func TestCoursesService_IsMember(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := mocks.NewMockCourseRepo(t)
-			svc := service.NewCoursesService(slog.Default(), repo)
+			svc := service.NewCoursesService(slog.Default(), repo, nil)
 			tc.mockBehavior(repo, tc.req)
 			got, err := svc.IsMember(context.Background(), tc.req)
 

@@ -105,7 +105,7 @@ func (c *consumer) handleUserExpelled(ctx context.Context, msg *sarama.ConsumerM
 		return
 	}
 
-	if err := c.svc.UserEnrolled(ctx, payload.UserID, payload.CourseID); err != nil {
+	if err := c.svc.UserExpelled(ctx, payload.UserID, payload.CourseID); err != nil {
 		logger.Error(ctx, "failed to notify user expelled", "user_id", payload.UserID, "err", err)
 		return
 	}
