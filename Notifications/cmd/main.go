@@ -3,11 +3,13 @@ package main
 import (
 	"Classroom/Notifications/internal/config"
 	"Classroom/Notifications/internal/consumer"
+	"Classroom/Notifications/internal/repo"
+	"Classroom/Notifications/internal/service"
 	"Classroom/Notifications/pkg/events"
 	"Classroom/Notifications/pkg/logger"
+	"Classroom/Notifications/pkg/mailer"
 	"Classroom/Notifications/pkg/postgres"
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -22,22 +24,33 @@ func main() {
 	defer stop()
 
 	config := config.MustNew()
-	fmt.Printf("%+v\n", config)
-
-	consumer := consumer.MustNew([]string{config.KafkaBroker}, nil)
-	defer consumer.Close()
 
 	postgres := postgres.MustNew(config.PostgresURL)
 	defer postgres.Close()
+
+	mailer := mailer.New(mailer.Config{
+		User: config.SMTP.User,
+		Pass: config.SMTP.Pass,
+		Port: config.SMTP.Port,
+		Host: config.SMTP.Host,
+	})
+	userRepo := repo.NewUserRepo(postgres)
+	courseRepo := repo.NewCourseRepo(postgres)
+	taskRepo := repo.NewTaskRepo(postgres)
+	lessonRepo := repo.NewLessonRepo(postgres)
+	service := service.NewNotificationsService(mailer, userRepo, taskRepo, lessonRepo, courseRepo)
+
+	consumer := consumer.MustNew([]string{config.KafkaBroker}, service)
+	defer consumer.Close()
 
 	consumer.ConsumeTopic(ctx, events.CourseEnrolledTopic)
 	consumer.ConsumeTopic(ctx, events.CourseExpelledTopic)
 	consumer.ConsumeTopic(ctx, events.TaskCreatedTopic)
 	consumer.ConsumeTopic(ctx, events.LessonCreatedTopic)
 
-	logger.Info(ctx, "Started")
+	logger.Info(ctx, "service started")
 	<-ctx.Done()
-	logger.Info(ctx, "Stopped")
+	logger.Info(ctx, "service stopped")
 }
 
 func init() {

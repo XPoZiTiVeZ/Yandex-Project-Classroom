@@ -13,8 +13,8 @@ import (
 type NotificationsService interface {
 	UserEnrolled(ctx context.Context, userID, courseID string) error
 	UserExpelled(ctx context.Context, userID, courseID string) error
-	LessonCreated(ctx context.Context, userID, courseID string) error
-	TaskCreated(ctx context.Context, userID, courseID string) error
+	LessonCreated(ctx context.Context, lessonID, courseID string) error
+	TaskCreated(ctx context.Context, taskID, courseID string) error
 }
 
 type EventHandler func(ctx context.Context, msg *sarama.ConsumerMessage)
@@ -34,7 +34,7 @@ func MustNew(brokers []string, svc NotificationsService) *consumer {
 		log.Fatalf("failed to create consumer: %v", err)
 	}
 
-	consumer := &consumer{master: master}
+	consumer := &consumer{master: master, svc: svc}
 
 	consumer.handlers = map[string]EventHandler{
 		events.CourseEnrolledTopic: consumer.handleUserEnrolled,
@@ -89,7 +89,13 @@ func (c *consumer) handleUserEnrolled(ctx context.Context, msg *sarama.ConsumerM
 		logger.Error(ctx, "invalid user enrolled payload")
 		return
 	}
-	logger.Info(ctx, "Получено сообщение", "topic", msg.Topic, "partition", msg.Partition, "offset", msg.Offset, "key", string(msg.Key), "value", string(msg.Value))
+
+	if err := c.svc.UserEnrolled(ctx, payload.UserID, payload.CourseID); err != nil {
+		logger.Error(ctx, "failed to notify user enrolled", "user_id", payload.UserID, "err", err)
+		return
+	}
+
+	logger.Debug(ctx, "notified user enrolled", "user_id", payload.UserID)
 }
 
 func (c *consumer) handleUserExpelled(ctx context.Context, msg *sarama.ConsumerMessage) {
@@ -98,7 +104,13 @@ func (c *consumer) handleUserExpelled(ctx context.Context, msg *sarama.ConsumerM
 		logger.Error(ctx, "invalid user expelled payload")
 		return
 	}
-	logger.Info(ctx, "Получено сообщение", "topic", msg.Topic, "partition", msg.Partition, "offset", msg.Offset, "key", string(msg.Key), "value", string(msg.Value))
+
+	if err := c.svc.UserEnrolled(ctx, payload.UserID, payload.CourseID); err != nil {
+		logger.Error(ctx, "failed to notify user expelled", "user_id", payload.UserID, "err", err)
+		return
+	}
+
+	logger.Debug(ctx, "notified user expelled", "user_id", payload.UserID)
 }
 
 func (c *consumer) handleLessonCreated(ctx context.Context, msg *sarama.ConsumerMessage) {
@@ -107,7 +119,13 @@ func (c *consumer) handleLessonCreated(ctx context.Context, msg *sarama.Consumer
 		logger.Error(ctx, "invalid lesson created payload")
 		return
 	}
-	logger.Info(ctx, "Получено сообщение", "topic", msg.Topic, "partition", msg.Partition, "offset", msg.Offset, "key", string(msg.Key), "value", string(msg.Value))
+
+	if err := c.svc.LessonCreated(ctx, payload.LessonID, payload.CourseID); err != nil {
+		logger.Error(ctx, "failed to notify lesson created", "lesson_id", payload.LessonID, "err", err)
+		return
+	}
+
+	logger.Debug(ctx, "notified lesson created", "lesson_id", payload.LessonID)
 }
 
 func (c *consumer) handleTaskCreated(ctx context.Context, msg *sarama.ConsumerMessage) {
@@ -116,7 +134,13 @@ func (c *consumer) handleTaskCreated(ctx context.Context, msg *sarama.ConsumerMe
 		logger.Error(ctx, "invalid task created payload")
 		return
 	}
-	logger.Info(ctx, "Получено сообщение", "topic", msg.Topic, "partition", msg.Partition, "offset", msg.Offset, "key", string(msg.Key), "value", string(msg.Value))
+
+	if err := c.svc.TaskCreated(ctx, payload.TaskID, payload.CourseID); err != nil {
+		logger.Error(ctx, "failed to notify task created", "task_id", payload.TaskID, "err", err)
+		return
+	}
+
+	logger.Debug(ctx, "notified task created", "task_id", payload.TaskID)
 }
 
 func decodeMessage(msg *sarama.ConsumerMessage, dest any) error {
