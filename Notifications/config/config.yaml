@@ -1,0 +1,5 @@
+postgres_url: 'postgres://postgres:password@postgres:5432/classroom?sslmode=disable'
+kafka_broker: 'kafka:9092'
+smtp:
+  host: smtp.gmail.com
+  port: 465
