@@ -51,12 +51,16 @@ func (s *Server) CreateLessonHandler(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body lessons.GetLessonRequest true "Идентификатор урока"
+// @Param course_id query string true "ID курса" example("a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a")
+// @Param lesson_id query string true "ID урока" example("94f9a22f-3a83-4591-a988-7aa3f0ec6eb0")
 // @Success 200 {object} lessons.GetLessonResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 401 {object} ErrorResponse "Требуется авторизация"
+// @Failure 403 {object} ErrorResponse "Доступ запрещен"
 // @Failure 404 {object} ErrorResponse "Урок не найден"
-// @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /lessons/lesson [post]
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Failure 503 {object} ErrorResponse "Сервис временно недоступен"
+// @Router /lessons/lesson [get]
 func (s *Server) GetLessonHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[lessons.GetLessonRequest](r.Context())
 
@@ -83,16 +87,16 @@ func (s *Server) GetLessonHandler(w http.ResponseWriter, r *http.Request) {
 
 // GetLessonsHandler возвращает список уроков
 // @Summary Получение списка уроков
-// @Description Возвращает список уроков с возможностью фильтрации
+// @Description Возвращает список уроков с возможностью фильтрации по курсу
 // @Tags Lessons
-// @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body lessons.GetLessonsRequest true "Параметры фильтрации"
+// @Param course_id query string true "ID курса" example("6994aefe-6815-476b-bdc0-2ae5c4d0c18e")
 // @Success 200 {object} lessons.GetLessonsResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 404 {object} ErrorResponse "Курс не найден"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /lessons/lessons [post]
+// @Router /lessons/lessons [get]
 func (s *Server) GetLessonsHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[lessons.GetLessonsRequest](r.Context())
 

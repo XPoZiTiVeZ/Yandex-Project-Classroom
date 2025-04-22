@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"strings"
 )
 
 // ErrorResponse стандартизированный формат для возврата ошибок API
@@ -16,69 +17,67 @@ type ErrorResponse struct {
 // @schema(title=ErrorResponse,required=["code","message"],order=["code","message"])
 
 func mergeMsgs(message string, msgs []string) string {
-	for _, msg := range msgs {
-		message += ": " + msg
-	}
+	message += ": " + strings.Join(msgs, ": ")
 	return message
 }
 
-func InternalError(w http.ResponseWriter, msgs ...string) error {
+func InternalError(w http.ResponseWriter, msgs ...string) {
 	message := mergeMsgs("Internal server error", msgs)
-	return WriteJSON(
+	WriteJSON(
 		w,
 		ErrorResponse{Code: http.StatusInternalServerError, Message: message},
 		http.StatusInternalServerError,
 	)
 }
 
-func Unauthorized(w http.ResponseWriter, msgs ...string) error {
+func Unauthorized(w http.ResponseWriter, msgs ...string) {
 	message := mergeMsgs("Unauthorized", msgs)
-	return WriteJSON(
+	WriteJSON(
 		w,
 		ErrorResponse{Code: http.StatusUnauthorized, Message: message},
 		http.StatusInternalServerError,
 	)
 }
 
-func Forbidden(w http.ResponseWriter, msgs ...string) error {
+func Forbidden(w http.ResponseWriter, msgs ...string) {
 	message := mergeMsgs("Forbidden", msgs)
-	return WriteJSON(
+	WriteJSON(
 		w,
 		ErrorResponse{Code: http.StatusForbidden, Message: message},
 		http.StatusInternalServerError,
 	)
 }
 
-func BadRequest(w http.ResponseWriter, msgs ...string) error {
+func BadRequest(w http.ResponseWriter, msgs ...string) {
 	message := mergeMsgs("Bad request", msgs)
-	return WriteJSON(
+	WriteJSON(
 		w,
 		ErrorResponse{Code: http.StatusBadRequest, Message: message},
 		http.StatusBadRequest,
 	)
 }
 
-func AlreadyExists(w http.ResponseWriter, msgs ...string) error {
+func AlreadyExists(w http.ResponseWriter, msgs ...string) {
 	message := mergeMsgs("Conflict", msgs)
-	return WriteJSON(
+	WriteJSON(
 		w,
 		ErrorResponse{Code: http.StatusConflict, Message: message},
 		http.StatusConflict,
 	)
 }
 
-func NotFound(w http.ResponseWriter, msgs ...string) error {
+func NotFound(w http.ResponseWriter, msgs ...string) {
 	message := mergeMsgs("Not found", msgs)
-	return WriteJSON(
+	WriteJSON(
 		w,
 		ErrorResponse{Code: http.StatusNotFound, Message: message},
 		http.StatusNotFound,
 	)
 }
 
-func ServiceUnavailable(w http.ResponseWriter, msgs ...string) error {
+func ServiceUnavailable(w http.ResponseWriter, msgs ...string) {
 	message := mergeMsgs("Service unavailable", msgs)
-	return WriteJSON(
+	WriteJSON(
 		w,
 		ErrorResponse{Code: http.StatusServiceUnavailable, Message: message},
 		http.StatusServiceUnavailable,

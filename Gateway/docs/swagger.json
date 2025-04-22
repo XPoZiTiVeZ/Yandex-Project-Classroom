@@ -211,16 +211,13 @@
             }
         },
         "/auth/user-info": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
                 "description": "Возвращает данные пользователя",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -230,13 +227,12 @@
                 "summary": "Информация о пользователе",
                 "parameters": [
                     {
+                        "type": "string",
+                        "example": "44e7f029-82cc-46f5-83e8-34b7d056ce32",
                         "description": "Идентификатор пользователя",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/AuthUserInfoRequest"
-                        }
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -255,17 +251,61 @@
                 }
             }
         },
+        "/courses": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список курсов с возможностью фильтрации по пользователю",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Получение списка курсов",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
+                        "description": "ID пользователя",
+                        "name": "user_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetCoursesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/courses/course": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
                 "description": "Возвращает детальную информацию о курсе",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -275,13 +315,12 @@
                 "summary": "Получение курса",
                 "parameters": [
                     {
-                        "description": "Идентификатор курса",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GetCourseRequest"
-                        }
+                        "type": "string",
+                        "example": "\"44e7f029-82cc-46f5-83e8-34b7d056ce32\"",
+                        "description": "ID курса",
+                        "name": "course_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -484,16 +523,13 @@
             }
         },
         "/courses/course/students": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Возвращает список студентов, записанных на курс",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Возвращает список студентов, записанных на курс, с поддержкой пагинации",
                 "produces": [
                     "application/json"
                 ],
@@ -503,13 +539,31 @@
                 "summary": "Получение студентов курса",
                 "parameters": [
                     {
-                        "description": "Идентификатор курса",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GetCourseStudentsRequest"
-                        }
+                        "type": "string",
+                        "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
+                        "description": "ID курса",
+                        "name": "course_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Начальный индекс (для пагинации)",
+                        "name": "index",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Лимит записей (для пагинации)",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -520,7 +574,7 @@
                         }
                     },
                     "400": {
-                        "description": "Некорректные данные",
+                        "description": "Некорректные параметры",
                         "schema": {
                             "$ref": "#/definitions/ErrorResponse"
                         }
@@ -597,57 +651,6 @@
                 }
             }
         },
-        "/courses/courses": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Возвращает список курсов с возможностью фильтрации",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Courses"
-                ],
-                "summary": "Получение списка курсов",
-                "parameters": [
-                    {
-                        "description": "Параметры фильтрации",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GetCoursesRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/GetCoursesResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректные данные",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "503": {
-                        "description": "Сервис недоступен",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/courses/create": {
             "post": {
                 "security": [
@@ -700,16 +703,13 @@
             }
         },
         "/courses/student-courses": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
                 "description": "Возвращает список курсов, на которые записан студент",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -719,13 +719,12 @@
                 "summary": "Получение курсов студента",
                 "parameters": [
                     {
-                        "description": "Идентификатор студента",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GetCoursesByStudentRequest"
-                        }
+                        "type": "string",
+                        "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
+                        "description": "ID студента",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -751,16 +750,13 @@
             }
         },
         "/courses/teacher-courses": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
                 "description": "Возвращает список курсов, которые ведет преподаватель",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -770,13 +766,12 @@
                 "summary": "Получение курсов преподавателя",
                 "parameters": [
                     {
-                        "description": "Идентификатор преподавателя",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GetCoursesByTeacherRequest"
-                        }
+                        "type": "string",
+                        "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
+                        "description": "ID преподавателя",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -853,7 +848,7 @@
             }
         },
         "/lessons/lesson": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -872,13 +867,20 @@
                 "summary": "Получение урока",
                 "parameters": [
                     {
-                        "description": "Идентификатор урока",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GetLessonRequest"
-                        }
+                        "type": "string",
+                        "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
+                        "description": "ID курса",
+                        "name": "course_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"94f9a22f-3a83-4591-a988-7aa3f0ec6eb0\"",
+                        "description": "ID урока",
+                        "name": "lesson_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -894,14 +896,32 @@
                             "$ref": "#/definitions/ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Урок не найден",
                         "schema": {
                             "$ref": "#/definitions/ErrorResponse"
                         }
                     },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
                     "503": {
-                        "description": "Сервис недоступен",
+                        "description": "Сервис временно недоступен",
                         "schema": {
                             "$ref": "#/definitions/ErrorResponse"
                         }
@@ -1024,16 +1044,13 @@
             }
         },
         "/lessons/lessons": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Возвращает список уроков с возможностью фильтрации",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Возвращает список уроков с возможностью фильтрации по курсу",
                 "produces": [
                     "application/json"
                 ],
@@ -1043,13 +1060,12 @@
                 "summary": "Получение списка уроков",
                 "parameters": [
                     {
-                        "description": "Параметры фильтрации",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GetLessonsRequest"
-                        }
+                        "type": "string",
+                        "example": "\"6994aefe-6815-476b-bdc0-2ae5c4d0c18e\"",
+                        "description": "ID курса",
+                        "name": "course_id",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1061,6 +1077,12 @@
                     },
                     "400": {
                         "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Курс не найден",
                         "schema": {
                             "$ref": "#/definitions/ErrorResponse"
                         }
@@ -1146,16 +1168,13 @@
             }
         },
         "/tasks/student-statuses": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
                 "description": "Возвращает статусы выполнения задачи для студентов",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1165,13 +1184,20 @@
                 "summary": "Получение статусов студентов",
                 "parameters": [
                     {
-                        "description": "Идентификатор задачи",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GetStudentStatusesRequest"
-                        }
+                        "type": "string",
+                        "example": "\"29f14724-aa33-48d1-872b-fdaddb212e40\"",
+                        "description": "ID курса",
+                        "name": "course_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"21dad0c3-dcea-4c19-b501-fb2fe888f683\"",
+                        "description": "ID задачи",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1187,8 +1213,26 @@
                             "$ref": "#/definitions/ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Данные не найдены",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "$ref": "#/definitions/ErrorResponse"
                         }
@@ -1260,16 +1304,13 @@
             }
         },
         "/tasks/task": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Возвращает детальную информацию о задаче",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Возвращает детальную информацию о задаче в рамках курса",
                 "produces": [
                     "application/json"
                 ],
@@ -1279,13 +1320,20 @@
                 "summary": "Получение задачи",
                 "parameters": [
                     {
-                        "description": "Идентификатор задачи",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GetTaskRequest"
-                        }
+                        "type": "string",
+                        "example": "\"68b75705-9722-466e-96a7-0afc3b5ef22f\"",
+                        "description": "ID курса",
+                        "name": "course_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"5a430d16-851d-45a9-b55b-15838785adea\"",
+                        "description": "ID задачи",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1301,8 +1349,26 @@
                             "$ref": "#/definitions/ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
                     "404": {
-                        "description": "Задача не найдена",
+                        "description": "Задача не найдены",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "$ref": "#/definitions/ErrorResponse"
                         }
@@ -1654,18 +1720,6 @@
         },
         "AuthRegisterResponse": {
             "description": "Возвращает ID созданного пользователя",
-            "type": "object",
-            "properties": {
-                "user_id": {
-                    "description": "Уникальный идентификатор пользователя",
-                    "type": "string",
-                    "x-order": "0",
-                    "example": "507f1f77bcf86cd799439011"
-                }
-            }
-        },
-        "AuthUserInfoRequest": {
-            "description": "Содержит ID пользователя для получения данных",
             "type": "object",
             "properties": {
                 "user_id": {
@@ -2114,18 +2168,6 @@
                 }
             }
         },
-        "GetCourseRequest": {
-            "description": "Требует ID курса для получения данных",
-            "type": "object",
-            "properties": {
-                "course_id": {
-                    "description": "ID запрашиваемого курса",
-                    "type": "string",
-                    "x-order": "0",
-                    "example": "507f1f77bcf86cd799439011"
-                }
-            }
-        },
         "GetCourseResponse": {
             "description": "Возвращает полные данные курса",
             "type": "object",
@@ -2137,30 +2179,6 @@
                         }
                     ],
                     "x-order": "0"
-                }
-            }
-        },
-        "GetCourseStudentsRequest": {
-            "description": "Возвращает студентов курса с пагинацией",
-            "type": "object",
-            "properties": {
-                "course_id": {
-                    "description": "ID курса",
-                    "type": "string",
-                    "x-order": "0",
-                    "example": "507f1f77bcf86cd799439011"
-                },
-                "index": {
-                    "description": "Начальный индекс (для пагинации)",
-                    "type": "integer",
-                    "x-order": "1",
-                    "example": 0
-                },
-                "limit": {
-                    "description": "Лимит записей (для пагинации)",
-                    "type": "integer",
-                    "x-order": "2",
-                    "example": 10
                 }
             }
         },
@@ -2190,42 +2208,6 @@
                 }
             }
         },
-        "GetCoursesByStudentRequest": {
-            "description": "Возвращает курсы, на которые подписан студент",
-            "type": "object",
-            "properties": {
-                "student_id": {
-                    "description": "ID студента",
-                    "type": "string",
-                    "x-order": "0",
-                    "example": "608f1f77bcf86cd799439022"
-                }
-            }
-        },
-        "GetCoursesByTeacherRequest": {
-            "description": "Возвращает курсы, созданные преподавателем",
-            "type": "object",
-            "properties": {
-                "teacher_id": {
-                    "description": "ID преподавателя",
-                    "type": "string",
-                    "x-order": "0",
-                    "example": "608f1f77bcf86cd799439022"
-                }
-            }
-        },
-        "GetCoursesRequest": {
-            "description": "Может фильтровать по ID пользователя",
-            "type": "object",
-            "properties": {
-                "user_id": {
-                    "description": "ID пользователя (опционально)",
-                    "type": "string",
-                    "x-order": "0",
-                    "example": "608f1f77bcf86cd799439022"
-                }
-            }
-        },
         "GetCoursesResponse": {
             "description": "Содержит массив курсов",
             "type": "object",
@@ -2237,24 +2219,6 @@
                         "$ref": "#/definitions/Course"
                     },
                     "x-order": "0"
-                }
-            }
-        },
-        "GetLessonRequest": {
-            "description": "Требует ID курса и ID занятия для получения данных",
-            "type": "object",
-            "properties": {
-                "course_id": {
-                    "description": "ID курса",
-                    "type": "string",
-                    "x-order": "0",
-                    "example": "608f1f77bcf86cd799439022"
-                },
-                "lesson_id": {
-                    "description": "ID занятия",
-                    "type": "string",
-                    "x-order": "1",
-                    "example": "507f1f77bcf86cd799439011"
                 }
             }
         },
@@ -2273,18 +2237,6 @@
                 }
             }
         },
-        "GetLessonsRequest": {
-            "description": "Возвращает все занятия в указанном курсе",
-            "type": "object",
-            "properties": {
-                "course_id": {
-                    "description": "ID курса",
-                    "type": "string",
-                    "x-order": "0",
-                    "example": "608f1f77bcf86cd799439022"
-                }
-            }
-        },
         "GetLessonsResponse": {
             "description": "Содержит массив занятий в курсе",
             "type": "object",
@@ -2299,24 +2251,6 @@
                 }
             }
         },
-        "GetStudentStatusesRequest": {
-            "description": "Возвращает статусы выполнения задания для студентов курса",
-            "type": "object",
-            "properties": {
-                "course_id": {
-                    "description": "ID курса",
-                    "type": "string",
-                    "x-order": "0",
-                    "example": "608f1f77bcf86cd799439022"
-                },
-                "task_id": {
-                    "description": "ID задания",
-                    "type": "string",
-                    "x-order": "1",
-                    "example": "507f1f77bcf86cd799439011"
-                }
-            }
-        },
         "GetStudentStatusesResponse": {
             "description": "Содержит статусы выполнения задания студентами",
             "type": "object",
@@ -2328,24 +2262,6 @@
                         "$ref": "#/definitions/TaskStatus"
                     },
                     "x-order": "0"
-                }
-            }
-        },
-        "GetTaskRequest": {
-            "description": "Требует ID курса и задания для получения данных",
-            "type": "object",
-            "properties": {
-                "course_id": {
-                    "description": "ID курса",
-                    "type": "string",
-                    "x-order": "0",
-                    "example": "608f1f77bcf86cd799439022"
-                },
-                "task_id": {
-                    "description": "ID задания",
-                    "type": "string",
-                    "x-order": "1",
-                    "example": "507f1f77bcf86cd799439011"
                 }
             }
         },
@@ -2467,12 +2383,6 @@
                     "type": "string",
                     "x-order": "0",
                     "example": "Pong!"
-                },
-                "status": {
-                    "description": "HTTP статус код ответа",
-                    "type": "integer",
-                    "x-order": "1",
-                    "example": 200
                 }
             }
         },

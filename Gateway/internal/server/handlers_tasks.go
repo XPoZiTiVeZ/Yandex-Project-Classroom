@@ -46,17 +46,20 @@ func (s *Server) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 // GetTaskHandler возвращает информацию о задаче
 // @Summary Получение задачи
-// @Description Возвращает детальную информацию о задаче
+// @Description Возвращает детальную информацию о задаче в рамках курса
 // @Tags Tasks
-// @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body tasks.GetTaskRequest true "Идентификатор задачи"
+// @Param course_id path string true "ID курса" example("68b75705-9722-466e-96a7-0afc3b5ef22f")
+// @Param task_id path string true "ID задачи" example("5a430d16-851d-45a9-b55b-15838785adea")
 // @Success 200 {object} tasks.GetTaskResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
-// @Failure 404 {object} ErrorResponse "Задача не найдена"
+// @Failure 401 {object} ErrorResponse "Требуется авторизация"
+// @Failure 403 {object} ErrorResponse "Доступ запрещен"
+// @Failure 404 {object} ErrorResponse "Задача не найдены"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /tasks/task [post]
+// @Router  /tasks/task [get]
 func (s *Server) GetTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.GetTaskRequest](r.Context())
 
@@ -85,15 +88,18 @@ func (s *Server) GetTaskHandler(w http.ResponseWriter, r *http.Request) {
 // @Summary Получение статусов студентов
 // @Description Возвращает статусы выполнения задачи для студентов
 // @Tags Tasks
-// @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body tasks.GetStudentStatusesRequest true "Идентификатор задачи"
+// @Param course_id path string true "ID курса" example("29f14724-aa33-48d1-872b-fdaddb212e40")
+// @Param task_id path string true "ID задачи" example("21dad0c3-dcea-4c19-b501-fb2fe888f683")
 // @Success 200 {object} tasks.GetStudentStatusesResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 401 {object} ErrorResponse "Требуется авторизация"
+// @Failure 403 {object} ErrorResponse "Доступ запрещен"
 // @Failure 404 {object} ErrorResponse "Данные не найдены"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /tasks/student-statuses [post]
+// @Router  /tasks/student-statuses [get]
 func (s *Server) GetStudentStatuses(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.GetStudentStatusesRequest](r.Context())
 

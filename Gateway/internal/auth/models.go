@@ -66,8 +66,8 @@ type LoginResponse struct {
 
 func NewLoginResponse(resp *pb.LoginResponse) LoginResponse {
     return LoginResponse{
-        resp.GetAccessToken(),
-        resp.GetRefreshToken(),
+        RefreshToken: resp.GetRefreshToken(),
+        AccessToken: resp.GetAccessToken(),
     }
 }
 
@@ -93,7 +93,7 @@ type RefreshResponse struct {
 
 func NewRefreshResponse(resp *pb.RefreshResponse) RefreshResponse {
     return RefreshResponse{
-        resp.GetAccessToken(),
+        AccessToken: resp.GetAccessToken(),
     }
 }
 
@@ -120,12 +120,9 @@ func NewLogoutResponse(resp *pb.LogoutResponse) LogoutResponse {
     return LogoutResponse{}
 }
 
-// UserInfoRequest - запрос информации о пользователе
-// @Description Содержит ID пользователя для получения данных
 type GetUserInfoRequest struct {
-    // Уникальный идентификатор пользователя
-    UserID string `json:"user_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
-} // @name AuthUserInfoRequest
+    UserID string `schema:"user_id"`
+}
 
 func NewGetUserInfoRequest(req GetUserInfoRequest) *pb.GetUserInfoRequest {
     return &pb.GetUserInfoRequest{

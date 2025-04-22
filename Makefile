@@ -23,7 +23,7 @@ ifneq (,$(wildcard .env))
 	export
 endif
 
-POSTGRES_URL ?= postgres://user:password@localhost:5432/dbname?sslmode=disable
+POSTGRES_URL ?= postgres://postgres:passwordd@localhost:5432/classroom?sslmode=disable
 
 BINARY_NAME=classroom
 
@@ -63,8 +63,6 @@ proto-gen: \
 	proto-gen-courses \
 	proto-gen-lessons \
 	proto-gen-tasks \
-# proto-gen-notifications \
-proto-gen-chat \
 
 proto-gen-gateway:
 	@mkdir -p $(GATEWAY_GEN_DIR)
@@ -100,6 +98,7 @@ generate-doc:
 	cd ..
 
 install:
+	$(GO) install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 	$(GO) install github.com/vektra/mockery/v3@v3.2.3
 	$(GO) install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 	$(GO) install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest

@@ -48,15 +48,14 @@ func (s *Server) CreateCourseHandler(w http.ResponseWriter, r *http.Request) {
 // @Summary Получение курса
 // @Description Возвращает детальную информацию о курсе
 // @Tags Courses
-// @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body courses.GetCourseRequest true "Идентификатор курса"
+// @Param course_id query string true "ID курса" example("44e7f029-82cc-46f5-83e8-34b7d056ce32")
 // @Success 200 {object} courses.GetCourseResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 404 {object} ErrorResponse "Курс не найден"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /courses/course [post]
+// @Router /courses/course [get]
 func (s *Server) GetCourseHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[courses.GetCourseRequest](r.Context())
 
@@ -83,16 +82,15 @@ func (s *Server) GetCourseHandler(w http.ResponseWriter, r *http.Request) {
 
 // GetCoursesHandler возвращает список курсов
 // @Summary Получение списка курсов
-// @Description Возвращает список курсов с возможностью фильтрации
+// @Description Возвращает список курсов с возможностью фильтрации по пользователю
 // @Tags Courses
-// @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body courses.GetCoursesRequest true "Параметры фильтрации"
+// @Param user_id query string false "ID пользователя" example("a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a") format(uuid)
 // @Success 200 {object} courses.GetCoursesResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /courses/courses [post]
+// @Router /courses [get]
 func (s *Server) GetCoursesHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[courses.GetCoursesRequest](r.Context())
 
@@ -119,14 +117,13 @@ func (s *Server) GetCoursesHandler(w http.ResponseWriter, r *http.Request) {
 // @Summary Получение курсов студента
 // @Description Возвращает список курсов, на которые записан студент
 // @Tags Courses
-// @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body courses.GetCoursesByStudentRequest true "Идентификатор студента"
+// @Param user_id query string true "ID студента" example("a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a")
 // @Success 200 {object} courses.GetCoursesResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /courses/student-courses [post]
+// @Router /courses/student-courses [get]
 func (s *Server) GetCoursesByStudentHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[courses.GetCoursesByStudentRequest](r.Context())
 
@@ -153,14 +150,13 @@ func (s *Server) GetCoursesByStudentHandler(w http.ResponseWriter, r *http.Reque
 // @Summary Получение курсов преподавателя
 // @Description Возвращает список курсов, которые ведет преподаватель
 // @Tags Courses
-// @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body courses.GetCoursesByTeacherRequest true "Идентификатор преподавателя"
+// @Param user_id query string true "ID преподавателя" example("a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a")
 // @Success 200 {object} courses.GetCoursesResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /courses/teacher-courses [post]
+// @Router /courses/teacher-courses [get]
 func (s *Server) GetCoursesByTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[courses.GetCoursesByTeacherRequest](r.Context())
 
@@ -333,17 +329,18 @@ func (s *Server) ExpelUserHandler(w http.ResponseWriter, r *http.Request) {
 
 // GetCourseStudentsHandler возвращает студентов курса
 // @Summary Получение студентов курса
-// @Description Возвращает список студентов, записанных на курс
+// @Description Возвращает список студентов, записанных на курс, с поддержкой пагинации
 // @Tags Courses
-// @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body courses.GetCourseStudentsRequest true "Идентификатор курса"
+// @Param course_id query string true "ID курса" example("a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a")
+// @Param index query int true "Начальный индекс (для пагинации)" default(0) minimum(0)
+// @Param limit query int true "Лимит записей (для пагинации)" default(10) minimum(1) maximum(100)
 // @Success 200 {object} courses.GetCourseStudentsResponse
-// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 400 {object} ErrorResponse "Некорректные параметры"
 // @Failure 404 {object} ErrorResponse "Курс не найден"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /courses/course/students [post]
+// @Router /courses/course/students [get]
 func (s *Server) GetCourseStudentsHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[courses.GetCourseStudentsRequest](r.Context())
 

@@ -145,13 +145,12 @@ func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 // @Summary Информация о пользователе
 // @Description Возвращает данные пользователя
 // @Tags Auth
-// @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body auth.GetUserInfoRequest true "Идентификатор пользователя"
+// @Param user_id query string true "Идентификатор пользователя" example(44e7f029-82cc-46f5-83e8-34b7d056ce32)
 // @Success 200 {object} auth.GetUserInfoResponse
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
-// @Router /auth/user-info [post]
+// @Router /auth/user-info [get]
 func (s *Server) GetUserInfoHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[auth.GetUserInfoRequest](r.Context())
 

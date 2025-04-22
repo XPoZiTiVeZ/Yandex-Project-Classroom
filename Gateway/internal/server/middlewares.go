@@ -12,14 +12,32 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/gorilla/schema"
 )
 
-func HandlerWrapper[T any](handler http.HandlerFunc) http.HandlerFunc {
+func JSONHandlerWrapper[T any](handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := app.NewLogger(r.Context(), true)
 
 		var body T
 		err := json.NewDecoder(r.Body).Decode(&body)
+		if err != nil {
+			logger.Debug(ctx, "Failed to decode request body", slog.Any("error", err))
+
+			InternalError(w, "failed to decode request body")
+			return
+		}
+
+		handler.ServeHTTP(w, r.WithContext(WithBody(ctx, body)))
+	}
+}
+
+func QueryHandlerWrapper[T any](handler http.HandlerFunc)  http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := app.NewLogger(r.Context(), true)
+
+		var body T
+		err := schema.NewDecoder().Decode(&body, r.URL.Query())
 		if err != nil {
 			logger.Debug(ctx, "Failed to decode request body", slog.Any("error", err))
 
@@ -57,7 +75,7 @@ func (s *Server) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 
 		var claims AuthClaims
 		authJWTSecret := s.Config.Common.AuthJWTSecret
-		token, err := jwt.ParseWithClaims(authHeader, &claims, func(token *jwt.Token) (any, error) {
+		token, err := jwt.ParseWithClaims(parts[1], &claims, func(token *jwt.Token) (any, error) {
 			return []byte(authJWTSecret), nil
 		})
 
