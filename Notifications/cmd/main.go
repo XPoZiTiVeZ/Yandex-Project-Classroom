@@ -3,6 +3,7 @@ package main
 import (
 	"Classroom/Notifications/internal/config"
 	"Classroom/Notifications/internal/consumer"
+	"Classroom/Notifications/pkg/events"
 	"Classroom/Notifications/pkg/logger"
 	"Classroom/Notifications/pkg/postgres"
 	"context"
@@ -23,13 +24,16 @@ func main() {
 	config := config.MustNew()
 	fmt.Printf("%+v\n", config)
 
-	consumer := consumer.MustNew([]string{config.KafkaBroker})
+	consumer := consumer.MustNew([]string{config.KafkaBroker}, nil)
 	defer consumer.Close()
 
 	postgres := postgres.MustNew(config.PostgresURL)
 	defer postgres.Close()
 
-	consumer.ConsumeTopic(ctx, "test-topic")
+	consumer.ConsumeTopic(ctx, events.CourseEnrolledTopic)
+	consumer.ConsumeTopic(ctx, events.CourseExpelledTopic)
+	consumer.ConsumeTopic(ctx, events.TaskCreatedTopic)
+	consumer.ConsumeTopic(ctx, events.LessonCreatedTopic)
 
 	logger.Info(ctx, "Started")
 	<-ctx.Done()

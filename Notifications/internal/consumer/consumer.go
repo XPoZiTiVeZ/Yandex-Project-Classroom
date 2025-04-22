@@ -4,18 +4,28 @@ import (
 	"Classroom/Notifications/pkg/events"
 	"Classroom/Notifications/pkg/logger"
 	"context"
+	"encoding/json"
 	"log"
 
 	"github.com/IBM/sarama"
 )
 
-type Service interface{}
-
-type consumer struct {
-	master sarama.Consumer
+type NotificationsService interface {
+	UserEnrolled(ctx context.Context, userID, courseID string) error
+	UserExpelled(ctx context.Context, userID, courseID string) error
+	LessonCreated(ctx context.Context, userID, courseID string) error
+	TaskCreated(ctx context.Context, userID, courseID string) error
 }
 
-func MustNew(brokers []string) *consumer {
+type EventHandler func(ctx context.Context, msg *sarama.ConsumerMessage)
+
+type consumer struct {
+	master   sarama.Consumer
+	svc      NotificationsService
+	handlers map[string]EventHandler
+}
+
+func MustNew(brokers []string, svc NotificationsService) *consumer {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
 
@@ -24,9 +34,16 @@ func MustNew(brokers []string) *consumer {
 		log.Fatalf("failed to create consumer: %v", err)
 	}
 
-	return &consumer{
-		master: master,
+	consumer := &consumer{master: master}
+
+	consumer.handlers = map[string]EventHandler{
+		events.CourseEnrolledTopic: consumer.handleUserEnrolled,
+		events.CourseExpelledTopic: consumer.handleUserExpelled,
+		events.LessonCreatedTopic:  consumer.handleLessonCreated,
+		events.TaskCreatedTopic:    consumer.handleTaskCreated,
 	}
+
+	return consumer
 }
 
 func (c *consumer) Close() error {
@@ -50,7 +67,7 @@ func (c *consumer) ConsumeTopic(ctx context.Context, topic string) {
 			for {
 				select {
 				case msg := <-pc.Messages():
-					handler, ok := handlers[msg.Topic]
+					handler, ok := c.handlers[msg.Topic]
 					if !ok {
 						logger.Error(ctx, "unknown topic", "topic", msg.Topic)
 						continue
@@ -66,27 +83,42 @@ func (c *consumer) ConsumeTopic(ctx context.Context, topic string) {
 	}
 }
 
-type EventHandler func(ctx context.Context, msg *sarama.ConsumerMessage)
-
-var handlers = map[string]EventHandler{
-	events.CourseEnrolledTopic: handleUserEnrolled,
-	events.CourseExpelledTopic: handleUserExpelled,
-	events.LessonCreatedTopic:  handleLessonCreated,
-	events.TaskCreatedTopic:    handleTaskCreated,
-}
-
-func handleUserEnrolled(ctx context.Context, msg *sarama.ConsumerMessage) {
+func (c *consumer) handleUserEnrolled(ctx context.Context, msg *sarama.ConsumerMessage) {
+	var payload events.UserEnrolled
+	if err := decodeMessage(msg, &payload); err != nil {
+		logger.Error(ctx, "invalid user enrolled payload")
+		return
+	}
 	logger.Info(ctx, "Получено сообщение", "topic", msg.Topic, "partition", msg.Partition, "offset", msg.Offset, "key", string(msg.Key), "value", string(msg.Value))
 }
 
-func handleUserExpelled(ctx context.Context, msg *sarama.ConsumerMessage) {
+func (c *consumer) handleUserExpelled(ctx context.Context, msg *sarama.ConsumerMessage) {
+	var payload events.UserExpelled
+	if err := decodeMessage(msg, &payload); err != nil {
+		logger.Error(ctx, "invalid user expelled payload")
+		return
+	}
 	logger.Info(ctx, "Получено сообщение", "topic", msg.Topic, "partition", msg.Partition, "offset", msg.Offset, "key", string(msg.Key), "value", string(msg.Value))
 }
 
-func handleLessonCreated(ctx context.Context, msg *sarama.ConsumerMessage) {
+func (c *consumer) handleLessonCreated(ctx context.Context, msg *sarama.ConsumerMessage) {
+	var payload events.LessonCreated
+	if err := decodeMessage(msg, &payload); err != nil {
+		logger.Error(ctx, "invalid lesson created payload")
+		return
+	}
 	logger.Info(ctx, "Получено сообщение", "topic", msg.Topic, "partition", msg.Partition, "offset", msg.Offset, "key", string(msg.Key), "value", string(msg.Value))
 }
 
-func handleTaskCreated(ctx context.Context, msg *sarama.ConsumerMessage) {
+func (c *consumer) handleTaskCreated(ctx context.Context, msg *sarama.ConsumerMessage) {
+	var payload events.TaskCreated
+	if err := decodeMessage(msg, &payload); err != nil {
+		logger.Error(ctx, "invalid task created payload")
+		return
+	}
 	logger.Info(ctx, "Получено сообщение", "topic", msg.Topic, "partition", msg.Partition, "offset", msg.Offset, "key", string(msg.Key), "value", string(msg.Value))
+}
+
+func decodeMessage(msg *sarama.ConsumerMessage, dest any) error {
+	return json.Unmarshal(msg.Value, dest)
 }
