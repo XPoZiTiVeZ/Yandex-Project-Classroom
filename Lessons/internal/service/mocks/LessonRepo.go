@@ -39,6 +39,61 @@ func (_m *MockLessonRepo) EXPECT() *MockLessonRepo_Expecter {
 	return &MockLessonRepo_Expecter{mock: &_m.Mock}
 }
 
+// CourseExists provides a mock function for the type MockLessonRepo
+func (_mock *MockLessonRepo) CourseExists(ctx context.Context, courseID string) (bool, error) {
+	ret := _mock.Called(ctx, courseID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CourseExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return returnFunc(ctx, courseID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = returnFunc(ctx, courseID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, courseID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockLessonRepo_CourseExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CourseExists'
+type MockLessonRepo_CourseExists_Call struct {
+	*mock.Call
+}
+
+// CourseExists is a helper method to define mock.On call
+//   - ctx
+//   - courseID
+func (_e *MockLessonRepo_Expecter) CourseExists(ctx interface{}, courseID interface{}) *MockLessonRepo_CourseExists_Call {
+	return &MockLessonRepo_CourseExists_Call{Call: _e.mock.On("CourseExists", ctx, courseID)}
+}
+
+func (_c *MockLessonRepo_CourseExists_Call) Run(run func(ctx context.Context, courseID string)) *MockLessonRepo_CourseExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockLessonRepo_CourseExists_Call) Return(b bool, err error) *MockLessonRepo_CourseExists_Call {
+	_c.Call.Return(b, err)
+	return _c
+}
+
+func (_c *MockLessonRepo_CourseExists_Call) RunAndReturn(run func(ctx context.Context, courseID string) (bool, error)) *MockLessonRepo_CourseExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Create provides a mock function for the type MockLessonRepo
 func (_mock *MockLessonRepo) Create(ctx context.Context, dto1 dto.CreateLessonDTO) (domain.Lesson, error) {
 	ret := _mock.Called(ctx, dto1)

@@ -28,6 +28,7 @@ func main() {
 	defer postgres.Close()
 
 	producer := producer.MustNewProducer([]string{conf.KafkaBroker})
+	defer producer.Close()
 
 	courseRepo := repo.NewCoursesRepo(postgres)
 	courseService := service.NewCoursesService(logger, courseRepo, producer)

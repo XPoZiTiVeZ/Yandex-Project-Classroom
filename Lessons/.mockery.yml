@@ -7,3 +7,4 @@ packages:
   Classroom/Lessons/internal/service:
     interfaces:
       LessonRepo:
+      Producer:

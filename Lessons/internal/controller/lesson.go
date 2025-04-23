@@ -56,6 +56,9 @@ func (c *lessonController) CreateLesson(ctx context.Context, req *pb.CreateLesso
 	}
 
 	lesson, err := c.svc.Create(ctx, dto)
+	if errors.Is(err, domain.ErrNotFound) {
+		return nil, status.Error(codes.NotFound, "course not found")
+	}
 	if err != nil {
 		c.logger.Error("failed to create lesson", "err", err)
 		return nil, status.Error(codes.Internal, "failed to create lesson")
