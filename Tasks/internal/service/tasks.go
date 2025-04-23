@@ -3,6 +3,7 @@ package service
 import (
 	"Classroom/Tasks/internal/domain"
 	"Classroom/Tasks/internal/dto"
+	"Classroom/Tasks/pkg/events"
 	"context"
 	"errors"
 	"fmt"
@@ -16,6 +17,7 @@ type TaskRepo interface {
 	ListByStudentID(ctx context.Context, studentID, courseID string) ([]domain.StudentTask, error)
 	Update(ctx context.Context, task domain.Task) error
 	Delete(ctx context.Context, id string) error
+	CourseExists(ctx context.Context, courseID string) (bool, error)
 }
 
 type StatusRepo interface {
@@ -25,20 +27,41 @@ type StatusRepo interface {
 	ListByTaskID(ctx context.Context, taskID string) ([]domain.TaskStatus, error)
 }
 
+type Producer interface {
+	PublishTaskCreated(msg events.TaskCreated) error
+}
+
 type taskService struct {
 	logger   *slog.Logger // Для дебага и информации, ошибки логируются в контроллере
 	tasks    TaskRepo
 	statuses StatusRepo
+	producer Producer
 }
 
-func NewTaskService(logger *slog.Logger, tasks TaskRepo, statuses StatusRepo) *taskService {
-	return &taskService{logger: logger, tasks: tasks, statuses: statuses}
+func NewTaskService(logger *slog.Logger, tasks TaskRepo, statuses StatusRepo, producer Producer) *taskService {
+	return &taskService{logger: logger, tasks: tasks, statuses: statuses, producer: producer}
 }
 
 func (s *taskService) Create(ctx context.Context, payload dto.CreateTaskDTO) (string, error) {
+	courseExists, err := s.tasks.CourseExists(ctx, payload.CourseID)
+	if err != nil {
+		return "", fmt.Errorf("failed to check course exists: %w", err)
+	}
+	if !courseExists {
+		return "", domain.ErrNotFound
+	}
+
 	task, err := s.tasks.Create(ctx, payload)
 	if err != nil {
 		return "", fmt.Errorf("failed to create task: %w", err)
+	}
+
+	msg := events.TaskCreated{
+		TaskID:   task.ID,
+		CourseID: task.CourseID,
+	}
+	if err = s.producer.PublishTaskCreated(msg); err != nil {
+		s.logger.Error("failed to publish task created event", "err", err)
 	}
 
 	s.logger.Info("task created", "id", task.ID, "title", task.Title)

@@ -24,6 +24,23 @@ func NewTaskRepo(storage *sqlx.DB) *taskRepo {
 	}
 }
 
+func (r *taskRepo) CourseExists(ctx context.Context, courseID string) (bool, error) {
+	query, args := r.qb.
+		Select("TRUE").
+		From("courses").
+		Where(sq.Eq{"course_id": courseID}).
+		MustSql()
+	var isExists bool
+	err := r.storage.GetContext(ctx, &isExists, query, args...)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return isExists, nil
+}
+
 func (r *taskRepo) Create(ctx context.Context, payload dto.CreateTaskDTO) (domain.Task, error) {
 	query, args := r.qb.
 		Insert("tasks").

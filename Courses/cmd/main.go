@@ -2,6 +2,7 @@ package main
 
 import (
 	"Classroom/Courses/internal/config"
+	"Classroom/Courses/internal/producer"
 	"Classroom/Courses/internal/repo"
 	"Classroom/Courses/internal/service"
 	pb "Classroom/Courses/pkg/api/courses"
@@ -26,8 +27,11 @@ func main() {
 	postgres := postgres.MustNew(conf.PostgresURL)
 	defer postgres.Close()
 
+	producer := producer.MustNewProducer([]string{conf.KafkaBroker})
+	defer producer.Close()
+
 	courseRepo := repo.NewCoursesRepo(postgres)
-	courseService := service.NewCoursesService(logger, courseRepo)
+	courseService := service.NewCoursesService(logger, courseRepo, producer)
 
 	server := grpc.NewServer()
 	pb.RegisterCoursesServiceServer(server, courseService)

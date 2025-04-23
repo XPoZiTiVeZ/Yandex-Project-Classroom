@@ -3,6 +3,7 @@ package main
 import (
 	"Classroom/Tasks/internal/config"
 	"Classroom/Tasks/internal/controller"
+	"Classroom/Tasks/internal/producer"
 	"Classroom/Tasks/internal/repo"
 	"Classroom/Tasks/internal/service"
 	"Classroom/Tasks/pkg/postgres"
@@ -30,9 +31,12 @@ func main() {
 	postgres := postgres.MustNew(conf.PostgresURL)
 	defer postgres.Close()
 
+	producer := producer.MustNewProducer([]string{conf.KafkaBroker})
+	defer producer.Close()
+
 	taskRepo := repo.NewTaskRepo(postgres)
 	statusesRepo := repo.NewStatusesRepo(postgres)
-	taskService := service.NewTaskService(logger, taskRepo, statusesRepo)
+	taskService := service.NewTaskService(logger, taskRepo, statusesRepo, producer)
 	taskController := controller.NewTaskController(logger, taskService)
 
 	server := grpc.NewServer()

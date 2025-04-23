@@ -8,3 +8,4 @@ packages:
     interfaces:
       TaskRepo:
       StatusRepo:
+      Producer:

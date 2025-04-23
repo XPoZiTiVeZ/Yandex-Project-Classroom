@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Port        int    `mapstructure:"port"`
 	PostgresURL string `mapstructure:"postgres_url"`
+	KafkaBroker string `mapstructure:"kafka_broker"`
 }
 
 func MustNew() *Config {
@@ -22,6 +23,8 @@ func MustNew() *Config {
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.BindEnv("postgres_url")
+	v.BindEnv("kafka_broker")
+	v.BindEnv("port")
 
 	v.SetConfigFile(*configPath)
 

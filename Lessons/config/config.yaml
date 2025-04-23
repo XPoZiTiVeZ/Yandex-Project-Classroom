@@ -1,2 +1,3 @@
 port: 50053
 postgres_url: 'postgres://postgres:password@postgres:5432/classroom?sslmode=disable'
+kafka_broker: 'localhost:9092'
