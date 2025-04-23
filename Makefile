@@ -23,7 +23,7 @@ ifneq (,$(wildcard .env))
 	export
 endif
 
-POSTGRES_URL ?= postgres://postgres:passwordd@localhost:5432/classroom?sslmode=disable
+POSTGRES_URL ?= postgres://postgres:passwordd@127.0.0.1:5432/classroom?sslmode=disable
 
 BINARY_NAME=classroom
 

@@ -20,6 +20,7 @@ import (
 // @Success 201 {object} auth.RegisterResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 409 {object} ErrorResponse "Пользователь уже существует"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
 // @Router /auth/register [post]
 func (s *Server) RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -57,6 +58,7 @@ func (s *Server) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} auth.LoginResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 401 {object} ErrorResponse "Неверные учетные данные"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
 // @Router /auth/login [post]
 func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +95,7 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 // @Param request body auth.RefreshRequest true "Refresh токен"
 // @Success 200 {object} auth.RefreshResponse
 // @Failure 401 {object} ErrorResponse "Неверный токен"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
 // @Router /auth/refresh [post]
 func (s *Server) RefreshHandler(w http.ResponseWriter, r *http.Request) {
@@ -127,6 +130,7 @@ func (s *Server) RefreshHandler(w http.ResponseWriter, r *http.Request) {
 // @Security BearerAuth
 // @Param request body auth.LogoutRequest true "Данные для выхода"
 // @Success 200 {object} auth.LogoutResponse
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
 // @Router /auth/logout [post]
 func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -136,7 +140,15 @@ func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error(r.Context(), "Handler auth.Logout error", slog.Any("error", err))
 
-		ServiceUnavailable(w)
+		if e, ok := status.FromError(err); ok {
+			switch e.Code() {
+			case codes.Unavailable:
+				ServiceUnavailable(w)
+			}
+		} else {
+			InternalError(w)
+		}
+		return
 	}
 	WriteJSON(w, resp, http.StatusOK)
 }
@@ -149,16 +161,33 @@ func (s *Server) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 // @Security BearerAuth
 // @Param user_id query string true "Идентификатор пользователя" example(44e7f029-82cc-46f5-83e8-34b7d056ce32)
 // @Success 200 {object} auth.GetUserInfoResponse
+// @Failure 400 {object} ErrorResponse "Некорректные данные"
+// @Failure 401 {object} ErrorResponse "Требуется авторизация"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка"
 // @Failure 503 {object} ErrorResponse "Сервис недоступен"
 // @Router /auth/user-info [get]
 func (s *Server) GetUserInfoHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[auth.GetUserInfoRequest](r.Context())
 
-	resp, err := s.Auth.GetUserInfo(r.Context(), body)
+	resp, err := s.Auth.GetUserInfo(r.Context(), s.Redis, body)
 	if err != nil {
 		logger.Error(r.Context(), "Handler auth.GetUserInfo error", slog.Any("error", err))
 
-		ServiceUnavailable(w)
+		if e, ok := status.FromError(err); ok {
+			switch e.Code() {
+			case codes.InvalidArgument:
+				BadRequest(w, e.Message())
+			case codes.Unauthenticated:
+				Unauthorized(w)
+			case codes.NotFound:
+				NotFound(w)
+			case codes.Unavailable:
+				ServiceUnavailable(w)
+			}
+		} else {
+			InternalError(w)
+		}
+		return
 	}
 
 	WriteJSON(w, resp, http.StatusOK)

@@ -1,6 +1,7 @@
 package courses
 
 import (
+	rds "Classroom/Gateway/internal/redis"
 	pb "Classroom/Gateway/pkg/api/courses"
 	"Classroom/Gateway/pkg/config"
 	"Classroom/Gateway/pkg/logger"
@@ -8,6 +9,8 @@ import (
 	"fmt"
 	"log/slog"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -64,18 +67,24 @@ func (s *CoursesServiceClient) CreateCourse(ctx context.Context, req CreateCours
 	return NewCreateCourseResponse(resp), nil
 }
 
-func (s *CoursesServiceClient) GetCourse(ctx context.Context, req GetCourseRequest) (GetCourseResponse, error) {
+func (s *CoursesServiceClient) GetCourse(ctx context.Context, rc *redis.Client, req GetCourseRequest) (GetCourseResponse, error) {
 	logger.Debug(ctx, "Getting course", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := s.Client.GetCourse(ctx, NewGetCourseRequest(req))
+	resp, err := rds.Get[GetCourseResponse](rc, ctx, "Courses.GetCourse", req.CourseID)
+	if err == nil {
+		return resp, nil
+	}
+	logger.Debug(ctx, "Response was not cached", slog.Any("error", err))
+
+	pbresp, err := s.Client.GetCourse(ctx, NewGetCourseRequest(req))
 	if err != nil {
 		return GetCourseResponse{}, err
 	}
 
 	logger.Debug(ctx, "Courses.GetCourse succeed")
-	return NewGetCourseResponse(resp), nil
+	return NewGetCourseResponse(pbresp), nil
 }
 
 func (s *CoursesServiceClient) GetCourses(ctx context.Context, req GetCoursesRequest) (GetCoursesResponse, error) {
@@ -176,32 +185,50 @@ func (s *CoursesServiceClient) ExpelUser(ctx context.Context, req ExpelUserReque
 	return NewExpelUserResponse(resp), nil
 }
 
-func (s *CoursesServiceClient) IsTeacher(ctx context.Context, req IsTeacherRequest) (IsTeacherResponse, error) {
+func (s *CoursesServiceClient) IsTeacher(ctx context.Context, rc *redis.Client, req IsTeacherRequest) (IsTeacherResponse, error) {
 	logger.Debug(ctx, "Checking if user is teacher", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := s.Client.IsTeacher(ctx, NewIsTeacherRequest(req))
+	resp, err := rds.Get[IsTeacherResponse](rc, ctx, "Courses.IsTeacher", req.CourseID + ":" + req.UserID)
+	if err == nil {
+		return resp, nil
+	}
+	logger.Debug(ctx, "Response was not cached", slog.Any("error", err))
+
+	pbresp, err := s.Client.IsTeacher(ctx, NewIsTeacherRequest(req))
 	if err != nil {
 		return IsTeacherResponse{}, err
 	}
 
+	resp = NewIsTeacherResponse(pbresp)
+	rds.Put(rc, ctx, "Courses.IsTeacher", req.UserID, resp, 24 * time.Hour)
+
 	logger.Debug(ctx, "Courses.IsTeacher succeed")
-	return NewIsTeacherResponse(resp), nil
+	return resp, nil
 }
 
-func (s *CoursesServiceClient) IsMember(ctx context.Context, req IsMemberRequest) (IsMemberResponse, error) {
+func (s *CoursesServiceClient) IsMember(ctx context.Context, rc *redis.Client, req IsMemberRequest) (IsMemberResponse, error) {
 	logger.Debug(ctx, "Checking if user is member", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := s.Client.IsMember(ctx, NewIsMemberRequest(req))
+	resp, err := rds.Get[IsMemberResponse](rc, ctx, "Courses.IsMember", req.UserID)
+	if err == nil {
+		return resp, nil
+	}
+	logger.Debug(ctx, "Response was not cached", slog.Any("error", err))
+
+	pbresp, err := s.Client.IsMember(ctx, NewIsMemberRequest(req))
 	if err != nil {
 		return IsMemberResponse{}, err
 	}
 
+	resp = NewIsMemberResponse(pbresp)
+	rds.Put(rc, ctx, "Courses.IsMember", req.UserID, resp, 24 * time.Hour)
+
 	logger.Debug(ctx, "Courses.IsMember succeed")
-	return NewIsMemberResponse(resp), nil
+	return resp, nil
 }
 
 func (s *CoursesServiceClient) GetCourseStudents(ctx context.Context, req GetCourseStudentsRequest) (GetCourseStudentsResponse, error) {

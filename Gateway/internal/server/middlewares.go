@@ -4,9 +4,8 @@ import (
 	"Classroom/Gateway/internal/courses"
 	app "Classroom/Gateway/internal/logger"
 	"Classroom/Gateway/pkg/logger"
-	"bytes"
+	"context"
 	"encoding/json"
-	"io"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -88,152 +87,62 @@ func (s *Server) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func (s *Server) IsStudent(next http.HandlerFunc) http.HandlerFunc {
-	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := app.NewLogger(r.Context(), true)
+func (s *Server) IsStudent(ctx context.Context, courseID string) (bool, error) {
+	claims, _ := GetClaims(ctx)
 
-		claims, ok := GetClaims(r.Context())
-		if !ok {
-			Forbidden(w)
-			return
-		}
+	req := courses.IsMemberRequest{
+		UserID: claims.UserID,
+		CourseID: courseID,
+	}
 
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			logger.Debug(ctx, "Internal error while reading a body", slog.Any("error", err))
+	resp, err := s.Courses.IsMember(ctx, s.Redis, req)
+	if err != nil {
+		return false, err
+	}
 
-			InternalError(w)
-			return
-		}
-
-		var req courses.IsMemberRequest
-		err = json.Unmarshal(body, &req)
-		if err != nil {
-			BadRequest(w)
-			return
-		}
-		req.UserID = claims.UserID
-
-		resp, err := s.Courses.IsMember(r.Context(), req)
-		if err != nil {
-			slog.Debug("Method Courses.IsMember error", slog.Any("error", err))
-
-			InternalError(w)
-			return
-		}
-
-		if !resp.IsMember && !claims.IsSuperUser {
-			Forbidden(w)
-			return
-		}
-
-		r.Body = io.NopCloser(bytes.NewReader(body))
-		next.ServeHTTP(w, r.WithContext(ctx))
-	}))
+	return resp.IsMember, nil
 }
 
-func (s *Server) IsMember(next http.HandlerFunc) http.HandlerFunc {
-	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := app.NewLogger(r.Context(), true)
+func (s *Server) IsTeacher(ctx context.Context, courseID string) (bool, error) {
+	claims, _ := GetClaims(ctx)
 
-		claims, ok := GetClaims(ctx)
-		if !ok {
-			Forbidden(w)
-			return
-		}
+	req := courses.IsTeacherRequest{
+		UserID: claims.UserID,
+		CourseID: courseID,
+	}
 
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			logger.Debug(ctx, "Internal error while reading a body", slog.Any("error", err))
+	resp, err := s.Courses.IsTeacher(ctx, s.Redis, req)
+	if err != nil {
+		return false, err
+	}
 
-			InternalError(w)
-			return
-		}
-
-		var reqIsMember courses.IsMemberRequest
-		err = json.Unmarshal(body, &reqIsMember)
-		if err != nil {
-			BadRequest(w)
-			return
-		}
-		reqIsMember.UserID = claims.UserID
-
-		respIsMember, err := s.Courses.IsMember(r.Context(), reqIsMember)
-		if err != nil {
-			slog.Debug("Method Courses.IsMember error", slog.Any("error", err))
-
-			InternalError(w)
-			return
-		}
-
-		var reqIsTeacher courses.IsTeacherRequest
-		err = json.Unmarshal(body, &reqIsTeacher)
-		if err != nil {
-			BadRequest(w)
-			return
-		}
-		reqIsTeacher.UserID = claims.UserID
-
-		respIsTeacher, err := s.Courses.IsTeacher(r.Context(), reqIsTeacher)
-		if err != nil {
-			logger.Debug(ctx, "Method courses.IsTeacher error", slog.Any("error", err))
-
-			InternalError(w)
-			return
-		}
-
-		if respIsMember.IsMember || respIsTeacher.IsTeacher || claims.IsSuperUser {
-			Forbidden(w)
-			return
-		}
-
-		r.Body = io.NopCloser(bytes.NewReader(body))
-		next.ServeHTTP(w, r.WithContext(ctx))
-	}))
+	return resp.IsTeacher, nil
 }
 
-func (s *Server) IsTeacher(next http.HandlerFunc) http.HandlerFunc {
-	return s.IsAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := app.NewLogger(r.Context(), true)
+func (s *Server) IsMember(ctx context.Context, courseID string) (bool, error) {
+	claims, _ := GetClaims(ctx)
 
-		claims, ok := GetClaims(ctx)
-		if !ok {
-			Forbidden(w)
-			return
-		}
+	req1 := courses.IsMemberRequest{
+		UserID: claims.UserID,
+		CourseID: courseID,
+	}
 
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			logger.Debug(ctx, "Internal error while reading a body", slog.Any("error", err))
+	resp1, err := s.Courses.IsMember(ctx, s.Redis, req1)
+	if err != nil {
+		return false, err
+	}
 
-			InternalError(w)
-			return
-		}
+	req2 := courses.IsTeacherRequest{
+		UserID: claims.UserID,
+		CourseID: courseID,
+	}
 
-		var req courses.IsTeacherRequest
-		err = json.Unmarshal(body, &req)
-		if err != nil {
-			BadRequest(w)
-			return
-		}
-		req.UserID = claims.UserID
+	resp2, err := s.Courses.IsTeacher(ctx, s.Redis, req2)
+	if err != nil {
+		return false, err
+	}
 
-		resp, err := s.Courses.IsTeacher(r.Context(), req)
-		if err != nil {
-			logger.Debug(ctx, "Method courses.IsTeacher error", slog.Any("error", err))
-
-			InternalError(w)
-			return
-		}
-
-		if resp.IsTeacher || claims.IsSuperUser {
-			Forbidden(w)
-			return
-		}
-
-		r.Body = io.NopCloser(bytes.NewReader(body))
-		next.ServeHTTP(w, r.WithContext(ctx))
-	}))
+	return resp1.IsMember || resp2.IsTeacher, nil
 }
 
 func (s *Server) IsSuperUser(next http.HandlerFunc) http.HandlerFunc {

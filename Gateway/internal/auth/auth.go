@@ -1,6 +1,7 @@
 package auth
 
 import (
+	rds "Classroom/Gateway/internal/redis"
 	pb "Classroom/Gateway/pkg/api/auth"
 	"Classroom/Gateway/pkg/config"
 	"Classroom/Gateway/pkg/logger"
@@ -8,6 +9,8 @@ import (
 	"fmt"
 	"log/slog"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -106,16 +109,25 @@ func (s *AuthServiceClient) Logout(ctx context.Context, req LogoutRequest) (Logo
 	return NewLogoutResponse(resp), nil
 }
 
-func (s *AuthServiceClient) GetUserInfo(ctx context.Context, req GetUserInfoRequest) (GetUserInfoResponse, error) {
+func (s *AuthServiceClient) GetUserInfo(ctx context.Context, rc *redis.Client, req GetUserInfoRequest) (GetUserInfoResponse, error) {
 	logger.Debug(ctx, "Getting user info", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	resp, err := s.Client.GetUserInfo(ctx, NewGetUserInfoRequest(req))
+	resp, err := rds.Get[GetUserInfoResponse](rc, ctx, "Auth.GetUserInfo", req.UserID)
+	if err == nil {
+		return resp, nil
+	}
+	logger.Debug(ctx, "Response was not cached", slog.Any("error", err))
+
+	pbresp, err := s.Client.GetUserInfo(ctx, NewGetUserInfoRequest(req))
 	if err != nil {
 		return GetUserInfoResponse{}, err
 	}
 
+	resp = NewGetUserInfoResponse(pbresp)
+	rds.Put(rc, ctx, "Auth.GetUserInfo", req.UserID, resp, 24 * time.Hour)
+
 	logger.Debug(ctx, "Auth.GetUserInfo succeed")
-	return NewGetUserInfoResponse(resp), nil
+	return resp, nil
 }

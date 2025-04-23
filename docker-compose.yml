@@ -5,14 +5,13 @@ services:
     image: postgres:17.4-alpine
     env_file:
       - .env
-    ports:
-      - 5432:5432
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} || exit 1']
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} || exit 1"]
       interval: 10s
       timeout: 1s
       retries: 3
     volumes:
+      - ./Postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
@@ -23,10 +22,8 @@ services:
     image: redis:7.4.2-alpine
     env_file:
       - .env
-    ports:
-      - 6379:6379
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 1s
       retries: 3
@@ -35,7 +32,7 @@ services:
       - ./Redis/redis.conf:/usr/local/etc/redis/redis.conf
     networks:
       - app-network
-    command: ['redis-server', '--save', '60', '1', '--loglevel', 'warning']
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
 
   service-auth:
     container_name: auth
@@ -70,7 +67,7 @@ services:
       - .env
     environment:
       - PORT=${COURSES_PORT}
-    command: ['--config', '/app/config/config.yaml']
+    command: ["--config", "/app/config/config.yaml"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -91,7 +88,7 @@ services:
       - .env
     environment:
       - PORT=${LESSONS_PORT}
-    command: ['--config', '/app/config/config.yaml']
+    command: ["--config", "/app/config/config.yaml"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -112,7 +109,7 @@ services:
       - .env
     environment:
       - PORT=${TASKS_PORT}
-    command: ['--config', '/app/config/config.yaml']
+    command: ["--config", "/app/config/config.yaml"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -131,7 +128,7 @@ services:
       - ./Notifications/config/config.yaml:/app/config/config.yaml
     env_file:
       - .env
-    command: ['--config', '/app/config/config.yaml']
+    command: ["--config", "/app/config/config.yaml"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -153,7 +150,7 @@ services:
       - ./Gateway/.env
     environment:
       - PORT=${GATEWAY_PORT}
-    command: ['--config', '/app/configs/config.yaml']
+    command: ["--config", "/app/configs/config.yaml"]
     networks:
       - app-network
 
@@ -163,7 +160,7 @@ services:
     image: nginx:1.27-alpine
     volumes:
       - ./Nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./Gateway/docs/swagger.json:/var/www/classroom/swagger.json
+      - ./Docs/OpenAPI.json:/var/www/classroom/swagger.json
     ports:
       - 80:80
     networks:
@@ -172,8 +169,6 @@ services:
   kafka:
     image: apache/kafka
     container_name: kafka
-    ports:
-      - '9092:9092'
     environment:
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_NODE_ID: 1
@@ -188,10 +183,10 @@ services:
     healthcheck:
       test:
         [
-          'CMD',
-          'bash',
-          '-c',
-          '/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092',
+          "CMD",
+          "bash",
+          "-c",
+          "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092",
         ]
       interval: 10s
       timeout: 5s
@@ -201,10 +196,8 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
-    ports:
-      - '8080:8080'
     environment:
-      DYNAMIC_CONFIG_ENABLED: 'true'
+      DYNAMIC_CONFIG_ENABLED: "true"
     depends_on:
       - kafka
     networks:

@@ -35,21 +35,12 @@ type Config struct {
 		Port    int    `mapstructure:"port"`
 		Enabled bool   `mapstructure:"enabled"`
 	} `mapstructure:"tasks"`
-	Chat struct {
-		Address string `mapstructure:"address"`
-		Port    int    `mapstructure:"port"`
-		Enabled bool   `mapstructure:"enabled"`
-	} `mapstructure:"chat"`
-	Notifications struct {
-		Enabled bool `mapstructure:"enabled"`
-	} `mapstructure:"notifications"`
 
 	Common struct {
 		Timeout       time.Duration `mapstructure:"timeout"`
 		MaxRetries    int           `mapstructure:"max_retries"`
 		AuthJWTSecret string        `mapstructure:"auth_jwt_secret"`
 		RedisURL      string        `mapstructure:"redis_url"`
-		KafkaURL      string        `mapstructure:"kafka_url"`
 	} `mapstructure:"common"`
 }
 
@@ -102,7 +93,6 @@ func MustReadConfig() *Config {
 		"MAX_RETRIES":     "common.max_retries",
 		"AUTH_JWT_SECRET": "common.auth_jwt_secret",
 		"REDIS_URL":       "common.redis_url",
-		"KAFKA_URL":       "common.kafka_url",
 	}
 
 	serviceList := []string{
@@ -110,7 +100,6 @@ func MustReadConfig() *Config {
 		"courses",
 		"lessons",
 		"tasks",
-		"chat",
 	}
 
 	for _, service := range serviceList {
