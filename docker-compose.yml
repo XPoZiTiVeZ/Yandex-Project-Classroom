@@ -74,7 +74,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
+      kafka:
         condition: service_healthy
     networks:
       - app-network
@@ -95,7 +95,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
+      kafka:
         condition: service_healthy
     networks:
       - app-network
@@ -116,7 +116,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
+      kafka:
         condition: service_healthy
     networks:
       - app-network
@@ -154,6 +154,9 @@ services:
     environment:
       - PORT=${GATEWAY_PORT}
     command: ['--config', '/app/configs/config.yaml']
+    depends_on:
+      redis:
+        condition: service_healthy
     networks:
       - app-network
 
