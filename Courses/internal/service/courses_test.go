@@ -6,6 +6,7 @@ import (
 	"Classroom/Courses/internal/service"
 	mocks "Classroom/Courses/internal/service/mocks"
 	pb "Classroom/Courses/pkg/api/courses"
+	"Classroom/Courses/pkg/events"
 	"context"
 	"errors"
 	"log/slog"
@@ -286,7 +287,7 @@ func TestCoursesService_DeleteCourse(t *testing.T) {
 }
 
 func TestCoursesService_EnrollUser(t *testing.T) {
-	type MockBehavior func(svc *mocks.MockCourseRepo, req *pb.EnrollUserRequest)
+	type MockBehavior func(repo *mocks.MockCourseRepo, pr *mocks.MockProducer, req *pb.EnrollUserRequest)
 
 	now := time.Now()
 	courseID := uuid.NewString()
@@ -301,13 +302,18 @@ func TestCoursesService_EnrollUser(t *testing.T) {
 	}{
 		{
 			name: "success - user enrolled",
-			mockBehavior: func(svc *mocks.MockCourseRepo, req *pb.EnrollUserRequest) {
-				svc.EXPECT().EnrollUser(mock.Anything, req.CourseId, req.UserId).
+			mockBehavior: func(repo *mocks.MockCourseRepo, pr *mocks.MockProducer, req *pb.EnrollUserRequest) {
+				repo.EXPECT().EnrollUser(mock.Anything, req.CourseId, req.UserId).
 					Return(domain.Enrollment{
 						CourseID:   req.CourseId,
 						StudentID:  req.UserId,
 						EnrolledAt: now,
 					}, nil)
+
+				pr.EXPECT().PublishUserEnrolled(events.UserEnrolled{
+					CourseID: req.CourseId,
+					UserID:   req.UserId,
+				}).Return(nil)
 			},
 			req: &pb.EnrollUserRequest{
 				CourseId: courseID,
@@ -323,7 +329,7 @@ func TestCoursesService_EnrollUser(t *testing.T) {
 		},
 		{
 			name:         "error - invalid course id",
-			mockBehavior: func(svc *mocks.MockCourseRepo, req *pb.EnrollUserRequest) {},
+			mockBehavior: func(repo *mocks.MockCourseRepo, pr *mocks.MockProducer, req *pb.EnrollUserRequest) {},
 			req: &pb.EnrollUserRequest{
 				CourseId: "invalid-uuid",
 				UserId:   studentID,
@@ -332,7 +338,7 @@ func TestCoursesService_EnrollUser(t *testing.T) {
 		},
 		{
 			name:         "error - invalid user id",
-			mockBehavior: func(svc *mocks.MockCourseRepo, req *pb.EnrollUserRequest) {},
+			mockBehavior: func(repo *mocks.MockCourseRepo, pr *mocks.MockProducer, req *pb.EnrollUserRequest) {},
 			req: &pb.EnrollUserRequest{
 				CourseId: courseID,
 				UserId:   "invalid-uuid",
@@ -341,8 +347,8 @@ func TestCoursesService_EnrollUser(t *testing.T) {
 		},
 		{
 			name: "error - internal server error",
-			mockBehavior: func(svc *mocks.MockCourseRepo, req *pb.EnrollUserRequest) {
-				svc.EXPECT().EnrollUser(mock.Anything, req.CourseId, req.UserId).
+			mockBehavior: func(repo *mocks.MockCourseRepo, pr *mocks.MockProducer, req *pb.EnrollUserRequest) {
+				repo.EXPECT().EnrollUser(mock.Anything, req.CourseId, req.UserId).
 					Return(domain.Enrollment{}, errors.New("internal error"))
 			},
 			req: &pb.EnrollUserRequest{
@@ -356,8 +362,9 @@ func TestCoursesService_EnrollUser(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := mocks.NewMockCourseRepo(t)
-			svc := service.NewCoursesService(slog.Default(), repo, nil)
-			tc.mockBehavior(repo, tc.req)
+			pr := mocks.NewMockProducer(t)
+			svc := service.NewCoursesService(slog.Default(), repo, pr)
+			tc.mockBehavior(repo, pr, tc.req)
 			got, err := svc.EnrollUser(context.Background(), tc.req)
 
 			if tc.wantErr != nil {
