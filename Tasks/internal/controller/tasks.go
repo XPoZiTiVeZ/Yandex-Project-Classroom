@@ -61,6 +61,9 @@ func (c *taskController) CreateTask(ctx context.Context, req *pb.CreateTaskReque
 	}
 
 	taskID, err := c.svc.Create(ctx, dto)
+	if errors.Is(err, domain.ErrNotFound) {
+		return nil, status.Error(codes.NotFound, "course not found")
+	}
 	if err != nil {
 		c.logger.Error("failed to create task", "err", err)
 		return nil, status.Error(codes.Internal, "failed to create task")
