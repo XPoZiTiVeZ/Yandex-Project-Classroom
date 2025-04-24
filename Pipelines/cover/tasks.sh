@@ -6,9 +6,8 @@ EXCLUDE_DIRS=(
   "pkg"
   "cmd"
   "internal/config"
-  "internal/app"
   "internal/dto"
-  "internal/entities"
+  "internal/domain"
   "internal/producer"
   "internal/repo"
   "internal/service/mocks"
@@ -17,7 +16,7 @@ EXCLUDE_DIRS=(
 
 # * Папка с микросевисом 
 # ! Обязательно изменить на свой
-MICROSERVICE_NAME="Auth"
+MICROSERVICE_NAME="Tasks"
 
 cd "$MICROSERVICE_NAME"
 EXCLUDE_PATHS=$(IFS="|"; echo "${EXCLUDE_DIRS[*]}")

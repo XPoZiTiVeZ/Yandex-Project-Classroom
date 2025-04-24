@@ -2,22 +2,19 @@
 
 # * Папки для исключения из покрытия
 EXCLUDE_DIRS=(
-  "mocks"
   "pkg"
   "cmd"
   "internal/config"
-  "internal/app"
   "internal/dto"
-  "internal/entities"
+  "internal/domain"
   "internal/producer"
   "internal/repo"
   "internal/service/mocks"
-  "internal/controller/mocks"
 )
 
 # * Папка с микросевисом 
 # ! Обязательно изменить на свой
-MICROSERVICE_NAME="Auth"
+MICROSERVICE_NAME="Courses"
 
 cd "$MICROSERVICE_NAME"
 EXCLUDE_PATHS=$(IFS="|"; echo "${EXCLUDE_DIRS[*]}")

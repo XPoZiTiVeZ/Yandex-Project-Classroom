@@ -6,7 +6,7 @@ variables:
   image: ${IMAGE}
   script:
     - cd $SERVICE_PATH
-    - go build ${SERVICE_PATH}/cmd
+    - go build -o ./bin/app ./cmd
 
 build_lessons:
   extends: .build-template
@@ -14,56 +14,56 @@ build_lessons:
     SERVICE_PATH: ./Lessons
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Lessons
+      # changes:
+      #   - ./Lessons
       when: always
 
-build_tasks:
+build-tasks:
   extends: .build-template
   variables:
     SERVICE_PATH: ./Tasks
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Tasks
+      # changes:
+      #   - ./Tasks
       when: always
 
-build_courses:
+build-courses:
   extends: .build-template
   variables:
     SERVICE_PATH: ./Courses
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Courses
+      # changes:
+      #   - ./Courses
       when: always
 
-build_notifications:
+build-notifications:
   extends: .build-template
   variables:
     SERVICE_PATH: ./Notifications
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Notifications
+      # changes:
+      #   - ./Notifications
       when: always
 
-build_gateway:
+build-gateway:
   extends: .build-template
   variables:
     SERVICE_PATH: ./Gateway
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Gateway
+      # changes:
+      #   - ./Gateway
       when: always
 
-build_auth:
+build-auth:
   extends: .build-template
   variables:
     SERVICE_PATH: ./Auth
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Auth
+      # changes:
+      #   - ./Auth
       when: always
