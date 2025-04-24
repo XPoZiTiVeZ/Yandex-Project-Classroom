@@ -1,0 +1,59 @@
+variables:
+  GO_VERSION: "1.24"
+
+.test-template:
+  stage: test
+  image: ${IMAGE}
+  script:
+    - cd $SERVICE_PATH
+    - go test ./...
+
+test-lessons:
+  extends: .test-template
+  variables:
+    SERVICE_PATH: ./Lessons
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - ./Lessons
+      when: always
+
+test-tasks:
+  extends: .test-template
+  variables:
+    SERVICE_PATH: ./Tasks
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - ./Tasks
+      when: always
+
+test-courses:
+  extends: .test-template
+  variables:
+    SERVICE_PATH: ./Courses
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - ./Courses
+      when: always
+
+test-notifications:
+  extends: .test-template
+  variables:
+    SERVICE_PATH: ./Notifications
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - ./Notifications
+      when: always
+
+test-auth:
+  extends: .test-template
+  variables:
+    SERVICE_PATH: ./Auth
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - ./Auth
+      when: always
