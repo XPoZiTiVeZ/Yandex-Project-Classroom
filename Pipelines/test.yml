@@ -8,7 +8,7 @@ variables:
     - cd $SERVICE_PATH
     - go test ./...
 
-test-lessons:
+lessons_test:
   extends: .test-template
   variables:
     SERVICE_PATH: ./Lessons
@@ -18,7 +18,7 @@ test-lessons:
         - ./Lessons
       when: always
 
-test-tasks:
+tasks_test:
   extends: .test-template
   variables:
     SERVICE_PATH: ./Tasks
@@ -28,7 +28,7 @@ test-tasks:
         - ./Tasks
       when: always
 
-test-courses:
+courses_test:
   extends: .test-template
   variables:
     SERVICE_PATH: ./Courses
@@ -38,7 +38,7 @@ test-courses:
         - ./Courses
       when: always
 
-test-notifications:
+notifications_test:
   extends: .test-template
   variables:
     SERVICE_PATH: ./Notifications
@@ -48,7 +48,7 @@ test-notifications:
         - ./Notifications
       when: always
 
-test-auth:
+auth_test:
   extends: .test-template
   variables:
     SERVICE_PATH: ./Auth
