@@ -8,7 +8,7 @@ variables:
     - cd $SERVICE_PATH
     - go build ./cmd
 
-build-lessons:
+build_lessons:
   extends: .build-template
   variables:
     SERVICE_PATH: ./Lessons
@@ -18,7 +18,7 @@ build-lessons:
         - ./Lessons
       when: always
 
-build-tasks:
+build_tasks:
   extends: .build-template
   variables:
     SERVICE_PATH: ./Tasks
@@ -28,7 +28,7 @@ build-tasks:
         - ./Tasks
       when: always
 
-build-courses:
+build_courses:
   extends: .build-template
   variables:
     SERVICE_PATH: ./Courses
@@ -38,7 +38,7 @@ build-courses:
         - ./Courses
       when: always
 
-build-notifications:
+build_notifications:
   extends: .build-template
   variables:
     SERVICE_PATH: ./Notifications
@@ -48,7 +48,7 @@ build-notifications:
         - ./Notifications
       when: always
 
-build-gateway:
+build_gateway:
   extends: .build-template
   variables:
     SERVICE_PATH: ./Gateway
@@ -58,7 +58,7 @@ build-gateway:
         - ./Gateway
       when: always
 
-build-auth:
+build_auth:
   extends: .build-template
   variables:
     SERVICE_PATH: ./Auth
