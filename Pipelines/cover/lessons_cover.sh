@@ -2,7 +2,6 @@
 
 # * Папки для исключения из покрытия
 EXCLUDE_DIRS=(
-  "Classroom/Gateway/internal/errors"
   "mocks"
   "pkg"
   "cmd"
@@ -10,7 +9,7 @@ EXCLUDE_DIRS=(
 
 # * Папка с микросевисом 
 # ! Обязательно изменить на свой
-MICROSERVICE_NAME="Gateway"
+MICROSERVICE_NAME="Lessons"
 
 cd "$MICROSERVICE_NAME"
 EXCLUDE_PATHS=$(IFS="|"; echo "${EXCLUDE_DIRS[*]}")
