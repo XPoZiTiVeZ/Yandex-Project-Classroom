@@ -14,8 +14,8 @@ build-lessons:
     SERVICE_PATH: ./Lessons
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Lessons
+      # changes:
+      #   - ./Lessons
       when: always
 
 build-tasks:
@@ -24,8 +24,8 @@ build-tasks:
     SERVICE_PATH: ./Tasks
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Tasks
+      # changes:
+      #   - ./Tasks
       when: always
 
 build-courses:
@@ -34,8 +34,8 @@ build-courses:
     SERVICE_PATH: ./Courses
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Courses
+      # changes:
+      #   - ./Courses
       when: always
 
 build-notifications:
@@ -44,8 +44,8 @@ build-notifications:
     SERVICE_PATH: ./Notifications
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Notifications
+      # changes:
+      #   - ./Notifications
       when: always
 
 build-gateway:
@@ -54,8 +54,8 @@ build-gateway:
     SERVICE_PATH: ./Gateway
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Gateway
+      # changes:
+      #   - ./Gateway
       when: always
 
 build-auth:
@@ -64,6 +64,6 @@ build-auth:
     SERVICE_PATH: ./Auth
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Auth
+      # changes:
+      #   - ./Auth
       when: always

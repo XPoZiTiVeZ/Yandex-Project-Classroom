@@ -14,8 +14,8 @@ test-lessons:
     SERVICE_PATH: ./Lessons
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Lessons
+      # changes:
+      #   - ./Lessons
       when: always
 
 test-tasks:
@@ -24,8 +24,8 @@ test-tasks:
     SERVICE_PATH: ./Tasks
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Tasks
+      # changes:
+      #   - ./Tasks
       when: always
 
 test-courses:
@@ -34,8 +34,8 @@ test-courses:
     SERVICE_PATH: ./Courses
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Courses
+      # changes:
+      #   - ./Courses
       when: always
 
 test-notifications:
@@ -44,8 +44,8 @@ test-notifications:
     SERVICE_PATH: ./Notifications
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Notifications
+      # changes:
+      #   - ./Notifications
       when: always
 
 test-auth:
@@ -54,6 +54,6 @@ test-auth:
     SERVICE_PATH: ./Auth
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      changes:
-        - ./Auth
+      # changes:
+      #   - ./Auth
       when: always
