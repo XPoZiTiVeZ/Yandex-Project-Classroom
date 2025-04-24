@@ -13,7 +13,7 @@ type RegisterRequest struct {
     FirstName string `json:"first_name" example:"Иван" extensions:"x-order=1"`
     // Фамилия пользователя
     LastName string `json:"last_name" example:"Иванов" extensions:"x-order=2"`
-    // Пароль (минимум 8 символов, должен содержать цифры и спецсимволы)
+    // Пароль
     Password string `json:"password" example:"Qwerty123!" extensions:"x-order=3"`
 } // @name AuthRegisterRequest
 
@@ -30,7 +30,7 @@ func NewRegisterRequest(req RegisterRequest) *pb.RegisterRequest {
 // @Description Возвращает ID созданного пользователя
 type RegisterResponse struct {
     // Уникальный идентификатор пользователя
-    UserID string `json:"user_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    UserID string `json:"user_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name AuthRegisterResponse
 
 func NewRegisterResponse(resp *pb.RegisterResponse) RegisterResponse {
@@ -59,15 +59,15 @@ func NewLoginRequest(req LoginRequest) *pb.LoginRequest {
 // @Description Возвращает пару access/refresh токенов для аутентификации
 type LoginResponse struct {
     // Токен для обновления access токена
-    RefreshToken string `json:"refresh_token" example:"eyJhbG..." extensions:"x-order=0"`
+    RefreshToken string `json:"refresh_token" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // Токен для доступа к API
     AccessToken string `json:"access_token" example:"eyJhbG..." extensions:"x-order=1"`
 } // @name AuthLoginResponse
 
 func NewLoginResponse(resp *pb.LoginResponse) LoginResponse {
     return LoginResponse{
-        resp.GetAccessToken(),
-        resp.GetRefreshToken(),
+        RefreshToken: resp.GetRefreshToken(),
+        AccessToken: resp.GetAccessToken(),
     }
 }
 
@@ -75,7 +75,7 @@ func NewLoginResponse(resp *pb.LoginResponse) LoginResponse {
 // @Description Содержит refresh токен для получения нового access токена
 type RefreshRequest struct {
     // Действующий refresh токен
-    RefreshToken string `json:"refresh_token" example:"eyJhbG..." extensions:"x-order=0"`
+    RefreshToken string `json:"refresh_token" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name AuthRefreshRequest
 
 func NewRefreshRequest(req RefreshRequest) *pb.RefreshRequest {
@@ -93,7 +93,7 @@ type RefreshResponse struct {
 
 func NewRefreshResponse(resp *pb.RefreshResponse) RefreshResponse {
     return RefreshResponse{
-        resp.GetAccessToken(),
+        AccessToken: resp.GetAccessToken(),
     }
 }
 
@@ -101,7 +101,7 @@ func NewRefreshResponse(resp *pb.RefreshResponse) RefreshResponse {
 // @Description Содержит refresh токен для инвалидации сессии
 type LogoutRequest struct {
     // Refresh токен для удаления
-    RefreshToken string `json:"refresh_token" example:"eyJhbG..." extensions:"x-order=0"`
+    RefreshToken string `json:"refresh_token" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name AuthLogoutRequest
 
 func NewLogoutRequest(req LogoutRequest) *pb.LogoutRequest {
@@ -120,12 +120,9 @@ func NewLogoutResponse(resp *pb.LogoutResponse) LogoutResponse {
     return LogoutResponse{}
 }
 
-// UserInfoRequest - запрос информации о пользователе
-// @Description Содержит ID пользователя для получения данных
 type GetUserInfoRequest struct {
-    // Уникальный идентификатор пользователя
-    UserID string `json:"user_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
-} // @name AuthUserInfoRequest
+    UserID string `schema:"user_id"`
+}
 
 func NewGetUserInfoRequest(req GetUserInfoRequest) *pb.GetUserInfoRequest {
     return &pb.GetUserInfoRequest{
@@ -137,7 +134,7 @@ func NewGetUserInfoRequest(req GetUserInfoRequest) *pb.GetUserInfoRequest {
 // @Description Возвращает все доступные данные пользователя
 type GetUserInfoResponse struct {
     // Уникальный идентификатор
-    UserID string `json:"user_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    UserID string `json:"user_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // Email адрес
     Email string `json:"email" example:"user@example.com" extensions:"x-order=1"`
     // Имя

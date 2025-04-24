@@ -27,8 +27,13 @@ func NewDevelopment(ctx context.Context, level slog.Level, request bool) context
 	}
 	logger = slog.New(slog.NewTextHandler(os.Stdout, opts))
 
+	requestID := "app"
+	if request {
+		requestID = uuid.New().String()
+	}
+
 	ctx = context.WithValue(ctx, LoggerCtxKey, logger)
-	ctx = context.WithValue(ctx, RequestIDKey, request)
+	ctx = context.WithValue(ctx, RequestIDKey, requestID)
 
 	return ctx
 }
@@ -44,8 +49,14 @@ func NewProduction(ctx context.Context, request bool) context.Context {
 	}
 	logger = slog.New(slog.NewJSONHandler(os.Stdout, opts))
 
+	requestID := "app"
+	if request {
+		requestID = uuid.New().String()
+	}
+
+
 	ctx = context.WithValue(ctx, LoggerCtxKey, logger)
-	ctx = context.WithValue(ctx, RequestIDKey, request)
+	ctx = context.WithValue(ctx, RequestIDKey, requestID)
 
 	return ctx
 }
@@ -62,11 +73,7 @@ func getLoggerFromCtx(ctx context.Context) *slog.Logger {
 func Info(ctx context.Context, msg string, fields ...any) {
 	logger := getLoggerFromCtx(ctx)
 
-	request := ctx.Value(RequestIDKey).(bool)
-	requestID := "app"
-	if request {
-		requestID = uuid.New().String()
-	}
+	requestID := ctx.Value(RequestIDKey).(string)
 
 	fields = append(fields, slog.String("flow", requestID))
 
@@ -76,11 +83,7 @@ func Info(ctx context.Context, msg string, fields ...any) {
 func Error(ctx context.Context, msg string, fields ...any) {
 	logger := getLoggerFromCtx(ctx)
 
-	request := ctx.Value(RequestIDKey).(bool)
-	requestID := "app"
-	if request {
-		requestID = uuid.New().String()
-	}
+	requestID := ctx.Value(RequestIDKey).(string)
 
 	fields = append(fields, slog.String("flow", requestID))
 
@@ -90,11 +93,7 @@ func Error(ctx context.Context, msg string, fields ...any) {
 func Debug(ctx context.Context, msg string, fields ...any) {
 	logger := getLoggerFromCtx(ctx)
 
-	request := ctx.Value(RequestIDKey).(bool)
-	requestID := "app"
-	if request {
-		requestID = uuid.New().String()
-	}
+	requestID := ctx.Value(RequestIDKey).(string)
 
 	fields = append(fields, slog.String("flow", requestID))
 
