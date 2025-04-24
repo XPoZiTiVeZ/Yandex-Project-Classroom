@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
 	app "Classroom/Gateway/internal/logger"
+	"Classroom/Gateway/internal/redis"
 	srv "Classroom/Gateway/internal/server"
 	cfg "Classroom/Gateway/pkg/config"
 	"Classroom/Gateway/pkg/logger"
@@ -21,7 +21,7 @@ import (
 // @title Classroom Gateway API
 // @version 1.0
 // @description Gateway service for Classroom microservices. Handles authentication, routing, and request aggregation.
-// @host localhost
+// @host 127.0.0.1
 // @BasePath /api
 // @schemes http
 // @produce json
@@ -39,10 +39,10 @@ func main() {
 	defer stop()
 
 	config := cfg.MustReadConfig()
-	//TODO: не забыть убрать, пока что пусть будет для дебага
-	fmt.Printf("%+v\n", config)
+	redis := redis.MustNew(config.Common.RedisURL)
 
 	server, err := srv.NewServer(ctx, config)
+	server.Redis = redis
 	server.CtxStop = stop
 	if err != nil {
 		logger.Error(ctx, "Server ran into problem: ", slog.Any("error", err))

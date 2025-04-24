@@ -1,14 +1,14 @@
 variables:
-  GO_VERSION: '1.24'
+  GO_VERSION: "1.24"
 
 .build-template:
   stage: build
-  image: golang:${GO_VERSION}
+  image: ${IMAGE}
   script:
     - cd $SERVICE_PATH
-    - go build -o bin/main ./cmd
+    - go build ${SERVICE_PATH}/cmd
 
-build-lessons:
+build_lessons:
   extends: .build-template
   variables:
     SERVICE_PATH: ./Lessons

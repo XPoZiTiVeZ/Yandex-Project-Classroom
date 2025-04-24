@@ -9,6 +9,9 @@ import (
 	"log/slog"
 	"time"
 
+	rds "Classroom/Gateway/internal/redis"
+
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -64,18 +67,24 @@ func (s *LessonsServiceClient) CreateLesson(ctx context.Context, req CreateLesso
 	return NewCreateLessonResponse(resp), nil
 }
 
-func (s *LessonsServiceClient) GetLesson(ctx context.Context, req GetLessonRequest) (GetLessonResponse, error) {
+func (s *LessonsServiceClient) GetLesson(ctx context.Context, rc *redis.Client, req GetLessonRequest) (GetLessonResponse, error) {
 	logger.Debug(ctx, "Getting lesson", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := s.Client.GetLesson(ctx, NewGetLessonRequest(req))
+	resp, err := rds.Get[GetLessonResponse](rc, ctx, "Lessons.GetLesson", req.LessonID)
+	if err == nil {
+		return resp, nil
+	}
+	logger.Debug(ctx, "Response was not cached", slog.Any("error", err))
+
+	pbresp, err := s.Client.GetLesson(ctx, NewGetLessonRequest(req))
 	if err != nil {
 		return GetLessonResponse{}, err
 	}
 
 	logger.Debug(ctx, "Lessons.GetLesson succeed")
-	return NewGetLessonResponse(resp), nil
+	return NewGetLessonResponse(pbresp), nil
 }
 
 func (s *LessonsServiceClient) GetLessons(ctx context.Context, req GetLessonsRequest) (GetLessonsResponse, error) {

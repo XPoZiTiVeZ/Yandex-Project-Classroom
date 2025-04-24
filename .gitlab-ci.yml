@@ -4,6 +4,9 @@ stages:
   - coverage
 
 include:
-  - local: 'Pipelines/build.yml'
-  - local: 'Pipelines/test.yml'
-  - local: 'Pipelines/coverage.yml'
+  - local: "Pipelines/build.yml"
+  - local: "Pipelines/test.yml"
+  - local: "Pipelines/coverage.yml"
+
+variables:
+  IMAGE: "golang:1.24.2"

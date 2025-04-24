@@ -12,9 +12,9 @@ import (
 // @Description Полная информация о курсе включая временные метки
 type Course struct {
     // Уникальный идентификатор курса
-    CourseID string `json:"course_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // ID преподавателя (владельца курса)
-    TeacherID string `json:"user_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=1"`
+    TeacherID string `json:"user_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=1"`
     // Название курса
     Title string `json:"title" example:"Основы программирования" extensions:"x-order=2"`
     // Подробное описание курса
@@ -53,7 +53,7 @@ func NewCourse(pbCourse *pb.Course) Course {
 // @Description Основные данные студента для отображения в списках курса
 type Student struct {
     // Уникальный идентификатор пользователя
-    UserID string `json:"user_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    UserID string `json:"user_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // Email студента
     Email string `json:"email" example:"student@example.com" extensions:"x-order=1"`
     // Имя студента
@@ -66,9 +66,9 @@ type Student struct {
 // @Description Информация о подписке студента на курс
 type Enrollment struct {
     // ID курса
-    CourseID string `json:"course_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // ID студента
-    StudentID string `json:"student_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=1"`
+    StudentID string `json:"student_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=1"`
     // Дата и время зачисления
     EnrolledAt time.Time `json:"enrolled_at" example:"2023-09-01T12:00:00Z" extensions:"x-order=2"`
 } // @name CourseEnrollment
@@ -77,7 +77,7 @@ type Enrollment struct {
 // @Description Параметры для создания нового курса
 type CreateCourseRequest struct {
     // ID преподавателя
-    UserID string `json:"user_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    UserID string `json:"user_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // Название курса
     Title string `json:"title" example:"Основы программирования" extensions:"x-order=1"`
     // Описание курса
@@ -129,7 +129,7 @@ func NewCreateCourseResponse(resp *pb.CreateCourseResponse) CreateCourseResponse
 // @Description Требует ID курса для получения данных
 type GetCourseRequest struct {
     // ID запрашиваемого курса
-    CourseID string `json:"course_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name GetCourseRequest
 
 func NewGetCourseRequest(req GetCourseRequest) *pb.GetCourseRequest {
@@ -156,7 +156,7 @@ func NewGetCourseResponse(resp *pb.GetCourseResponse) GetCourseResponse {
 // @Description Может фильтровать по ID пользователя
 type GetCoursesRequest struct {
     // ID пользователя (опционально)
-    UserID string `json:"user_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    UserID string `json:"user_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name GetCoursesRequest
 
 func NewGetCoursesRequest(req GetCoursesRequest) *pb.GetCoursesRequest {
@@ -169,7 +169,7 @@ func NewGetCoursesRequest(req GetCoursesRequest) *pb.GetCoursesRequest {
 // @Description Возвращает курсы, на которые подписан студент
 type GetCoursesByStudentRequest struct {
     // ID студента
-    StudentId string `json:"student_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    StudentId string `json:"student_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name GetCoursesByStudentRequest
 
 func NewGetCoursesByStudentRequest(req GetCoursesByStudentRequest) *pb.GetCoursesByStudentRequest {
@@ -182,7 +182,7 @@ func NewGetCoursesByStudentRequest(req GetCoursesByStudentRequest) *pb.GetCourse
 // @Description Возвращает курсы, созданные преподавателем
 type GetCoursesByTeacherRequest struct {
     // ID преподавателя
-    TeacherID string `json:"teacher_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    TeacherID string `json:"teacher_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name GetCoursesByTeacherRequest
 
 func NewGetCoursesByTeacherRequest(req GetCoursesByTeacherRequest) *pb.GetCoursesByTeacherRequest {
@@ -214,7 +214,7 @@ func NewGetCoursesResponse(resp *pb.GetCoursesResponse) GetCoursesResponse {
 // @Description Позволяет частично обновить данные курса
 type UpdateCourseRequest struct {
     // ID обновляемого курса
-    CourseID string `json:"course_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // Новое название (опционально)
     Title *string `json:"title,omitempty" example:"Продвинутое программирование" extensions:"x-order=1"`
     // Новое описание (опционально)
@@ -265,7 +265,7 @@ func NewUpdateCourseResponse(resp *pb.UpdateCourseResponse) UpdateCourseResponse
 // @Description Требует ID курса для удаления
 type DeleteCourseRequest struct {
     // ID удаляемого курса
-    CourseID string `json:"course_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name DeleteCourseRequest
 
 func NewDeleteCourseRequest(req DeleteCourseRequest) *pb.DeleteCourseRequest {
@@ -292,9 +292,9 @@ func NewDeleteCourseResponse(resp *pb.DeleteCourseResponse) DeleteCourseResponse
 // @Description Добавляет студента на курс
 type EnrollUserRequest struct {
     // ID курса
-    CourseID string `json:"course_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // ID студента
-    UserID string `json:"user_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=1"`
+    UserID string `json:"user_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=1"`
 } // @name EnrollUserRequest
 
 func NewEnrollUserRequest(req EnrollUserRequest) *pb.EnrollUserRequest {
@@ -324,9 +324,9 @@ func NewEnrollUserResponse(resp *pb.EnrollUserResponse) EnrollUserResponse {
 // @Description Удаляет студента с курса
 type ExpelUserRequest struct {
     // ID курса
-    CourseID string `json:"course_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // ID студента
-    UserID string `json:"user_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=1"`
+    UserID string `json:"user_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=1"`
 } // @name ExpelUserRequest
 
 func NewExpelUserRequest(req ExpelUserRequest) *pb.ExpelUserRequest {
@@ -356,9 +356,9 @@ func NewExpelUserResponse(resp *pb.ExpelUserResponse) ExpelUserResponse {
 // @Description Проверяет, является ли пользователь преподавателем курса
 type IsTeacherRequest struct {
     // ID пользователя
-    UserID string `json:"user_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    UserID string `json:"user_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // ID курса
-    CourseID string `json:"course_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=1"`
+    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=1"`
 } // @name IsTeacherRequest
 
 func NewIsTeacherRequest(req IsTeacherRequest) *pb.IsTeacherRequest {
@@ -385,9 +385,9 @@ func NewIsTeacherResponse(resp *pb.IsTeacherResponse) IsTeacherResponse {
 // @Description Проверяет, является ли пользователь участником курса
 type IsMemberRequest struct {
     // ID пользователя
-    UserID string `json:"user_id" example:"608f1f77bcf86cd799439022" extensions:"x-order=0"`
+    UserID string `json:"user_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // ID курса
-    CourseID string `json:"course_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=1"`
+    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=1"`
 } // @name IsMemberRequest
 
 func NewIsMemberRequest(req IsMemberRequest) *pb.IsMemberRequest {
@@ -414,7 +414,7 @@ func NewIsMemberResponse(resp *pb.IsMemberResponse) IsMemberResponse {
 // @Description Возвращает студентов курса с пагинацией
 type GetCourseStudentsRequest struct {
     // ID курса
-    CourseID string `json:"course_id" example:"507f1f77bcf86cd799439011" extensions:"x-order=0"`
+    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // Начальный индекс (для пагинации)
     Index int32 `json:"index" example:"0" extensions:"x-order=1"`
     // Лимит записей (для пагинации)

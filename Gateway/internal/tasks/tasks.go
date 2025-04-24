@@ -9,6 +9,9 @@ import (
 	"log/slog"
 	"time"
 
+	rds "Classroom/Gateway/internal/redis"
+
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -64,18 +67,24 @@ func (s *TasksServiceClient) CreateTask(ctx context.Context, req CreateTaskReque
 	return NewCreateTaskResponse(resp), nil
 }
 
-func (s *TasksServiceClient) GetTask(ctx context.Context, req GetTaskRequest) (GetTaskResponse, error) {
+func (s *TasksServiceClient) GetTask(ctx context.Context, rc *redis.Client, req GetTaskRequest) (GetTaskResponse, error) {
 	logger.Debug(ctx, "Getting task", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := s.Client.GetTask(ctx, NewGetTaskRequest(req))
+	resp, err := rds.Get[GetTaskResponse](rc, ctx, "Lessons.GetTask", req.TaskID)
+	if err == nil {
+		return resp, nil
+	}
+	logger.Debug(ctx, "Response was not cached", slog.Any("error", err))
+
+	pbresp, err := s.Client.GetTask(ctx, NewGetTaskRequest(req))
 	if err != nil {
 		return GetTaskResponse{}, err
 	}
 
 	logger.Debug(ctx, "Tasks.GetTask succeed")
-	return NewGetTaskResponse(resp), nil
+	return NewGetTaskResponse(pbresp), nil
 }
 
 func (s *TasksServiceClient) GetStudentStatuses(ctx context.Context, req GetStudentStatusesRequest) (GetStudentStatusesResponse, error) {

@@ -1,59 +1,59 @@
 variables:
-  GO_VERSION: '1.24'
+  GO_VERSION: "1.24"
 
 .test-template:
   stage: test
-  image: golang:${GO_VERSION}
+  image: ${IMAGE}
   script:
     - cd $SERVICE_PATH
     - go test ./...
 
-test-lessons:
+lessons_test:
   extends: .test-template
   variables:
     SERVICE_PATH: ./Lessons
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      # changes:
-      #   - ./Lessons
+      changes:
+        - ./Lessons
       when: always
 
-test-tasks:
+tasks_test:
   extends: .test-template
   variables:
     SERVICE_PATH: ./Tasks
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      # changes:
-      #   - ./Tasks
+      changes:
+        - ./Tasks
       when: always
 
-test-courses:
+courses_test:
   extends: .test-template
   variables:
     SERVICE_PATH: ./Courses
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      # changes:
-      #   - ./Courses
+      changes:
+        - ./Courses
       when: always
 
-test-notifications:
+notifications_test:
   extends: .test-template
   variables:
     SERVICE_PATH: ./Notifications
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      # changes:
-      #   - ./Notifications
+      changes:
+        - ./Notifications
       when: always
 
-test-auth:
+auth_test:
   extends: .test-template
   variables:
     SERVICE_PATH: ./Auth
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-      # changes:
-      #   - ./Auth
+      changes:
+        - ./Auth
       when: always
