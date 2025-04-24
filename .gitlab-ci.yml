@@ -1,13 +1,18 @@
 stages:
   - test
+  - cover
+  - build
+
+variables:
+  IMAGE: "golang:1.24.2"
 
 # Общие настройки для всех тестов
 .test_config: &test_config
   stage: test
-  image: golang:1.24.2
+  image: $IMAGE
   allow_failure: false
   variables:
-    CI_DEBUG_TRACE: 'false'
+    CI_DEBUG_TRACE: "false"
   before_script:
     - chmod +x ./Pipelines/test/${CI_JOB_NAME}.sh
   script:
@@ -17,14 +22,14 @@ stages:
     - echo $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME;
     - echo $CI_JOB_NAME;
     - if [ $EXIT_CODE -ne 0 ]; then
-      echo "❌ Merge request declined ${SERVICE_NAME} tests failed)";
+      echo "❌ Merge request declined (tests failed)";
       exit $EXIT_CODE;
       fi
-    - echo "✅ Merge request approved (${SERVICE_NAME} tests passed)";
+    - echo "✅ Merge request approved (tests passed)";
 
 .cover_config: &cover_config
-  stage: test
-  image: golang:1.24.2
+  stage: cover
+  image: $IMAGE
   allow_failure: false
   variables:
     MIN_COVERAGE: 30
@@ -37,19 +42,27 @@ stages:
     - COVERAGE=$(./${CI_JOB_NAME}.sh)
     - EXIT_CODE=$?
     - if [ $EXIT_CODE -ne 0 ]; then
-    -   echo "❌ Unit tests failed!"
-    -   exit 1
+    - echo "❌ Unit tests failed!"
+    - exit 1
     - fi
     - echo "📊 Test coverage:\ $COVERAGE% (minimum required:\ $MIN_COVERAGE%)"
     - if [ $COVERAGE -lt $MIN_COVERAGE ]; then
-    -   echo "❌ Coverage is below 30%"
-    -   exit 1
+    - echo "❌ Coverage is below 30%"
+    - exit 1
     - fi
+
+.build_config:
+  stage: build
+  image: $IMAGE
+  allow_failure: false
+  script:
+    - cd $SERVICE_PATH
+    - go build ./cmd
 
 gateway_test:
   extends: .test_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' &&
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
         - Gateway/**/*
         - Common/Proto/**/*
@@ -58,7 +71,7 @@ gateway_test:
 auth_test:
   extends: .test_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'dev'
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
         - Auth/**/*
         - Common/Proto/auth.proto
@@ -67,7 +80,7 @@ auth_test:
 courses_test:
   extends: .test_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'dev'
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
         - Courses/**/*
         - Common/Proto/courses.proto
@@ -76,7 +89,7 @@ courses_test:
 lessons_test:
   extends: .test_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'dev'
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
         - Lessons/**/*
         - Common/Proto/lessons.proto
@@ -85,7 +98,7 @@ lessons_test:
 tasks_test:
   extends: .test_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'dev'
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
         - Tasks/**/*
         - Common/Proto/tasks.proto
@@ -94,61 +107,125 @@ tasks_test:
 notifications_test:
   extends: .test_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'dev'
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
         - Notifications/**/*
       when: always
 
 gateway_cover:
-  extends: .test_config
+  extends: .cover_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' &&
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
         - Gateway/**/*
         - Common/Proto/**/*
       when: always
 
 auth_cover:
-  extends: .test_config
+  extends: .cover_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'dev'
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
         - Auth/**/*
         - Common/Proto/auth.proto
       when: always
 
 courses_cover:
-  extends: .test_config
+  extends: .cover_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'dev'
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
         - Courses/**/*
         - Common/Proto/courses.proto
       when: always
 
 lessons_cover:
-  extends: .test_config
+  extends: .cover_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'dev'
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
         - Lessons/**/*
         - Common/Proto/lessons.proto
       when: always
 
 tasks_cover:
-  extends: .test_config
+  extends: .cover_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'dev'
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
         - Tasks/**/*
         - Common/Proto/tasks.proto
       when: always
 
 notifications_cover:
-  extends: .test_config
+  extends: .cover_config
   rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'dev'
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
       changes:
         - Notifications/**/*
       when: always
 
+gateway_build:
+  extends: .build_config
+  variables:
+    SERVICE_PATH: 'Gateway'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - Gateway/**/*
+        - Common/Proto/**/*
+      when: always
+
+auth_build:
+  extends: .build_config
+  variables:
+    SERVICE_PATH: 'Auth'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - Auth/**/*
+        - Common/Proto/auth.proto
+      when: always
+
+courses_build:
+  extends: .build_config
+  variables:
+    SERVICE_PATH: 'Courses'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - Courses/**/*
+        - Common/Proto/courses.proto
+      when: always
+
+lessons_build:
+  extends: .build_config
+  variables:
+    SERVICE_PATH: 'Lessons'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - Lessons/**/*
+        - Common/Proto/lessons.proto
+      when: always
+
+tasks_build:
+  extends: .build_config
+  variables:
+    SERVICE_PATH: 'Tasks'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - Tasks/**/*
+        - Common/Proto/tasks.proto
+      when: always
+
+notifications_build:
+  extends: .build_config
+  variables:
+    SERVICE_PATH: 'Notifications'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      changes:
+        - Notifications/**/*
+      when: always

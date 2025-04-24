@@ -11,7 +11,6 @@ services:
       timeout: 1s
       retries: 3
     volumes:
-      - ./Postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
@@ -33,6 +32,20 @@ services:
     networks:
       - app-network
     command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+
+  migrations:
+    container_name: migrations
+    image: migrate/migrate
+    volumes:
+      - ./Common/Migrations:/migrations
+    env_file:
+      - .env
+    command: ['-path=/migrations', '-database=${POSTGRES_URL}', 'up']
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
 
   service-auth:
     container_name: auth
@@ -192,16 +205,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    environment:
-      DYNAMIC_CONFIG_ENABLED: "true"
-    depends_on:
-      - kafka
-    networks:
-      - app-network
 
 networks:
   app-network:
