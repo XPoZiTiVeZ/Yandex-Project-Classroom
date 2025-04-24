@@ -12,6 +12,8 @@ variables:
     MIN_COVERAGE: 30
     CI_DEBUG_TRACE: 'false'
     FILENAME: 'test.sh'
+  before_script:
+    - chmod +x ./Pipelines/cover/$FILENAME
   script:
     - echo "🔍 Running tests with coverage..."
     - COVERAGE=$(./Pipelines/cover/$FILENAME)
