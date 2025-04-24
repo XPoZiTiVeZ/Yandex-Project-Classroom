@@ -1,0 +1,10 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+packages:
+  Classroom/Auth/internal/controller:
+    interfaces:
+      AuthService:
+  Classroom/Auth/internal/service:
+    interfaces:
+      TokenRepo:
+      UserRepo:

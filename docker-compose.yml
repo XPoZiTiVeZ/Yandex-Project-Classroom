@@ -1,0 +1,218 @@
+services:
+  postgres:
+    container_name: postgres
+    restart: unless-stopped
+    image: postgres:17.4-alpine
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} || exit 1"]
+      interval: 10s
+      timeout: 1s
+      retries: 3
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  redis:
+    container_name: redis
+    restart: unless-stopped
+    image: redis:7.4.2-alpine
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 1s
+      retries: 3
+    volumes:
+      - redis_data:/data
+      - ./Redis/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - app-network
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+
+  migrations:
+    container_name: migrations
+    image: migrate/migrate
+    volumes:
+      - ./Common/Migrations:/migrations
+    env_file:
+      - .env
+    command: ['-path=/migrations', '-database=${POSTGRES_URL}', 'up']
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  service-auth:
+    container_name: auth
+    restart: unless-stopped
+    build:
+      context: ./Auth
+      dockerfile: Dockerfile
+    volumes:
+      - ./Auth/config/config.yaml:/app/config/config.yaml
+    env_file:
+      - .env
+    environment:
+      - PORT=${AUTH_PORT}
+    command: ["--config", "/app/config/config.yaml"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  service-courses:
+    container_name: courses
+    restart: unless-stopped
+    build:
+      context: ./Courses
+      dockerfile: Dockerfile
+    volumes:
+      - ./Courses/config/config.yaml:/app/config/config.yaml
+    env_file:
+      - .env
+    environment:
+      - PORT=${COURSES_PORT}
+    command: ["--config", "/app/config/config.yaml"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  service-lessons:
+    container_name: lessons
+    restart: unless-stopped
+    build:
+      context: ./Lessons
+      dockerfile: Dockerfile
+    volumes:
+      - ./Lessons/config/config.yaml:/app/config/config.yaml
+    env_file:
+      - .env
+    environment:
+      - PORT=${LESSONS_PORT}
+    command: ["--config", "/app/config/config.yaml"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  service-tasks:
+    container_name: tasks
+    restart: unless-stopped
+    build:
+      context: ./Tasks
+      dockerfile: Dockerfile
+    volumes:
+      - ./Tasks/config/config.yaml:/app/config/config.yaml
+    env_file:
+      - .env
+    environment:
+      - PORT=${TASKS_PORT}
+    command: ["--config", "/app/config/config.yaml"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  service-notifications:
+    container_name: notifications
+    restart: unless-stopped
+    build:
+      context: ./Notifications
+      dockerfile: Dockerfile
+    volumes:
+      - ./Notifications/config/config.yaml:/app/config/config.yaml
+    env_file:
+      - .env
+    command: ["--config", "/app/config/config.yaml"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  service-gateway:
+    container_name: gateway
+    restart: unless-stopped
+    build:
+      context: ./Gateway
+      dockerfile: Dockerfile
+    volumes:
+      - ./Gateway/configs/config.yaml:/app/configs/config.yaml
+    env_file:
+      - .env
+      - ./Gateway/.env
+    environment:
+      - PORT=${GATEWAY_PORT}
+    command: ['--config', '/app/configs/config.yaml']
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  nginx:
+    container_name: nginx
+    restart: unless-stopped
+    image: nginx:1.27-alpine
+    volumes:
+      - ./Nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./Docs/OpenAPI.json:/var/www/classroom/swagger.json
+    ports:
+      - 80:80
+    networks:
+      - app-network
+
+  kafka:
+    image: apache/kafka
+    container_name: kafka
+    environment:
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+    networks:
+      - app-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

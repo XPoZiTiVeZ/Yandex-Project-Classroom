@@ -1,0 +1,7 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+packages:
+  Classroom/Courses/internal/service:
+    interfaces:
+      CourseRepo:
+      Producer:

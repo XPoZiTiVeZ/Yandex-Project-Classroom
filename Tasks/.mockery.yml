@@ -1,0 +1,11 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+packages:
+  Classroom/Tasks/internal/controller:
+    interfaces:
+      TaskService:
+  Classroom/Tasks/internal/service:
+    interfaces:
+      TaskRepo:
+      StatusRepo:
+      Producer:

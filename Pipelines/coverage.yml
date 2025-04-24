@@ -1,0 +1,50 @@
+stages:
+  - coverage
+
+.coverage-template:
+  stage: coverage
+  image: ${IMAGE}
+  allow_failure: false
+  variables:
+    MIN_COVERAGE: 30
+    CI_DEBUG_TRACE: "false"
+  before_script:
+    - chmod +x ./Pipelines/cover/${CI_JOB_NAME}.sh
+  script:
+    - echo "🔍 Running tests with coverage..."
+    - COVERAGE=$(./Pipelines/cover/${CI_JOB_NAME}.sh)
+    - EXIT_CODE=$?
+    - if [ $EXIT_CODE -ne 0 ]; then
+    - echo "❌ Unit tests failed!"
+    - exit 1
+    - fi
+    - echo "📊 Test coverage:\ $COVERAGE% (minimum required:\ $MIN_COVERAGE%)"
+    - if [ $COVERAGE -lt $MIN_COVERAGE ]; then
+    - echo "❌ Coverage is below 30%"
+    - exit 1
+    - fi
+    - echo "✅ Coverage above ${MIN_COVERAGE}. Passed!" 
+
+auth_cover:
+  extends: .coverage-template
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'main'
+      when: always
+
+courses_cover:
+  extends: .coverage-template
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'main'
+      when: always
+
+lessons_cover:
+  extends: .coverage-template
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'main'
+      when: always
+
+tasks_cover:
+  extends: .coverage-template
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'main'
+      when: always

@@ -1,0 +1,153 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "api/courses";
+
+package courses;
+
+service CoursesService {
+    rpc CreateCourse(CreateCourseRequest) returns (CreateCourseResponse); // Создание курса
+    rpc GetCourse(GetCourseRequest) returns (GetCourseResponse); // Получение данных курса
+    rpc GetCourses(GetCoursesRequest) returns (GetCoursesResponse); // Получение всех курсов для пользователя
+    rpc GetCoursesByStudent(GetCoursesByStudentRequest) returns (GetCoursesResponse); // Получение курсов для студента
+    rpc GetCoursesByTeacher(GetCoursesByTeacherRequest) returns (GetCoursesResponse); // Получение курсов для учителя
+    rpc UpdateCourse(UpdateCourseRequest) returns (UpdateCourseResponse); // Изменение информации курса
+    rpc DeleteCourse(DeleteCourseRequest) returns (DeleteCourseResponse); // Удаление курса
+    rpc EnrollUser(EnrollUserRequest) returns (EnrollUserResponse); // Зачислить пользователя на курс
+    rpc ExpelUser(ExpelUserRequest) returns (ExpelUserResponse); // Удалить пользователя из курса
+    rpc IsTeacher(IsTeacherRequest) returns (IsTeacherResponse); // Является ли пользователь учителем курса
+    rpc IsMember(IsMemberRequest) returns (IsMemberResponse); // Является ли пользователь студентом курса
+    rpc GetCourseStudents(GetCourseStudentsRequest) returns(GetCourseStudentsResponse); // Получение пользователей курса
+}
+
+message Course {
+    string course_id = 1;                              // ID курса
+    string teacher_id = 2;                             // ID Владельца
+    string title = 3;                                  // Название курса
+    string description = 4;                            // Описание курса
+    bool visibility = 5;                               // Видимость курса пользователю
+    optional google.protobuf.Timestamp start_time = 6; // Дата открытия доступа к курсу
+    optional google.protobuf.Timestamp end_time = 7;   // Дата закрытия доступа к курсу
+    google.protobuf.Timestamp created_at = 8;          // Дата создания курса
+}
+
+message Student {
+    string user_id = 1;
+    string email = 2;
+    string first_name = 3;
+    string last_name = 4;
+}
+
+message Enrollment {
+    string course_id = 1;
+    string student_id = 2;
+    google.protobuf.Timestamp enrolled_at = 3;
+}
+
+message CreateCourseRequest {
+    string user_id = 1;
+    string title = 2;
+    string description = 3;
+    bool visibility = 4;
+    optional google.protobuf.Timestamp start_time = 5;
+    optional google.protobuf.Timestamp end_time = 6;
+}
+
+message CreateCourseResponse {
+    Course course = 1;
+}
+
+message GetCourseRequest {
+    string course_id = 1;
+    string user_id = 2;
+}
+
+message GetCourseResponse {
+    Course course = 1;
+}
+
+message GetCoursesRequest {
+    string user_id = 1;
+}
+
+message GetCoursesByStudentRequest {
+    string student_id = 1;
+}
+
+message GetCoursesByTeacherRequest {
+    string teacher_id = 1;
+}
+
+message GetCoursesResponse {
+    repeated Course courses = 1;
+}
+
+message UpdateCourseRequest {
+    string course_id = 1;
+    optional string title = 3;
+    optional string description = 4; 
+    optional bool visibility = 5;
+    optional google.protobuf.Timestamp start_time = 6;
+    optional google.protobuf.Timestamp end_time = 7;
+}
+
+message UpdateCourseResponse {
+    Course course = 1;
+}
+
+message DeleteCourseRequest {
+    string course_id = 1;
+}
+
+message DeleteCourseResponse {
+    Course course = 1;
+}
+
+message EnrollUserRequest {
+    string course_id = 1;
+    string user_id = 2;
+}
+
+message EnrollUserResponse {
+    Enrollment enrollment = 1;
+}
+
+message ExpelUserRequest{
+    string course_id = 1;
+    string user_id = 2; 
+}
+
+message ExpelUserResponse {
+    Enrollment enrollment = 1;
+}
+
+message IsTeacherRequest{
+    string user_id = 1;
+    string course_id = 2;
+}
+
+message IsTeacherResponse{
+    bool is_teacher = 1;
+}
+
+message IsMemberRequest{
+    string user_id = 1;
+    string course_id = 2;
+}
+
+message IsMemberResponse{
+    bool is_member = 1;
+}
+
+message GetCourseStudentsRequest{
+    string course_id = 1;
+    int32 index = 2;
+    int32 limit = 3;
+}
+
+message GetCourseStudentsResponse{
+    int32 index = 1;
+    int32 total = 2;
+    repeated Student students = 3;
+}

@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+option go_package = "api/auth";
+
+package auth;
+
+service AuthService {
+  rpc Register(RegisterRequest) returns (RegisterResponse); // Осуществление регистрации пользователя
+  rpc Login(LoginRequest)       returns (LoginResponse);    // Осуществление аутентификации пользователя
+  rpc Refresh(RefreshRequest)   returns (RefreshResponse);  // Обновление access токена
+  rpc Logout(LogoutRequest)     returns (LogoutResponse);   // Отзыв refresh токена
+  rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse); // Получение информации о пользователе
+}
+
+message RegisterRequest {
+  string email = 1;      // Почта пользователя
+  string password = 2;   // Пароль пользователя
+  string first_name = 4; // Имя пользователя
+  string last_name = 5;  // Фамилия пользователя
+}
+
+message RegisterResponse {
+  string user_id = 1;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+}
+
+message RefreshRequest {
+  string refresh_token = 2;
+}
+
+message RefreshResponse {
+  string access_token = 1;
+}
+
+message LogoutRequest {
+  string refresh_token = 1;
+}
+
+message LogoutResponse {}
+
+message GetUserInfoRequest {
+  string user_id = 1;
+}
+
+message GetUserInfoResponse {
+  string user_id = 1;
+  string email = 2;
+  string first_name = 3;
+  string last_name = 4;
+  bool is_superuser = 5;
+}
