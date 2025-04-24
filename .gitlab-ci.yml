@@ -1,7 +1,9 @@
 stages:
   - build
   - test
+  - coverage
 
 include:
   - local: 'Pipelines/build.yml'
   - local: 'Pipelines/test.yml'
+  - local: 'Pipelines/coverage.yml'
