@@ -4,3 +4,4 @@ packages:
   Classroom/Courses/internal/service:
     interfaces:
       CourseRepo:
+      Producer:

@@ -4,6 +4,7 @@ import (
 	"Classroom/Courses/internal/domain"
 	"Classroom/Courses/internal/dto"
 	pb "Classroom/Courses/pkg/api/courses"
+	"Classroom/Courses/pkg/events"
 	"context"
 	"errors"
 	"log/slog"
@@ -34,16 +35,22 @@ type CourseRepo interface {
 	IsMember(ctx context.Context, courseID, userID string) (bool, error)
 }
 
+type Producer interface {
+	PublishUserEnrolled(event events.UserEnrolled) error
+	PublishUserExpelled(event events.UserExpelled) error
+}
+
 type CoursesService struct {
 	pb.UnimplementedCoursesServiceServer
 	logger   *slog.Logger
 	validate *validator.Validate
 	repo     CourseRepo
+	producer Producer
 }
 
-func NewCoursesService(logger *slog.Logger, repo CourseRepo) *CoursesService {
+func NewCoursesService(logger *slog.Logger, repo CourseRepo, producer Producer) *CoursesService {
 	validate := validator.New()
-	return &CoursesService{repo: repo, logger: logger, validate: validate}
+	return &CoursesService{repo: repo, logger: logger, validate: validate, producer: producer}
 }
 
 func (s *CoursesService) CreateCourse(ctx context.Context, req *pb.CreateCourseRequest) (*pb.CreateCourseResponse, error) {
@@ -155,18 +162,28 @@ func (s *CoursesService) EnrollUser(ctx context.Context, req *pb.EnrollUserReque
 	if err := s.validate.Var(req.UserId, "required,uuid"); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid user id")
 	}
-	enrollemnt, err := s.repo.EnrollUser(ctx, req.CourseId, req.UserId)
+	enrollment, err := s.repo.EnrollUser(ctx, req.CourseId, req.UserId)
 	if err != nil {
 		s.logger.Error("failed to enroll user", "error", err)
 		return nil, status.Error(codes.Internal, "failed to enroll user")
 	}
 
-	s.logger.Info("user enrolled", "course_id", enrollemnt.CourseID, "student_id", enrollemnt.StudentID)
+	err = s.producer.PublishUserEnrolled(events.UserEnrolled{
+		CourseID: enrollment.CourseID,
+		UserID:   enrollment.StudentID,
+	})
+
+	if err != nil {
+		s.logger.Error("failed to publish user enrolled event", "error", err)
+		// не возвращаем ошибку потому что действие и так было выполнено в бд, фикс будет через логи
+	}
+
+	s.logger.Info("user enrolled", "course_id", enrollment.CourseID, "student_id", enrollment.StudentID)
 	return &pb.EnrollUserResponse{
 		Enrollment: &pb.Enrollment{
-			CourseId:   enrollemnt.CourseID,
-			StudentId:  enrollemnt.StudentID,
-			EnrolledAt: timestamppb.New(enrollemnt.EnrolledAt),
+			CourseId:   enrollment.CourseID,
+			StudentId:  enrollment.StudentID,
+			EnrolledAt: timestamppb.New(enrollment.EnrolledAt),
 		},
 	}, nil
 }
@@ -179,7 +196,7 @@ func (s *CoursesService) ExpelUser(ctx context.Context, req *pb.ExpelUserRequest
 		return nil, status.Error(codes.InvalidArgument, "invalid user id")
 	}
 
-	enrollemnt, err := s.repo.ExpelUser(ctx, req.CourseId, req.UserId)
+	enrollment, err := s.repo.ExpelUser(ctx, req.CourseId, req.UserId)
 	if errors.Is(err, domain.ErrNotFound) {
 		return nil, status.Error(codes.NotFound, "enrollment not found")
 	}
@@ -188,12 +205,22 @@ func (s *CoursesService) ExpelUser(ctx context.Context, req *pb.ExpelUserRequest
 		return nil, status.Error(codes.Internal, "failed to expel user")
 	}
 
-	s.logger.Info("user expelled", "course_id", enrollemnt.CourseID, "student_id", enrollemnt.StudentID)
+	err = s.producer.PublishUserExpelled(events.UserExpelled{
+		CourseID: enrollment.CourseID,
+		UserID:   enrollment.StudentID,
+	})
+
+	if err != nil {
+		s.logger.Error("failed to publish user expelled event", "error", err)
+		// не возвращаем ошибку потому что действие и так было выполнено в бд, фикс будет через логи
+	}
+
+	s.logger.Info("user expelled", "course_id", enrollment.CourseID, "student_id", enrollment.StudentID)
 	return &pb.ExpelUserResponse{
 		Enrollment: &pb.Enrollment{
-			CourseId:   enrollemnt.CourseID,
-			StudentId:  enrollemnt.StudentID,
-			EnrolledAt: timestamppb.New(enrollemnt.EnrolledAt),
+			CourseId:   enrollment.CourseID,
+			StudentId:  enrollment.StudentID,
+			EnrolledAt: timestamppb.New(enrollment.EnrolledAt),
 		},
 	}, nil
 }

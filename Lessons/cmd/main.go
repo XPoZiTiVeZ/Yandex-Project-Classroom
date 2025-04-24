@@ -3,6 +3,7 @@ package main
 import (
 	"Classroom/Lessons/internal/config"
 	"Classroom/Lessons/internal/controller"
+	"Classroom/Lessons/internal/producer"
 	"Classroom/Lessons/internal/repo"
 	"Classroom/Lessons/internal/service"
 	"Classroom/Lessons/pkg/postgres"
@@ -30,8 +31,11 @@ func main() {
 	postgres := postgres.MustNew(conf.PostgresURL)
 	defer postgres.Close()
 
+	producer := producer.MustNewProducer([]string{conf.KafkaBroker})
+	defer producer.Close()
+
 	lessonRepo := repo.NewLessonRepo(postgres)
-	lessonService := service.NewLessonService(logger, lessonRepo)
+	lessonService := service.NewLessonService(logger, lessonRepo, producer)
 	lessonController := controller.NewLessonController(logger, lessonService)
 
 	server := grpc.NewServer()

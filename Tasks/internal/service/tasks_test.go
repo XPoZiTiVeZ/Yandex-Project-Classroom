@@ -5,6 +5,7 @@ import (
 	"Classroom/Tasks/internal/dto"
 	"Classroom/Tasks/internal/service"
 	mocks "Classroom/Tasks/internal/service/mocks"
+	"Classroom/Tasks/pkg/events"
 	"context"
 	"log/slog"
 	"testing"
@@ -15,7 +16,7 @@ import (
 )
 
 func TestTaskService_Create(t *testing.T) {
-	type MockBehavior func(repo *mocks.MockTaskRepo, payload dto.CreateTaskDTO)
+	type MockBehavior func(repo *mocks.MockTaskRepo, pr *mocks.MockProducer, payload dto.CreateTaskDTO)
 
 	testCases := []struct {
 		name         string
@@ -26,13 +27,16 @@ func TestTaskService_Create(t *testing.T) {
 	}{
 		{
 			name: "success",
-			mockBehavior: func(repo *mocks.MockTaskRepo, payload dto.CreateTaskDTO) {
+			mockBehavior: func(repo *mocks.MockTaskRepo, pr *mocks.MockProducer, payload dto.CreateTaskDTO) {
+				repo.EXPECT().CourseExists(context.Background(), payload.CourseID).Return(true, nil)
 				repo.EXPECT().Create(context.Background(), payload).Return(domain.Task{
 					ID:       "task-id",
 					Title:    payload.Title,
 					Content:  payload.Content,
 					CourseID: payload.CourseID,
 				}, nil)
+
+				pr.EXPECT().PublishTaskCreated(events.TaskCreated{CourseID: payload.CourseID, TaskID: "task-id"}).Return(nil)
 			},
 			payload: dto.CreateTaskDTO{
 				CourseID: "course-id",
@@ -46,8 +50,9 @@ func TestTaskService_Create(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := mocks.NewMockTaskRepo(t)
-			tc.mockBehavior(repo, tc.payload)
-			svc := service.NewTaskService(slog.Default(), repo, nil)
+			pr := mocks.NewMockProducer(t)
+			tc.mockBehavior(repo, pr, tc.payload)
+			svc := service.NewTaskService(slog.Default(), repo, nil, pr)
 			got, err := svc.Create(context.Background(), tc.payload)
 			if tc.wantErr != nil {
 				assert.ErrorIs(t, err, tc.wantErr)
@@ -112,7 +117,7 @@ func TestTaskService_Update(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := mocks.NewMockTaskRepo(t)
 			tc.mockBehavior(repo, tc.payload)
-			svc := service.NewTaskService(slog.Default(), repo, nil)
+			svc := service.NewTaskService(slog.Default(), repo, nil, nil)
 			got, err := svc.Update(context.Background(), tc.payload)
 			if tc.wantErr != nil {
 				assert.ErrorIs(t, err, tc.wantErr)
@@ -190,7 +195,7 @@ func TestTaskService_ToggleTaskStatus(t *testing.T) {
 			tasks := mocks.NewMockTaskRepo(t)
 			statuses := mocks.NewMockStatusRepo(t)
 			tc.mockBehavior(tasks, statuses, tc.args)
-			svc := service.NewTaskService(slog.Default(), tasks, statuses)
+			svc := service.NewTaskService(slog.Default(), tasks, statuses, nil)
 			got, err := svc.ToggleTaskStatus(context.Background(), tc.args.TaskID, tc.args.UserID)
 			if tc.wantErr != nil {
 				assert.ErrorIs(t, err, tc.wantErr)
