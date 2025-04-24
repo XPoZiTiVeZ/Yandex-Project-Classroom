@@ -13,7 +13,6 @@ EXCLUDE_DIRS=(
   "internal/repo"
   "internal/service/mocks"
   "internal/controller/mocks"
-
 )
 
 # * Папка с микросевисом 
