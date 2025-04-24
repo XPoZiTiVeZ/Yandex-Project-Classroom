@@ -6,7 +6,7 @@ variables:
   image: golang:${GO_VERSION}
   script:
     - cd $SERVICE_PATH
-    - go build ./cmd
+    - go build -o bin/main ./cmd
 
 build-lessons:
   extends: .build-template
