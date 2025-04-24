@@ -1,3 +1,7 @@
+stages:
+  - build
+  - test
+
 include:
   - local: 'Pipelines/build.yml'
   - local: 'Pipelines/test.yml'
