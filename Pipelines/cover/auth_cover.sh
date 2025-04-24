@@ -5,6 +5,15 @@ EXCLUDE_DIRS=(
   "mocks"
   "pkg"
   "cmd"
+  "internal/config"
+  "internal/app"
+  "internal/dto"
+  "internal/entities"
+  "internal/producer"
+  "internal/repo"
+  "internal/service/mocks"
+  "internal/controller/mocks"
+
 )
 
 # * Папка с микросевисом 
