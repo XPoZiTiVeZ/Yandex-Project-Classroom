@@ -1,0 +1,30 @@
+gateway:
+  address: localhost
+  port: 8080
+auth:
+  address: localhost
+  port: 50051
+  enabled: true
+courses:
+  address: courses
+  port: 50052
+  enabled: false
+lessons:
+  address: lessons
+  port: 50053
+  enabled: false
+tasks:
+  address: tasks
+  port: 50054
+  enabled: false
+notifications:
+  address: notifications
+  port: 50055
+  enabled: false
+chat:
+  address: chat
+  port: 50056
+  enabled: false
+
+common:
+  auth_jwt_secret: secret

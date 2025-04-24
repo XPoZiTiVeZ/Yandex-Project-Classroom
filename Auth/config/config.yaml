@@ -1,0 +1,7 @@
+port: 50051
+postgres_url: 'postgres://postgres:password@postgres:5432/classroom?sslmode=disable'
+redis_url: 'redis://redis:6379/0'
+auth:
+  jwt_secret: secret
+  access_ttl: 15m
+  refresh_ttl: 720h
