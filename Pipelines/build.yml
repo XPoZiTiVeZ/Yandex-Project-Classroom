@@ -6,7 +6,7 @@ variables:
   image: ${IMAGE}
   script:
     - cd $SERVICE_PATH
-    - go build ./cmd
+    - go build -o ./bin/app ./cmd
 
 build_lessons:
   extends: .build-template
