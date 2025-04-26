@@ -17,7 +17,9 @@ type ErrorResponse struct {
 // @schema(title=ErrorResponse,required=["code","message"],order=["code","message"])
 
 func mergeMsgs(message string, msgs []string) string {
-	message += ": " + strings.Join(msgs, ": ")
+	if len(msgs) > 0 {
+		message += ": " + strings.Join(msgs, ": ")
+	}
 	return message
 }
 

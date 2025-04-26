@@ -42,7 +42,7 @@ type StudentTask struct {
 // @Description Информация о выполнении задания конкретным студентом
 type TaskStatus struct {
     // ID задания
-    TaskID string `json:"task_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
+    TaskID string `json:"-" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0" swaggerignore:"true"`
     // ID студента
     StudentID string `json:"student_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=1"`
     // Статус выполнения
@@ -85,7 +85,7 @@ func NewCreateTaskResponse(resp *pb.CreateTaskResponse) CreateTaskResponse {
 // @Description Требует ID курса и задания для получения данных
 type GetTaskRequest struct {
     // ID задания
-    TaskID string `json:"task_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
+    TaskID string `schema:"task_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name GetTaskRequest
 
 func NewGetTaskRequest(req GetTaskRequest) *pb.GetTaskRequest {
@@ -105,6 +105,9 @@ func NewGetTaskResponse(resp *pb.GetTaskResponse) GetTaskResponse {
 	return GetTaskResponse{
 		Task: Task{
 			TaskID: resp.GetTask().GetTaskId(),
+			CourseID: resp.Task.GetCourseId(),
+			Title: resp.Task.GetTitle(),
+			Description: resp.Task.GetContent(),
 		},
 	}
 }
@@ -113,7 +116,7 @@ func NewGetTaskResponse(resp *pb.GetTaskResponse) GetTaskResponse {
 // @Description Возвращает статусы выполнения задания для студентов курса
 type GetStudentStatusesRequest struct {
     // ID задания
-    TaskID string `json:"task_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
+    TaskID string `schema:"task_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name GetStudentStatusesRequest
 
 func NewGetStudentStatusesRequest(req GetStudentStatusesRequest) *pb.GetStudentStatusesRequest {
@@ -149,7 +152,7 @@ func NewGetStudentStatusesResponse(resp *pb.GetStudentStatusesResponse) GetStude
 // @Description Возвращает все задания в указанном курсе
 type GetTasksRequest struct {
     // ID курса
-    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
+    CourseID string `schema:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name GetTasksRequest
 
 func NewGetTasksRequest(req GetTasksRequest) *pb.GetTasksRequest {
@@ -187,7 +190,7 @@ func NewGetTasksResponse(resp *pb.GetTasksResponse) GetTasksResponse {
 // @Description Возвращает задания с информацией о статусе выполнения
 type GetTasksForStudentRequest struct {
     // ID курса
-    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
+    CourseID string `schema:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
     // ID студента
     StudentID string `json:"student_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=1"`
 } // @name GetTasksForStudentRequest

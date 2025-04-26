@@ -1,2741 +1,2842 @@
 {
-  "produces": ["application/json"],
-  "schemes": ["http"],
-  "swagger": "2.0",
-  "info": {
-    "description": "Gateway service for Classroom microservices. Handles authentication, routing, and request aggregation.",
-    "title": "Classroom Gateway API",
-    "contact": {},
-    "version": "1.0"
-  },
-  "host": "127.0.0.1",
-  "basePath": "/api",
-  "paths": {
-    "/ping": {
-      "get": {
-        "description": "Возвращает ответ \"Pong!\" для проверки доступности сервера",
-        "produces": ["application/json"],
-        "tags": ["Service"],
-        "summary": "Проверка работоспособности",
-        "responses": {
-          "200": {
-            "description": "Успешный ответ",
-            "schema": {
-              "$ref": "#/definitions/Pong"
-            }
-          }
-        }
-      }
+    "produces": [
+        "application/json"
+    ],
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "Gateway service for Classroom microservices. Handles authentication, routing, and request aggregation.",
+        "title": "Classroom Gateway API",
+        "contact": {},
+        "version": "1.0"
     },
-    "/auth/register": {
-      "post": {
-        "description": "Создает новую учетную запись пользователя",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Auth"],
-        "summary": "Регистрация пользователя",
-        "parameters": [
-          {
-            "description": "Данные регистрации",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AuthRegisterRequest"
+    "host": "127.0.0.1",
+    "basePath": "/api",
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Возвращает токены доступа и обновления",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Вход в систему",
+                "parameters": [
+                    {
+                        "description": "Учетные данные",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AuthLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/AuthLoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Неверные учетные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
             }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "$ref": "#/definitions/AuthRegisterResponse"
+        },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Инвалидирует токены пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Выход из системы",
+                "parameters": [
+                    {
+                        "description": "Данные для выхода",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AuthLogoutRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/AuthLogoutResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
             }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+        },
+        "/auth/refresh": {
+            "post": {
+                "description": "Генерирует новую пару токенов по refresh-токену",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Обновление токена",
+                "parameters": [
+                    {
+                        "description": "Refresh токен",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AuthRefreshRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/AuthRefreshResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Неверный токен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
             }
-          },
-          "409": {
-            "description": "Пользователь уже существует",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Создает новую учетную запись пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Регистрация пользователя",
+                "parameters": [
+                    {
+                        "description": "Данные регистрации",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AuthRegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/AuthRegisterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Пользователь уже существует",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
             }
-          },
-          "500": {
-            "description": "Внутренняя ошибка",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+        },
+        "/auth/user-info": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает данные пользователя",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Информация о пользователе",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "44e7f029-82cc-46f5-83e8-34b7d056ce32",
+                        "description": "Идентификатор пользователя",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/AuthUserInfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
             }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+        },
+        "/courses/course": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает детальную информацию о курсе",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Получение курса",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"44e7f029-82cc-46f5-83e8-34b7d056ce32\"",
+                        "description": "ID курса",
+                        "name": "course_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetCourseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Курс не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
             }
-          }
+        },
+        "/courses/course/delete": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаляет курс по идентификатору",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Удаление курса",
+                "parameters": [
+                    {
+                        "description": "Идентификатор курса",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DeleteCourseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/DeleteCourseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Курс не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/course/enroll": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Записывает пользователя на указанный курс",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Запись на курс",
+                "parameters": [
+                    {
+                        "description": "Данные для записи",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/EnrollUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/EnrollUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Курс или пользователь не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/course/expel": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Отчисляет пользователя с указанного курса",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Отчисление с курса",
+                "parameters": [
+                    {
+                        "description": "Данные для отчисления",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ExpelUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ExpelUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Курс или пользователь не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/course/students": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список студентов, записанных на курс, с поддержкой пагинации",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Получение студентов курса",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
+                        "description": "ID курса",
+                        "name": "course_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Начальный индекс (для пагинации)",
+                        "name": "index",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Лимит записей (для пагинации)",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetCourseStudentsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректыные параметр",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Курс не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/course/update": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновляет информацию о курсе",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Обновление курса",
+                "parameters": [
+                    {
+                        "description": "Данные для обновления",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateCourseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UpdateCourseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Курс не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/courses": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список курсов с возможностью фильтрации по пользователю",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Получение списка курсов",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetCoursesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создает новый курс",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Создание курса",
+                "parameters": [
+                    {
+                        "description": "Данные для создания курса",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateCourseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/CreateCourseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/student-courses": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список курсов, на которые записан студент",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Получение курсов студента",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetCoursesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/teacher-courses": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список курсов, которые ведет преподаватель",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Получение курсов преподавателя",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetCoursesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создает новый урок в курсе",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Создание урока",
+                "parameters": [
+                    {
+                        "description": "Данные для создания урока",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateLessonRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/CreateLessonResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/lesson": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает детальную информацию об уроке",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Получение урока",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"94f9a22f-3a83-4591-a988-7aa3f0ec6eb0\"",
+                        "description": "ID урока",
+                        "name": "lesson_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetLessonResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Урок не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис временно недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/lesson/delete": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаляет урок по идентификатору",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Удаление урока",
+                "parameters": [
+                    {
+                        "description": "Идентификатор урока",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DeleteLessonRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/DeleteLessonResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Урок не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/lesson/update": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновляет информацию об уроке",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Обновление урока",
+                "parameters": [
+                    {
+                        "description": "Данные для обновления",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateLessonRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UpdateLessonResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Урок не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/lessons": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список уроков с возможностью фильтрации по курсу",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Получение списка уроков",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"6994aefe-6815-476b-bdc0-2ae5c4d0c18e\"",
+                        "description": "ID курса",
+                        "name": "course_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetLessonsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Курс не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ping": {
+            "get": {
+                "description": "Возвращает ответ \"Pong!\" для проверки доступности сервера",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Service"
+                ],
+                "summary": "Проверка работоспособности",
+                "responses": {
+                    "200": {
+                        "description": "Успешный ответ",
+                        "schema": {
+                            "$ref": "#/definitions/Pong"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создает новую задачу в курсе",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Создание задачи",
+                "parameters": [
+                    {
+                        "description": "Данные для создания задачи",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/CreateTaskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/student-statuses": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает статусы выполнения задачи для студентов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Получение статусов студентов",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"21dad0c3-dcea-4c19-b501-fb2fe888f683\"",
+                        "description": "ID задачи",
+                        "name": "task_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetStudentStatusesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Данные не найдены",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/student-tasks": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список задач для конкретного студента",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Получение задач студента",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "44e7f029-82cc-46f5-83e8-34b7d056ce32",
+                        "description": "Идентификатор курса",
+                        "name": "course_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetTasksForStudentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Студент не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/task": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает детальную информацию о задаче в рамках курса",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Получение задачи",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"5a430d16-851d-45a9-b55b-15838785adea\"",
+                        "description": "ID задачи",
+                        "name": "task_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetTaskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Задача не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/task/changestatus": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновляет статус выполнения задачи студентом",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Изменение статуса задачи",
+                "parameters": [
+                    {
+                        "description": "Данные для изменения статуса",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ChangeStatusTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ChangeStatusTaskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Задача не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/task/delete": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаляет задачу по идентификатору",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Удаление задачи",
+                "parameters": [
+                    {
+                        "description": "Идентификатор задачи",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DeleteTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/DeleteTaskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Задача не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/task/update": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновляет информацию о задаче",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Обновление задачи",
+                "parameters": [
+                    {
+                        "description": "Данные для обновления",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UpdateTaskResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Задача не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/teacher-tasks": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список задач курса для учителя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Получение списка задач для учителя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "44e7f029-82cc-46f5-83e8-34b7d056ce32",
+                        "description": "Идентификатор курса",
+                        "name": "course_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GetTasksResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Требуется авторизация",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Курс не найден",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Сервис недоступен",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
-      }
     },
-    "/auth/login": {
-      "post": {
-        "description": "Возвращает токены доступа и обновления",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Auth"],
-        "summary": "Вход в систему",
-        "parameters": [
-          {
-            "description": "Учетные данные",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AuthLoginRequest"
+    "definitions": {
+        "AuthLoginRequest": {
+            "description": "Содержит учетные данные для входа в систему",
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "Email пользователя",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "user@example.com"
+                },
+                "password": {
+                    "description": "Пароль пользователя",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "Qwerty123!"
+                }
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/AuthLoginResponse"
+        },
+        "AuthLoginResponse": {
+            "description": "Возвращает пару access/refresh токенов для аутентификации",
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "description": "Токен для обновления access токена",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "access_token": {
+                    "description": "Токен для доступа к API",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "eyJhbG..."
+                }
             }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+        },
+        "AuthLogoutRequest": {
+            "description": "Содержит refresh токен для инвалидации сессии",
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "description": "Refresh токен для удаления",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                }
             }
-          },
-          "401": {
-            "description": "Неверные учетные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+        },
+        "AuthLogoutResponse": {
+            "description": "Пустой ответ, указывающий на успешный выход",
+            "type": "object"
+        },
+        "AuthRefreshRequest": {
+            "description": "Содержит refresh токен для получения нового access токена",
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "description": "Действующий refresh токен",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                }
             }
-          },
-          "500": {
-            "description": "Внутренняя ошибка",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+        },
+        "AuthRefreshResponse": {
+            "description": "Возвращает новый access токен",
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "description": "Новый access токен",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "eyJhbG..."
+                }
             }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+        },
+        "AuthRegisterRequest": {
+            "description": "Содержит данные, необходимые для создания нового пользователя",
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "Email пользователя",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "user@example.com"
+                },
+                "first_name": {
+                    "description": "Имя пользователя",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "Иван"
+                },
+                "last_name": {
+                    "description": "Фамилия пользователя",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Иванов"
+                },
+                "password": {
+                    "description": "Пароль",
+                    "type": "string",
+                    "x-order": "3",
+                    "example": "Qwerty123!"
+                }
             }
-          }
+        },
+        "AuthRegisterResponse": {
+            "description": "Возвращает ID созданного пользователя",
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "description": "Уникальный идентификатор пользователя",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                }
+            }
+        },
+        "AuthUserInfoResponse": {
+            "description": "Возвращает все доступные данные пользователя",
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "description": "Уникальный идентификатор",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "email": {
+                    "description": "Email адрес",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "user@example.com"
+                },
+                "first_name": {
+                    "description": "Имя",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Иван"
+                },
+                "last_name": {
+                    "description": "Фамилия",
+                    "type": "string",
+                    "x-order": "3",
+                    "example": "Иванов"
+                },
+                "is_superuser": {
+                    "description": "Признак администратора",
+                    "type": "boolean",
+                    "x-order": "4",
+                    "example": false
+                }
+            }
+        },
+        "ChangeStatusTaskRequest": {
+            "description": "Позволяет изменить статус выполнения задания",
+            "type": "object",
+            "properties": {
+                "task_id": {
+                    "description": "ID задания",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                }
+            }
+        },
+        "ChangeStatusTaskResponse": {
+            "description": "Пустой ответ при успешном изменении",
+            "type": "object"
+        },
+        "Course": {
+            "description": "Полная информация о курсе включая временные метки",
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "description": "Уникальный идентификатор курса",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "teacher_id": {
+                    "description": "ID преподавателя (владельца курса)",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "title": {
+                    "description": "Название курса",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Основы программирования"
+                },
+                "description": {
+                    "description": "Подробное описание курса",
+                    "type": "string",
+                    "x-order": "3",
+                    "example": "Базовый курс по алгоритмам и структурам данных"
+                },
+                "visibility": {
+                    "description": "Видимость курса для студентов",
+                    "type": "boolean",
+                    "x-order": "4",
+                    "example": true
+                },
+                "start_time": {
+                    "description": "Дата начала курса (опционально)",
+                    "type": "string",
+                    "x-order": "5",
+                    "example": "2023-09-01T00:00:00Z"
+                },
+                "end_time": {
+                    "description": "Дата окончания курса (опционально)",
+                    "type": "string",
+                    "x-order": "6",
+                    "example": "2023-12-31T23:59:59Z"
+                }
+            }
+        },
+        "CourseEnrollment": {
+            "description": "Информация о подписке студента на курс",
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "description": "ID курса",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "student_id": {
+                    "description": "ID студента",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "enrolled_at": {
+                    "description": "Дата и время зачисления",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "2023-09-01T12:00:00Z"
+                }
+            }
+        },
+        "CourseStudent": {
+            "description": "Основные данные студента для отображения в списках курса",
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "description": "Уникальный идентификатор пользователя",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "email": {
+                    "description": "Email студента",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "student@example.com"
+                },
+                "first_name": {
+                    "description": "Имя студента",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Алексей"
+                },
+                "last_name": {
+                    "description": "Фамилия студента",
+                    "type": "string",
+                    "x-order": "3",
+                    "example": "Петров"
+                }
+            }
+        },
+        "CreateCourseRequest": {
+            "description": "Параметры для создания нового курса",
+            "type": "object",
+            "properties": {
+                "title": {
+                    "description": "Название курса",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "Основы программирования"
+                },
+                "description": {
+                    "description": "Описание курса",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Базовый курс по алгоритмам"
+                },
+                "visibility": {
+                    "description": "Видимость курса",
+                    "type": "boolean",
+                    "x-order": "3",
+                    "example": true
+                },
+                "start_time": {
+                    "description": "Дата начала (опционально)",
+                    "type": "string",
+                    "x-order": "4",
+                    "example": "2023-09-01T00:00:00Z"
+                },
+                "end_time": {
+                    "description": "Дата окончания (опционально)",
+                    "type": "string",
+                    "x-order": "5",
+                    "example": "2023-12-31T23:59:59Z"
+                }
+            }
+        },
+        "CreateCourseResponse": {
+            "description": "Возвращает созданный курс",
+            "type": "object",
+            "properties": {
+                "course": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Course"
+                        }
+                    ],
+                    "x-order": "0"
+                }
+            }
+        },
+        "CreateLessonRequest": {
+            "description": "Параметры для создания нового занятия в курсе",
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "description": "ID курса",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "title": {
+                    "description": "Название занятия",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "Основы алгоритмов"
+                },
+                "content": {
+                    "description": "Содержание занятия",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Подробное описание занятия..."
+                }
+            }
+        },
+        "CreateLessonResponse": {
+            "description": "Возвращает ID созданного занятия",
+            "type": "object",
+            "properties": {
+                "lesson_id": {
+                    "description": "ID созданного занятия",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                }
+            }
+        },
+        "CreateTaskRequest": {
+            "description": "Параметры для создания нового задания в курсе",
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "description": "ID курса",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "title": {
+                    "description": "Название задания",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "Лабораторная работа 1"
+                },
+                "description": {
+                    "description": "Описание задания",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Реализовать алгоритм сортировки"
+                }
+            }
+        },
+        "CreateTaskResponse": {
+            "description": "Возвращает ID созданного задания",
+            "type": "object",
+            "properties": {
+                "task_id": {
+                    "description": "ID созданного задания",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                }
+            }
+        },
+        "DeleteCourseRequest": {
+            "description": "Требует ID курса для удаления",
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "description": "ID удаляемого курса",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                }
+            }
+        },
+        "DeleteCourseResponse": {
+            "description": "Возвращает удаленный курс",
+            "type": "object",
+            "properties": {
+                "course": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Course"
+                        }
+                    ],
+                    "x-order": "0"
+                }
+            }
+        },
+        "DeleteLessonRequest": {
+            "description": "Требует ID курса и ID занятия для удаления",
+            "type": "object",
+            "properties": {
+                "lesson_id": {
+                    "description": "ID занятия",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                }
+            }
+        },
+        "DeleteLessonResponse": {
+            "description": "Пустой ответ при успешном удалении",
+            "type": "object"
+        },
+        "DeleteTaskRequest": {
+            "description": "Требует ID курса и задания для удаления",
+            "type": "object",
+            "properties": {
+                "task_id": {
+                    "description": "ID задания",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                }
+            }
+        },
+        "DeleteTaskResponse": {
+            "description": "Пустой ответ при успешном удалении",
+            "type": "object"
+        },
+        "EnrollUserRequest": {
+            "description": "Добавляет студента на курс",
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "description": "ID курса",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "user_id": {
+                    "description": "ID студента",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                }
+            }
+        },
+        "EnrollUserResponse": {
+            "description": "Подтверждение успешного зачисления",
+            "type": "object",
+            "properties": {
+                "enrollment": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/CourseEnrollment"
+                        }
+                    ],
+                    "x-order": "0"
+                }
+            }
+        },
+        "ErrorResponse": {
+            "description": "Cтандартизированный формат всех ошибок в API.",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "Код ошибки (HTTP статус код)",
+                    "type": "integer",
+                    "example": 400
+                },
+                "message": {
+                    "description": "Сообщение об ошибке",
+                    "type": "string",
+                    "example": "Bad request"
+                }
+            }
+        },
+        "ExpelUserRequest": {
+            "description": "Удаляет студента с курса",
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "description": "ID курса",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "user_id": {
+                    "description": "ID студента",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                }
+            }
+        },
+        "ExpelUserResponse": {
+            "description": "Подтверждение успешного отчисления",
+            "type": "object",
+            "properties": {
+                "enrollment": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/CourseEnrollment"
+                        }
+                    ],
+                    "x-order": "0"
+                }
+            }
+        },
+        "GetCourseResponse": {
+            "description": "Возвращает полные данные курса",
+            "type": "object",
+            "properties": {
+                "course": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Course"
+                        }
+                    ],
+                    "x-order": "0"
+                }
+            }
+        },
+        "GetCourseStudentsResponse": {
+            "description": "Содержит массив студентов с информацией о пагинации",
+            "type": "object",
+            "properties": {
+                "index": {
+                    "description": "Текущий индекс",
+                    "type": "integer",
+                    "x-order": "0",
+                    "example": 0
+                },
+                "total": {
+                    "description": "Общее количество студентов",
+                    "type": "integer",
+                    "x-order": "1",
+                    "example": 100
+                },
+                "students": {
+                    "description": "Массив студентов",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CourseStudent"
+                    },
+                    "x-order": "2"
+                }
+            }
+        },
+        "GetCoursesResponse": {
+            "description": "Содержит массив курсов",
+            "type": "object",
+            "properties": {
+                "courses": {
+                    "description": "Массив курсов",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Course"
+                    },
+                    "x-order": "0"
+                }
+            }
+        },
+        "GetLessonResponse": {
+            "description": "Возвращает полные данные занятия",
+            "type": "object",
+            "properties": {
+                "lesson": {
+                    "description": "Объект занятия",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Lesson"
+                        }
+                    ],
+                    "x-order": "0"
+                }
+            }
+        },
+        "GetLessonsResponse": {
+            "description": "Содержит массив занятий в курсе",
+            "type": "object",
+            "properties": {
+                "lessons": {
+                    "description": "Массив занятий",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Lesson"
+                    },
+                    "x-order": "0"
+                }
+            }
+        },
+        "GetStudentStatusesResponse": {
+            "description": "Содержит статусы выполнения задания студентами",
+            "type": "object",
+            "properties": {
+                "statuses": {
+                    "description": "Массив статусов",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TaskStatus"
+                    },
+                    "x-order": "0"
+                }
+            }
+        },
+        "GetTaskResponse": {
+            "description": "Возвращает полные данные задания",
+            "type": "object",
+            "properties": {
+                "task": {
+                    "description": "Объект задания",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Task"
+                        }
+                    ],
+                    "x-order": "0"
+                }
+            }
+        },
+        "GetTasksForStudentResponse": {
+            "description": "Содержит задания с информацией о статусе выполнения",
+            "type": "object",
+            "properties": {
+                "tasks": {
+                    "description": "Массив заданий со статусами",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/StudentTask"
+                    },
+                    "x-order": "0"
+                }
+            }
+        },
+        "GetTasksResponse": {
+            "description": "Содержит массив заданий в курсе",
+            "type": "object",
+            "properties": {
+                "tasks": {
+                    "description": "Массив заданий",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Task"
+                    },
+                    "x-order": "0"
+                }
+            }
+        },
+        "Lesson": {
+            "description": "Полная информация о занятии в курсе",
+            "type": "object",
+            "properties": {
+                "lesson_id": {
+                    "description": "Уникальный идентификатор занятия",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "course_id": {
+                    "description": "Идентификатор курса",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "title": {
+                    "description": "Название занятия",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Введение в программирование"
+                },
+                "description": {
+                    "description": "Содержание занятия",
+                    "type": "string",
+                    "x-order": "3",
+                    "example": "Базовые понятия и термины"
+                },
+                "created_at": {
+                    "description": "Дата создания",
+                    "type": "string",
+                    "x-order": "4",
+                    "example": "2023-01-15T10:00:00Z"
+                }
+            }
+        },
+        "Pong": {
+            "description": "Используется для health-check и проверки доступности сервера",
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "Сообщение-ответ сервера",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "Pong!"
+                },
+                "code": {
+                    "description": "Статус код ответа сервера",
+                    "type": "integer",
+                    "x-orders": "0",
+                    "example": 200
+                }
+            }
+        },
+        "StudentTask": {
+            "description": "Расширенная информация о задании с указанием статуса выполнения",
+            "type": "object",
+            "properties": {
+                "task_id": {
+                    "description": "Уникальный идентификатор задания",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "course_id": {
+                    "description": "Идентификатор курса",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "title": {
+                    "description": "Название задания",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Домашнее задание 1"
+                },
+                "description": {
+                    "description": "Описание задания",
+                    "type": "string",
+                    "x-order": "3",
+                    "example": "Решить задачи по алгоритмам"
+                },
+                "completed": {
+                    "description": "Статус выполнения",
+                    "type": "boolean",
+                    "x-order": "4",
+                    "example": false
+                },
+                "created_at": {
+                    "description": "Дата создания",
+                    "type": "string",
+                    "x-order": "5",
+                    "example": "2023-01-15T10:00:00Z"
+                }
+            }
+        },
+        "Task": {
+            "description": "Полная информация о задании в курсе",
+            "type": "object",
+            "properties": {
+                "task_id": {
+                    "description": "Уникальный идентификатор задания",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "course_id": {
+                    "description": "Идентификатор курса",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "title": {
+                    "description": "Название задания",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Домашнее задание 1"
+                },
+                "description": {
+                    "description": "Описание задания",
+                    "type": "string",
+                    "x-order": "3",
+                    "example": "Решить задачи по алгоритмам"
+                },
+                "created_at": {
+                    "description": "Дата создания",
+                    "type": "string",
+                    "x-order": "4",
+                    "example": "2023-01-15T10:00:00Z"
+                }
+            }
+        },
+        "TaskStatus": {
+            "description": "Информация о выполнении задания конкретным студентом",
+            "type": "object",
+            "properties": {
+                "student_id": {
+                    "description": "ID студента",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "completed": {
+                    "description": "Статус выполнения",
+                    "type": "boolean",
+                    "x-order": "2",
+                    "example": true
+                }
+            }
+        },
+        "UpdateCourseRequest": {
+            "description": "Позволяет частично обновить данные курса",
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "description": "ID обновляемого курса",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "title": {
+                    "description": "Новое название (опционально)",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "Продвинутое программирование"
+                },
+                "description": {
+                    "description": "Новое описание (опционально)",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Расширенный курс"
+                },
+                "visibility": {
+                    "description": "Новая видимость (опционально)",
+                    "type": "boolean",
+                    "x-order": "3",
+                    "example": false
+                },
+                "start_time": {
+                    "description": "Новое время начала (опционально)",
+                    "type": "string",
+                    "x-order": "4",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "end_time": {
+                    "description": "Новое время окончания (опционально)",
+                    "type": "string",
+                    "x-order": "5",
+                    "example": "2024-06-30T23:59:59Z"
+                }
+            }
+        },
+        "UpdateCourseResponse": {
+            "description": "Возвращает обновленный курс",
+            "type": "object",
+            "properties": {
+                "course": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Course"
+                        }
+                    ],
+                    "x-order": "0"
+                }
+            }
+        },
+        "UpdateLessonRequest": {
+            "description": "Позволяет частично обновить данные занятия",
+            "type": "object",
+            "properties": {
+                "lesson_id": {
+                    "description": "ID занятия",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "title": {
+                    "description": "Новое название (опционально)",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "Обновленное название"
+                },
+                "description": {
+                    "description": "Новое содержание (опционально)",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Обновленное содержание"
+                }
+            }
+        },
+        "UpdateLessonResponse": {
+            "description": "Пустой ответ при успешном обновлении",
+            "type": "object",
+            "properties": {
+                "lesson": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Lesson"
+                        }
+                    ],
+                    "x-order": "0"
+                }
+            }
+        },
+        "UpdateTaskRequest": {
+            "description": "Позволяет обновить данные задания",
+            "type": "object",
+            "properties": {
+                "task_id": {
+                    "description": "ID задания",
+                    "type": "string",
+                    "x-order": "0",
+                    "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
+                },
+                "title": {
+                    "description": "Новое название (опционально)",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "Обновленное название"
+                },
+                "description": {
+                    "description": "Новое описание (опционально)",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Новые требования"
+                }
+            }
+        },
+        "UpdateTaskResponse": {
+            "description": "Пустой ответ при успешном обновлении",
+            "type": "object"
         }
-      }
     },
-    "/auth/refresh": {
-      "post": {
-        "description": "Генерирует новую пару токенов по refresh-токену",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Auth"],
-        "summary": "Обновление токена",
-        "parameters": [
-          {
-            "description": "Refresh токен",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AuthRefreshRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/AuthRefreshResponse"
-            }
-          },
-          "401": {
-            "description": "Неверный токен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Enter JWT token in format: \"Bearer {token}\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
-      }
-    },
-    "/auth/logout": {
-      "post": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Инвалидирует токены пользователя",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Auth"],
-        "summary": "Выход из системы",
-        "parameters": [
-          {
-            "description": "Данные для выхода",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AuthLogoutRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/AuthLogoutResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/auth/user-info": {
-      "get": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Возвращает данные пользователя",
-        "produces": ["application/json"],
-        "tags": ["Auth"],
-        "summary": "Информация о пользователе",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "44e7f029-82cc-46f5-83e8-34b7d056ce32",
-            "description": "Идентификатор пользователя",
-            "name": "user_id",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/AuthUserInfoResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/courses/course": {
-      "get": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Возвращает детальную информацию о курсе",
-        "produces": ["application/json"],
-        "tags": ["Courses"],
-        "summary": "Получение курса",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "\"44e7f029-82cc-46f5-83e8-34b7d056ce32\"",
-            "description": "ID курса",
-            "name": "course_id",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/GetCourseResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Доступ запрещён",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Курс не найден",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/courses/create": {
-      "post": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Создает новый курс",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Courses"],
-        "summary": "Создание курса",
-        "parameters": [
-          {
-            "description": "Данные для создания курса",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CreateCourseRequest"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "$ref": "#/definitions/CreateCourseResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/courses/course/enroll": {
-      "post": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Записывает пользователя на указанный курс",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Courses"],
-        "summary": "Запись на курс",
-        "parameters": [
-          {
-            "description": "Данные для записи",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/EnrollUserRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/EnrollUserResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Доступ запрещён",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Курс или пользователь не найден",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/courses/course/expel": {
-      "post": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Отчисляет пользователя с указанного курса",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Courses"],
-        "summary": "Отчисление с курса",
-        "parameters": [
-          {
-            "description": "Данные для отчисления",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/ExpelUserRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/ExpelUserResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Доступ запрещён",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Курс или пользователь не найден",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/courses/course/students": {
-      "get": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Возвращает список студентов, записанных на курс, с поддержкой пагинации",
-        "produces": ["application/json"],
-        "tags": ["Courses"],
-        "summary": "Получение студентов курса",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
-            "description": "ID курса",
-            "name": "course_id",
-            "in": "query",
-            "required": true
-          },
-          {
-            "minimum": 0,
-            "type": "integer",
-            "default": 0,
-            "description": "Начальный индекс (для пагинации)",
-            "name": "index",
-            "in": "query",
-            "required": true
-          },
-          {
-            "maximum": 100,
-            "minimum": 1,
-            "type": "integer",
-            "default": 10,
-            "description": "Лимит записей (для пагинации)",
-            "name": "limit",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/GetCourseStudentsResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректыные параметр",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Доступ запрещён",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Курс не найден",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/courses/course/update": {
-      "put": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Обновляет информацию о курсе",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Courses"],
-        "summary": "Обновление курса",
-        "parameters": [
-          {
-            "description": "Данные для обновления",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UpdateCourseRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/UpdateCourseResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Доступ запрещён",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Курс не найден",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/courses/course/delete": {
-      "delete": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Удаляет курс по идентификатору",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Courses"],
-        "summary": "Удаление курса",
-        "parameters": [
-          {
-            "description": "Идентификатор курса",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/DeleteCourseRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/DeleteCourseResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Доступ запрещён",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Курс не найден",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/courses/courses": {
-      "get": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Возвращает список курсов с возможностью фильтрации по пользователю",
-        "produces": ["application/json"],
-        "tags": ["Courses"],
-        "summary": "Получение списка курсов",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
-            "description": "ID пользователя",
-            "name": "user_id",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/GetCoursesResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/courses/student-courses": {
-      "get": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Возвращает список курсов, на которые записан студент",
-        "produces": ["application/json"],
-        "tags": ["Courses"],
-        "summary": "Получение курсов студента",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
-            "description": "ID студента",
-            "name": "user_id",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/GetCoursesResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/courses/teacher-courses": {
-      "get": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Возвращает список курсов, которые ведет преподаватель",
-        "produces": ["application/json"],
-        "tags": ["Courses"],
-        "summary": "Получение курсов преподавателя",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
-            "description": "ID преподавателя",
-            "name": "user_id",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/GetCoursesResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/lessons/create": {
-      "post": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Создает новый урок в курсе",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Lessons"],
-        "summary": "Создание урока",
-        "parameters": [
-          {
-            "description": "Данные для создания урока",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CreateLessonRequest"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "$ref": "#/definitions/CreateLessonResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Доступ запрещён",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/lessons/lesson": {
-      "get": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Возвращает детальную информацию об уроке",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Lessons"],
-        "summary": "Получение урока",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "\"94f9a22f-3a83-4591-a988-7aa3f0ec6eb0\"",
-            "description": "ID урока",
-            "name": "lesson_id",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/GetLessonResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Доступ запрещен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Урок не найден",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис временно недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/lessons/lesson/update": {
-      "put": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Обновляет информацию об уроке",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Lessons"],
-        "summary": "Обновление урока",
-        "parameters": [
-          {
-            "description": "Данные для обновления",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UpdateLessonRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/UpdateLessonResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Урок не найден",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/lessons/lesson/delete": {
-      "delete": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Удаляет урок по идентификатору",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Lessons"],
-        "summary": "Удаление урока",
-        "parameters": [
-          {
-            "description": "Идентификатор урока",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/DeleteLessonRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/DeleteLessonResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Урок не найден",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/lessons/lessons": {
-      "get": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Возвращает список уроков с возможностью фильтрации по курсу",
-        "produces": ["application/json"],
-        "tags": ["Lessons"],
-        "summary": "Получение списка уроков",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "\"6994aefe-6815-476b-bdc0-2ae5c4d0c18e\"",
-            "description": "ID курса",
-            "name": "course_id",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/GetLessonsResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Курс не найден",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/tasks/create": {
-      "post": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Создает новую задачу в курсе",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Tasks"],
-        "summary": "Создание задачи",
-        "parameters": [
-          {
-            "description": "Данные для создания задачи",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CreateTaskRequest"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "$ref": "#/definitions/CreateTaskResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Доступ запрещён",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/tasks/task": {
-      "get": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Возвращает детальную информацию о задаче в рамках курса",
-        "produces": ["application/json"],
-        "tags": ["Tasks"],
-        "summary": "Получение задачи",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "\"5a430d16-851d-45a9-b55b-15838785adea\"",
-            "description": "ID задачи",
-            "name": "task_id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/GetTaskResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Доступ запрещен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Задача не найдена",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/tasks/student-statuses": {
-      "get": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Возвращает статусы выполнения задачи для студентов",
-        "produces": ["application/json"],
-        "tags": ["Tasks"],
-        "summary": "Получение статусов студентов",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "\"21dad0c3-dcea-4c19-b501-fb2fe888f683\"",
-            "description": "ID задачи",
-            "name": "task_id",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/GetStudentStatusesResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Доступ запрещен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Данные не найдены",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/tasks/task/changestatus": {
-      "patch": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Обновляет статус выполнения задачи студентом",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Tasks"],
-        "summary": "Изменение статуса задачи",
-        "parameters": [
-          {
-            "description": "Данные для изменения статуса",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/ChangeStatusTaskRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/ChangeStatusTaskResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Задача не найдена",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/tasks/task/update": {
-      "put": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Обновляет информацию о задаче",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Tasks"],
-        "summary": "Обновление задачи",
-        "parameters": [
-          {
-            "description": "Данные для обновления",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UpdateTaskRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/UpdateTaskResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Задача не найдена",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/tasks/task/delete": {
-      "delete": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Удаляет задачу по идентификатору",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Tasks"],
-        "summary": "Удаление задачи",
-        "parameters": [
-          {
-            "description": "Идентификатор задачи",
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/DeleteTaskRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/DeleteTaskResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Задача не найдена",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/tasks/student-tasks": {
-      "get": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Возвращает список задач для конкретного студента",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Tasks"],
-        "summary": "Получение задач студента",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "44e7f029-82cc-46f5-83e8-34b7d056ce32",
-            "description": "Идентификатор курса",
-            "name": "course_id",
-            "in": "query",
-            "required": true
-          },
-          {
-            "type": "string",
-            "example": "44e7f029-82cc-46f5-83e8-34b7d056ce32",
-            "description": "Идентификатор пользователя",
-            "name": "user_id",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/GetTasksForStudentResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Студент не найден",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/tasks/teacher-tasks": {
-      "get": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "description": "Возвращает список задач курса",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["Tasks"],
-        "summary": "Получение списка задач",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "44e7f029-82cc-46f5-83e8-34b7d056ce32",
-            "description": "Идентификатор курса",
-            "name": "course_id",
-            "in": "query",
-            "required": true
-          },
-          {
-            "type": "string",
-            "example": "44e7f029-82cc-46f5-83e8-34b7d056ce32",
-            "description": "Идентификатор пользователя",
-            "name": "user_id",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/GetTasksResponse"
-            }
-          },
-          "400": {
-            "description": "Некорректные данные",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Требуется авторизация",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Курс не найден",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "503": {
-            "description": "Сервис недоступен",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
     }
-  },
-  "definitions": {
-    "AuthLoginRequest": {
-      "description": "Содержит учетные данные для входа в систему",
-      "type": "object",
-      "properties": {
-        "email": {
-          "description": "Email пользователя",
-          "type": "string",
-          "x-order": "0",
-          "example": "user@example.com"
-        },
-        "password": {
-          "description": "Пароль пользователя",
-          "type": "string",
-          "x-order": "1",
-          "example": "Qwerty123!"
-        }
-      }
-    },
-    "AuthLoginResponse": {
-      "description": "Возвращает пару access/refresh токенов для аутентификации",
-      "type": "object",
-      "properties": {
-        "refresh_token": {
-          "description": "Токен для обновления access токена",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "access_token": {
-          "description": "Токен для доступа к API",
-          "type": "string",
-          "x-order": "1",
-          "example": "eyJhbG..."
-        }
-      }
-    },
-    "AuthLogoutRequest": {
-      "description": "Содержит refresh токен для инвалидации сессии",
-      "type": "object",
-      "properties": {
-        "refresh_token": {
-          "description": "Refresh токен для удаления",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        }
-      }
-    },
-    "AuthLogoutResponse": {
-      "description": "Пустой ответ, указывающий на успешный выход",
-      "type": "object"
-    },
-    "AuthRefreshRequest": {
-      "description": "Содержит refresh токен для получения нового access токена",
-      "type": "object",
-      "properties": {
-        "refresh_token": {
-          "description": "Действующий refresh токен",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        }
-      }
-    },
-    "AuthRefreshResponse": {
-      "description": "Возвращает новый access токен",
-      "type": "object",
-      "properties": {
-        "access_token": {
-          "description": "Новый access токен",
-          "type": "string",
-          "x-order": "0",
-          "example": "eyJhbG..."
-        }
-      }
-    },
-    "AuthRegisterRequest": {
-      "description": "Содержит данные, необходимые для создания нового пользователя",
-      "type": "object",
-      "properties": {
-        "email": {
-          "description": "Email пользователя",
-          "type": "string",
-          "x-order": "0",
-          "example": "user@example.com"
-        },
-        "first_name": {
-          "description": "Имя пользователя",
-          "type": "string",
-          "x-order": "1",
-          "example": "Иван"
-        },
-        "last_name": {
-          "description": "Фамилия пользователя",
-          "type": "string",
-          "x-order": "2",
-          "example": "Иванов"
-        },
-        "password": {
-          "description": "Пароль",
-          "type": "string",
-          "x-order": "3",
-          "example": "Qwerty123!"
-        }
-      }
-    },
-    "AuthRegisterResponse": {
-      "description": "Возвращает ID созданного пользователя",
-      "type": "object",
-      "properties": {
-        "user_id": {
-          "description": "Уникальный идентификатор пользователя",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        }
-      }
-    },
-    "AuthUserInfoResponse": {
-      "description": "Возвращает все доступные данные пользователя",
-      "type": "object",
-      "properties": {
-        "user_id": {
-          "description": "Уникальный идентификатор",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "email": {
-          "description": "Email адрес",
-          "type": "string",
-          "x-order": "1",
-          "example": "user@example.com"
-        },
-        "first_name": {
-          "description": "Имя",
-          "type": "string",
-          "x-order": "2",
-          "example": "Иван"
-        },
-        "last_name": {
-          "description": "Фамилия",
-          "type": "string",
-          "x-order": "3",
-          "example": "Иванов"
-        },
-        "is_superuser": {
-          "description": "Признак администратора",
-          "type": "boolean",
-          "x-order": "4",
-          "example": false
-        }
-      }
-    },
-    "ChangeStatusTaskRequest": {
-      "description": "Позволяет изменить статус выполнения задания",
-      "type": "object",
-      "properties": {
-        "task_id": {
-          "description": "ID задания",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        }
-      }
-    },
-    "ChangeStatusTaskResponse": {
-      "description": "Пустой ответ при успешном изменении",
-      "type": "object"
-    },
-    "Course": {
-      "description": "Полная информация о курсе включая временные метки",
-      "type": "object",
-      "properties": {
-        "course_id": {
-          "description": "Уникальный идентификатор курса",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "user_id": {
-          "description": "ID преподавателя (владельца курса)",
-          "type": "string",
-          "x-order": "1",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "title": {
-          "description": "Название курса",
-          "type": "string",
-          "x-order": "2",
-          "example": "Основы программирования"
-        },
-        "description": {
-          "description": "Подробное описание курса",
-          "type": "string",
-          "x-order": "3",
-          "example": "Базовый курс по алгоритмам и структурам данных"
-        },
-        "visibility": {
-          "description": "Видимость курса для студентов",
-          "type": "boolean",
-          "x-order": "4",
-          "example": true
-        },
-        "start_time": {
-          "description": "Дата начала курса (опционально)",
-          "type": "string",
-          "x-order": "5",
-          "example": "2023-09-01T00:00:00Z"
-        },
-        "end_time": {
-          "description": "Дата окончания курса (опционально)",
-          "type": "string",
-          "x-order": "6",
-          "example": "2023-12-31T23:59:59Z"
-        }
-      }
-    },
-    "CourseEnrollment": {
-      "description": "Информация о подписке студента на курс",
-      "type": "object",
-      "properties": {
-        "course_id": {
-          "description": "ID курса",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "student_id": {
-          "description": "ID студента",
-          "type": "string",
-          "x-order": "1",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "enrolled_at": {
-          "description": "Дата и время зачисления",
-          "type": "string",
-          "x-order": "2",
-          "example": "2023-09-01T12:00:00Z"
-        }
-      }
-    },
-    "CourseStudent": {
-      "description": "Основные данные студента для отображения в списках курса",
-      "type": "object",
-      "properties": {
-        "user_id": {
-          "description": "Уникальный идентификатор пользователя",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "email": {
-          "description": "Email студента",
-          "type": "string",
-          "x-order": "1",
-          "example": "student@example.com"
-        },
-        "first_name": {
-          "description": "Имя студента",
-          "type": "string",
-          "x-order": "2",
-          "example": "Алексей"
-        },
-        "last_name": {
-          "description": "Фамилия студента",
-          "type": "string",
-          "x-order": "3",
-          "example": "Петров"
-        }
-      }
-    },
-    "CreateCourseRequest": {
-      "description": "Параметры для создания нового курса",
-      "type": "object",
-      "properties": {
-        "user_id": {
-          "description": "ID преподавателя",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "title": {
-          "description": "Название курса",
-          "type": "string",
-          "x-order": "1",
-          "example": "Основы программирования"
-        },
-        "description": {
-          "description": "Описание курса",
-          "type": "string",
-          "x-order": "2",
-          "example": "Базовый курс по алгоритмам"
-        },
-        "visibility": {
-          "description": "Видимость курса",
-          "type": "boolean",
-          "x-order": "3",
-          "example": true
-        },
-        "start_time": {
-          "description": "Дата начала (опционально)",
-          "type": "string",
-          "x-order": "4",
-          "example": "2023-09-01T00:00:00Z"
-        },
-        "end_time": {
-          "description": "Дата окончания (опционально)",
-          "type": "string",
-          "x-order": "5",
-          "example": "2023-12-31T23:59:59Z"
-        }
-      }
-    },
-    "CreateCourseResponse": {
-      "description": "Возвращает созданный курс",
-      "type": "object",
-      "properties": {
-        "course": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Course"
-            }
-          ],
-          "x-order": "0"
-        }
-      }
-    },
-    "CreateLessonRequest": {
-      "description": "Параметры для создания нового занятия в курсе",
-      "type": "object",
-      "properties": {
-        "course_id": {
-          "description": "ID курса",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "title": {
-          "description": "Название занятия",
-          "type": "string",
-          "x-order": "1",
-          "example": "Основы алгоритмов"
-        },
-        "content": {
-          "description": "Содержание занятия",
-          "type": "string",
-          "x-order": "2",
-          "example": "Подробное описание занятия..."
-        }
-      }
-    },
-    "CreateLessonResponse": {
-      "description": "Возвращает ID созданного занятия",
-      "type": "object",
-      "properties": {
-        "lesson_id": {
-          "description": "ID созданного занятия",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        }
-      }
-    },
-    "CreateTaskRequest": {
-      "description": "Параметры для создания нового задания в курсе",
-      "type": "object",
-      "properties": {
-        "course_id": {
-          "description": "ID курса",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "title": {
-          "description": "Название задания",
-          "type": "string",
-          "x-order": "1",
-          "example": "Лабораторная работа 1"
-        },
-        "description": {
-          "description": "Описание задания",
-          "type": "string",
-          "x-order": "2",
-          "example": "Реализовать алгоритм сортировки"
-        }
-      }
-    },
-    "CreateTaskResponse": {
-      "description": "Возвращает ID созданного задания",
-      "type": "object",
-      "properties": {
-        "task_id": {
-          "description": "ID созданного задания",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        }
-      }
-    },
-    "DeleteCourseRequest": {
-      "description": "Требует ID курса для удаления",
-      "type": "object",
-      "properties": {
-        "course_id": {
-          "description": "ID удаляемого курса",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        }
-      }
-    },
-    "DeleteCourseResponse": {
-      "description": "Возвращает удаленный курс",
-      "type": "object",
-      "properties": {
-        "course": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Course"
-            }
-          ],
-          "x-order": "0"
-        }
-      }
-    },
-    "DeleteLessonRequest": {
-      "description": "Требует ID курса и ID занятия для удаления",
-      "type": "object",
-      "properties": {
-        "lesson_id": {
-          "description": "ID занятия",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        }
-      }
-    },
-    "DeleteLessonResponse": {
-      "description": "Пустой ответ при успешном удалении",
-      "type": "object"
-    },
-    "DeleteTaskRequest": {
-      "description": "Требует ID курса и задания для удаления",
-      "type": "object",
-      "properties": {
-        "task_id": {
-          "description": "ID задания",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        }
-      }
-    },
-    "DeleteTaskResponse": {
-      "description": "Пустой ответ при успешном удалении",
-      "type": "object"
-    },
-    "EnrollUserRequest": {
-      "description": "Добавляет студента на курс",
-      "type": "object",
-      "properties": {
-        "course_id": {
-          "description": "ID курса",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "user_id": {
-          "description": "ID студента",
-          "type": "string",
-          "x-order": "1",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        }
-      }
-    },
-    "EnrollUserResponse": {
-      "description": "Подтверждение успешного зачисления",
-      "type": "object",
-      "properties": {
-        "enrollment": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/CourseEnrollment"
-            }
-          ],
-          "x-order": "0"
-        }
-      }
-    },
-    "ErrorResponse": {
-      "description": "Cтандартизированный формат всех ошибок в API.",
-      "type": "object",
-      "properties": {
-        "code": {
-          "description": "Код ошибки (HTTP статус код)",
-          "type": "integer",
-          "example": 400
-        },
-        "message": {
-          "description": "Сообщение об ошибке",
-          "type": "string",
-          "example": "Bad request"
-        }
-      }
-    },
-    "ExpelUserRequest": {
-      "description": "Удаляет студента с курса",
-      "type": "object",
-      "properties": {
-        "course_id": {
-          "description": "ID курса",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "user_id": {
-          "description": "ID студента",
-          "type": "string",
-          "x-order": "1",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        }
-      }
-    },
-    "ExpelUserResponse": {
-      "description": "Подтверждение успешного отчисления",
-      "type": "object",
-      "properties": {
-        "enrollment": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/CourseEnrollment"
-            }
-          ],
-          "x-order": "0"
-        }
-      }
-    },
-    "GetCourseResponse": {
-      "description": "Возвращает полные данные курса",
-      "type": "object",
-      "properties": {
-        "course": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Course"
-            }
-          ],
-          "x-order": "0"
-        }
-      }
-    },
-    "GetCourseStudentsResponse": {
-      "description": "Содержит массив студентов с информацией о пагинации",
-      "type": "object",
-      "properties": {
-        "index": {
-          "description": "Текущий индекс",
-          "type": "integer",
-          "x-order": "0",
-          "example": 0
-        },
-        "total": {
-          "description": "Общее количество студентов",
-          "type": "integer",
-          "x-order": "1",
-          "example": 100
-        },
-        "students": {
-          "description": "Массив студентов",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CourseStudent"
-          },
-          "x-order": "2"
-        }
-      }
-    },
-    "GetCoursesResponse": {
-      "description": "Содержит массив курсов",
-      "type": "object",
-      "properties": {
-        "courses": {
-          "description": "Массив курсов",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Course"
-          },
-          "x-order": "0"
-        }
-      }
-    },
-    "GetLessonResponse": {
-      "description": "Возвращает полные данные занятия",
-      "type": "object",
-      "properties": {
-        "lesson": {
-          "description": "Объект занятия",
-          "allOf": [
-            {
-              "$ref": "#/definitions/Lesson"
-            }
-          ],
-          "x-order": "0"
-        }
-      }
-    },
-    "GetLessonsResponse": {
-      "description": "Содержит массив занятий в курсе",
-      "type": "object",
-      "properties": {
-        "lessons": {
-          "description": "Массив занятий",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Lesson"
-          },
-          "x-order": "0"
-        }
-      }
-    },
-    "GetStudentStatusesResponse": {
-      "description": "Содержит статусы выполнения задания студентами",
-      "type": "object",
-      "properties": {
-        "statuses": {
-          "description": "Массив статусов",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/TaskStatus"
-          },
-          "x-order": "0"
-        }
-      }
-    },
-    "GetTaskResponse": {
-      "description": "Возвращает полные данные задания",
-      "type": "object",
-      "properties": {
-        "task": {
-          "description": "Объект задания",
-          "allOf": [
-            {
-              "$ref": "#/definitions/Task"
-            }
-          ],
-          "x-order": "0"
-        }
-      }
-    },
-    "GetTasksForStudentResponse": {
-      "description": "Содержит задания с информацией о статусе выполнения",
-      "type": "object",
-      "properties": {
-        "tasks": {
-          "description": "Массив заданий со статусами",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/StudentTask"
-          },
-          "x-order": "0"
-        }
-      }
-    },
-    "GetTasksResponse": {
-      "description": "Содержит массив заданий в курсе",
-      "type": "object",
-      "properties": {
-        "tasks": {
-          "description": "Массив заданий",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Task"
-          },
-          "x-order": "0"
-        }
-      }
-    },
-    "Lesson": {
-      "description": "Полная информация о занятии в курсе",
-      "type": "object",
-      "properties": {
-        "lesson_id": {
-          "description": "Уникальный идентификатор занятия",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "course_id": {
-          "description": "Идентификатор курса",
-          "type": "string",
-          "x-order": "1",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "title": {
-          "description": "Название занятия",
-          "type": "string",
-          "x-order": "2",
-          "example": "Введение в программирование"
-        },
-        "description": {
-          "description": "Содержание занятия",
-          "type": "string",
-          "x-order": "3",
-          "example": "Базовые понятия и термины"
-        },
-        "created_at": {
-          "description": "Дата создания",
-          "type": "string",
-          "x-order": "4",
-          "example": "2023-01-15T10:00:00Z"
-        }
-      }
-    },
-    "Pong": {
-      "description": "Используется для health-check и проверки доступности сервера",
-      "type": "object",
-      "properties": {
-        "code": {
-          "description": "Статус код ответа сервера",
-          "type": "integer",
-          "x-orders": "1",
-          "example": 200
-        },
-        "message": {
-          "description": "Сообщение-ответ сервера",
-          "type": "string",
-          "x-order": "0",
-          "example": "Pong!"
-        }
-      }
-    },
-    "StudentTask": {
-      "description": "Расширенная информация о задании с указанием статуса выполнения",
-      "type": "object",
-      "properties": {
-        "task_id": {
-          "description": "Уникальный идентификатор задания",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "course_id": {
-          "description": "Идентификатор курса",
-          "type": "string",
-          "x-order": "1",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "title": {
-          "description": "Название задания",
-          "type": "string",
-          "x-order": "2",
-          "example": "Домашнее задание 1"
-        },
-        "description": {
-          "description": "Описание задания",
-          "type": "string",
-          "x-order": "3",
-          "example": "Решить задачи по алгоритмам"
-        },
-        "completed": {
-          "description": "Статус выполнения",
-          "type": "boolean",
-          "x-order": "4",
-          "example": false
-        },
-        "created_at": {
-          "description": "Дата создания",
-          "type": "string",
-          "x-order": "5",
-          "example": "2023-01-15T10:00:00Z"
-        }
-      }
-    },
-    "Task": {
-      "description": "Полная информация о задании в курсе",
-      "type": "object",
-      "properties": {
-        "task_id": {
-          "description": "Уникальный идентификатор задания",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "course_id": {
-          "description": "Идентификатор курса",
-          "type": "string",
-          "x-order": "1",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "title": {
-          "description": "Название задания",
-          "type": "string",
-          "x-order": "2",
-          "example": "Домашнее задание 1"
-        },
-        "description": {
-          "description": "Описание задания",
-          "type": "string",
-          "x-order": "3",
-          "example": "Решить задачи по алгоритмам"
-        },
-        "created_at": {
-          "description": "Дата создания",
-          "type": "string",
-          "x-order": "4",
-          "example": "2023-01-15T10:00:00Z"
-        }
-      }
-    },
-    "TaskStatus": {
-      "description": "Информация о выполнении задания конкретным студентом",
-      "type": "object",
-      "properties": {
-        "task_id": {
-          "description": "ID задания",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "student_id": {
-          "description": "ID студента",
-          "type": "string",
-          "x-order": "1",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "completed": {
-          "description": "Статус выполнения",
-          "type": "boolean",
-          "x-order": "2",
-          "example": true
-        }
-      }
-    },
-    "UpdateCourseRequest": {
-      "description": "Позволяет частично обновить данные курса",
-      "type": "object",
-      "properties": {
-        "course_id": {
-          "description": "ID обновляемого курса",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "title": {
-          "description": "Новое название (опционально)",
-          "type": "string",
-          "x-order": "1",
-          "example": "Продвинутое программирование"
-        },
-        "description": {
-          "description": "Новое описание (опционально)",
-          "type": "string",
-          "x-order": "2",
-          "example": "Расширенный курс"
-        },
-        "visibility": {
-          "description": "Новая видимость (опционально)",
-          "type": "boolean",
-          "x-order": "3",
-          "example": false
-        },
-        "start_time": {
-          "description": "Новое время начала (опционально)",
-          "type": "string",
-          "x-order": "4",
-          "example": "2024-01-01T00:00:00Z"
-        },
-        "end_time": {
-          "description": "Новое время окончания (опционально)",
-          "type": "string",
-          "x-order": "5",
-          "example": "2024-06-30T23:59:59Z"
-        }
-      }
-    },
-    "UpdateCourseResponse": {
-      "description": "Возвращает обновленный курс",
-      "type": "object",
-      "properties": {
-        "course": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Course"
-            }
-          ],
-          "x-order": "0"
-        }
-      }
-    },
-    "UpdateLessonRequest": {
-      "description": "Позволяет частично обновить данные занятия",
-      "type": "object",
-      "properties": {
-        "lesson_id": {
-          "description": "ID занятия",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "title": {
-          "description": "Новое название (опционально)",
-          "type": "string",
-          "x-order": "1",
-          "example": "Обновленное название"
-        },
-        "description": {
-          "description": "Новое содержание (опционально)",
-          "type": "string",
-          "x-order": "2",
-          "example": "Обновленное содержание"
-        }
-      }
-    },
-    "UpdateLessonResponse": {
-      "description": "Пустой ответ при успешном обновлении",
-      "type": "object",
-      "properties": {
-        "lesson": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Lesson"
-            }
-          ],
-          "x-order": "0"
-        }
-      }
-    },
-    "UpdateTaskRequest": {
-      "description": "Позволяет обновить данные задания",
-      "type": "object",
-      "properties": {
-        "task_id": {
-          "description": "ID задания",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
-        "title": {
-          "description": "Новое название (опционально)",
-          "type": "string",
-          "x-order": "1",
-          "example": "Обновленное название"
-        },
-        "description": {
-          "description": "Новое описание (опционально)",
-          "type": "string",
-          "x-order": "2",
-          "example": "Новые требования"
-        }
-      }
-    },
-    "UpdateTaskResponse": {
-      "description": "Пустой ответ при успешном обновлении",
-      "type": "object"
-    }
-  },
-  "securityDefinitions": {
-    "BearerAuth": {
-      "description": "Enter JWT token in format: \"Bearer {token}\"",
-      "type": "apiKey",
-      "name": "Authorization",
-      "in": "header"
-    }
-  }
 }

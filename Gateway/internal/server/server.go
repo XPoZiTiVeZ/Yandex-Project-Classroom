@@ -97,30 +97,30 @@ func (s *Server) RegisterMux(mux *http.ServeMux) {
 		mux.HandleFunc("GET /api/courses/teacher-courses", s.IsAuthenticated(QueryHandlerWrapper[courses.GetCoursesByTeacherRequest](s.GetCoursesByTeacherHandler)))
 		mux.HandleFunc("PUT /api/courses/course/update", s.IsAuthenticated(JSONHandlerWrapper[courses.UpdateCourseRequest](s.UpdateCourseHandler)))
 		mux.HandleFunc("DELETE /api/courses/course/delete", s.IsAuthenticated(JSONHandlerWrapper[courses.DeleteCourseRequest](s.DeleteCourseHandler)))
-		mux.HandleFunc("PUT /api/courses/course/enroll", s.IsAuthenticated(JSONHandlerWrapper[courses.EnrollUserRequest](s.EnrollUserHandler)))
-		mux.HandleFunc("PUT /api/courses/course/expel", s.IsAuthenticated(JSONHandlerWrapper[courses.ExpelUserRequest](s.ExpelUserHandler)))
+		mux.HandleFunc("POST /api/courses/course/enroll", s.IsAuthenticated(JSONHandlerWrapper[courses.EnrollUserRequest](s.EnrollUserHandler)))
+		mux.HandleFunc("POST /api/courses/course/expel", s.IsAuthenticated(JSONHandlerWrapper[courses.ExpelUserRequest](s.ExpelUserHandler)))
 		mux.HandleFunc("GET /api/courses/course/students", s.IsAuthenticated(QueryHandlerWrapper[courses.GetCourseStudentsRequest](s.GetCourseStudentsHandler)))
 	}
 
 	// Lessons handlers
 	if s.Config.Auth.Enabled && s.Config.Courses.Enabled && s.Config.Lessons.Enabled {
 		mux.HandleFunc("POST /api/lessons/create", s.IsAuthenticated(JSONHandlerWrapper[lessons.CreateLessonRequest](s.CreateLessonHandler)))
-		mux.HandleFunc("POST /api/lessons/lesson", s.IsAuthenticated(JSONHandlerWrapper[lessons.GetLessonRequest](s.GetLessonHandler)))
-		mux.HandleFunc("POST /api/lessons/lessons", s.IsAuthenticated(JSONHandlerWrapper[lessons.GetLessonsRequest](s.GetLessonsHandler)))
+		mux.HandleFunc("GET /api/lessons/lesson", s.IsAuthenticated(QueryHandlerWrapper[lessons.GetLessonRequest](s.GetLessonHandler)))
+		mux.HandleFunc("GET /api/lessons/lessons", s.IsAuthenticated(QueryHandlerWrapper[lessons.GetLessonsRequest](s.GetLessonsHandler)))
 		mux.HandleFunc("PUT /api/lessons/lesson/update", s.IsAuthenticated(JSONHandlerWrapper[lessons.UpdateLessonRequest](s.UpdateLessonHandler)))
 		mux.HandleFunc("DELETE /api/lessons/lesson/delete", s.IsAuthenticated(JSONHandlerWrapper[lessons.DeleteLessonRequest](s.DeleteLessonHandler)))
 	}
 
 	// Tasks handlers
 	if s.Config.Auth.Enabled && s.Config.Courses.Enabled && s.Config.Tasks.Enabled {
-		mux.HandleFunc("POST /api/tasks/create", JSONHandlerWrapper[tasks.CreateTaskRequest](s.CreateTaskHandler))
-		mux.HandleFunc("GET /api/tasks/task", QueryHandlerWrapper[tasks.GetTaskRequest](s.GetTaskHandler))
-		mux.HandleFunc("GET /api/tasks/student-tasks", QueryHandlerWrapper[tasks.GetTasksRequest](s.GetTasksForStudentHandler))
-		mux.HandleFunc("GET /api/tasks/teacher-tasks", QueryHandlerWrapper[tasks.GetTasksRequest](s.GetTasksForTeacherHandler))
-		mux.HandleFunc("GET /api/tasks/tasks-statuses", JSONHandlerWrapper[tasks.GetTasksRequest](s.GetStudentStatuses))
-		mux.HandleFunc("PUT /api/tasks/task/update", JSONHandlerWrapper[tasks.UpdateTaskRequest](s.UpdateTaskHandler))
-		mux.HandleFunc("DELETE /api/tasks/task/delete", JSONHandlerWrapper[tasks.DeleteTaskRequest](s.DeleteTaskHandler))
-		mux.HandleFunc("PATCH /api/tasks/task/changestatus", JSONHandlerWrapper[tasks.ChangeStatusTaskRequest](s.ChangeStatusTaskHandler))
+		mux.HandleFunc("POST /api/tasks/create", s.IsAuthenticated(JSONHandlerWrapper[tasks.CreateTaskRequest](s.CreateTaskHandler)))
+		mux.HandleFunc("GET /api/tasks/task", s.IsAuthenticated(QueryHandlerWrapper[tasks.GetTaskRequest](s.GetTaskHandler)))
+		mux.HandleFunc("GET /api/tasks/student-tasks", s.IsAuthenticated(QueryHandlerWrapper[tasks.GetTasksForStudentRequest](s.GetTasksForStudentHandler)))
+		mux.HandleFunc("GET /api/tasks/teacher-tasks", s.IsAuthenticated(QueryHandlerWrapper[tasks.GetTasksRequest](s.GetTasksForTeacherHandler)))
+		mux.HandleFunc("GET /api/tasks/student-statuses", s.IsAuthenticated(QueryHandlerWrapper[tasks.GetStudentStatusesRequest](s.GetStudentStatuses)))
+		mux.HandleFunc("PUT /api/tasks/task/update", s.IsAuthenticated(JSONHandlerWrapper[tasks.UpdateTaskRequest](s.UpdateTaskHandler)))
+		mux.HandleFunc("DELETE /api/tasks/task/delete", s.IsAuthenticated(JSONHandlerWrapper[tasks.DeleteTaskRequest](s.DeleteTaskHandler)))
+		mux.HandleFunc("PATCH /api/tasks/task/changestatus", s.IsAuthenticated(JSONHandlerWrapper[tasks.ChangeStatusTaskRequest](s.ChangeStatusTaskHandler)))
 	}
 }
 

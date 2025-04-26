@@ -1,7 +1,6 @@
 package server
 
 import (
-	"Classroom/Gateway/internal/redis"
 	"Classroom/Gateway/internal/tasks"
 	"Classroom/Gateway/pkg/logger"
 	"log/slog"
@@ -79,7 +78,7 @@ func (s *Server) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 // @Tags Tasks
 // @Produce json
 // @Security BearerAuth
-// @Param task_id path string true "ID задачи" example("5a430d16-851d-45a9-b55b-15838785adea")
+// @Param task_id query string true "ID задачи" example("5a430d16-851d-45a9-b55b-15838785adea")
 // @Success 200 {object} tasks.GetTaskResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 401 {object} ErrorResponse "Требуется авторизация"
@@ -91,7 +90,7 @@ func (s *Server) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) GetTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.GetTaskRequest](r.Context())
 
-	resp, err := s.Tasks.GetTask(r.Context(), s.Redis, body)
+	resp, err := s.Tasks.GetTask(r.Context(), body)
 
 	isMember, err := s.IsMember(r.Context(), resp.Task.CourseID)
 	if err != nil {
@@ -141,7 +140,7 @@ func (s *Server) GetStudentStatuses(w http.ResponseWriter, r *http.Request) {
 	body1 := tasks.GetTaskRequest{
 		TaskID: body.TaskID,
 	}
-	resp1, err := s.Tasks.GetTask(r.Context(), s.Redis, body1)
+	resp1, err := s.Tasks.GetTask(r.Context(), body1)
 	if err != nil {
 		logger.Error(r.Context(), "Handler tasks.GetTask error", slog.Any("error", err))
 
@@ -206,15 +205,14 @@ func (s *Server) GetStudentStatuses(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, resp, http.StatusOK)
 }
 
-// GetTasksHandler возвращает список задач
-// @Summary Получение списка задач
-// @Description Возвращает список задач курса
+// GetTasksHandler возвращает задачи для учителя
+// @Summary Получение списка задач для учителя
+// @Description Возвращает список задач курса для учителя
 // @Tags Tasks
 // @Accept json
 // @Produce json
 // @Security BearerAuth
 // @Param course_id query string true "Идентификатор курса" example(44e7f029-82cc-46f5-83e8-34b7d056ce32)
-// @Param user_id query string true "Идентификатор пользователя" example(44e7f029-82cc-46f5-83e8-34b7d056ce32)
 // @Success 200 {object} tasks.GetTasksResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 401 {object} ErrorResponse "Требуется авторизация"
@@ -279,7 +277,6 @@ func (s *Server) GetTasksForTeacherHandler(w http.ResponseWriter, r *http.Reques
 // @Produce json
 // @Security BearerAuth
 // @Param course_id query string true "Идентификатор курса" example(44e7f029-82cc-46f5-83e8-34b7d056ce32)
-// @Param user_id query string true "Идентификатор пользователя" example(44e7f029-82cc-46f5-83e8-34b7d056ce32)
 // @Success 200 {object} tasks.GetTasksForStudentResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 401 {object} ErrorResponse "Требуется авторизация"
@@ -289,6 +286,8 @@ func (s *Server) GetTasksForTeacherHandler(w http.ResponseWriter, r *http.Reques
 // @Router /tasks/student-tasks [get]
 func (s *Server) GetTasksForStudentHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[tasks.GetTasksForStudentRequest](r.Context())
+	claims, _ := GetClaims(r.Context())
+	body.StudentID = claims.UserID
 
 	isStudent, err := s.IsStudent(r.Context(), body.CourseID)
 	if err != nil {
@@ -357,7 +356,7 @@ func (s *Server) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body1 := tasks.GetTaskRequest{
 		TaskID: body.TaskID,
 	}
-	resp1, err := s.Tasks.GetTask(r.Context(), s.Redis, body1)
+	resp1, err := s.Tasks.GetTask(r.Context(), body1)
 	if err != nil {
 		logger.Error(r.Context(), "Handler tasks.GetTask error", slog.Any("error", err))
 
@@ -373,6 +372,7 @@ func (s *Server) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			InternalError(w)
 		}
+		return
 	}
 
 	isTeacher, err := s.IsTeacher(r.Context(), resp1.Task.CourseID)
@@ -418,9 +418,6 @@ func (s *Server) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = redis.Delete(s.Redis, r.Context(), "Lessons.GetTask", body.TaskID)
-	logger.Debug(r.Context(), "Lessons.GetTask uncached", slog.Any("error", err))
-
 	WriteJSON(w, resp, http.StatusOK)
 }
 
@@ -445,7 +442,7 @@ func (s *Server) ChangeStatusTaskHandler(w http.ResponseWriter, r *http.Request)
 	body1 := tasks.GetTaskRequest{
 		TaskID: body.TaskID,
 	}
-	resp1, err := s.Tasks.GetTask(r.Context(), s.Redis, body1)
+	resp1, err := s.Tasks.GetTask(r.Context(), body1)
 	if err != nil {
 		logger.Error(r.Context(), "Handler tasks.GetTask error", slog.Any("error", err))
 
@@ -531,7 +528,7 @@ func (s *Server) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body1 := tasks.GetTaskRequest{
 		TaskID: body.TaskID,
 	}
-	resp1, err := s.Tasks.GetTask(r.Context(), s.Redis, body1)
+	resp1, err := s.Tasks.GetTask(r.Context(), body1)
 	if err != nil {
 		logger.Error(r.Context(), "Handler tasks.GetTask error", slog.Any("error", err))
 
@@ -592,9 +589,6 @@ func (s *Server) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	err = redis.Delete(s.Redis, r.Context(), "Lessons.GetTask", body.TaskID)
-	logger.Debug(r.Context(), "Lessons.GetTask uncached", slog.Any("error", err))
 
 	WriteJSON(w, resp, http.StatusOK)
 }

@@ -83,13 +83,15 @@ func (s *Server) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
+		logger.Debug(ctx, "claims", slog.Any("claims", claims))
 		next.ServeHTTP(w, r.WithContext(WithClaims(ctx, claims)))
 	}
 }
 
 func (s *Server) IsStudent(ctx context.Context, courseID string) (bool, error) {
-	claims, _ := GetClaims(ctx)
+	claims, ok := GetClaims(ctx)
 
+	logger.Debug(ctx, "claims", slog.Any("status", ok))
 	req := courses.IsMemberRequest{
 		UserID: claims.UserID,
 		CourseID: courseID,
@@ -104,8 +106,9 @@ func (s *Server) IsStudent(ctx context.Context, courseID string) (bool, error) {
 }
 
 func (s *Server) IsTeacher(ctx context.Context, courseID string) (bool, error) {
-	claims, _ := GetClaims(ctx)
+	claims, ok := GetClaims(ctx)
 
+	logger.Debug(ctx, "claims", slog.Any("status", ok))
 	req := courses.IsTeacherRequest{
 		UserID: claims.UserID,
 		CourseID: courseID,
@@ -115,13 +118,14 @@ func (s *Server) IsTeacher(ctx context.Context, courseID string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
+	
 	return resp.IsTeacher, nil
 }
 
 func (s *Server) IsMember(ctx context.Context, courseID string) (bool, error) {
-	claims, _ := GetClaims(ctx)
+	claims, ok := GetClaims(ctx)
 
+	logger.Debug(ctx, "claims", slog.Any("status", ok))
 	req1 := courses.IsMemberRequest{
 		UserID: claims.UserID,
 		CourseID: courseID,
@@ -130,6 +134,10 @@ func (s *Server) IsMember(ctx context.Context, courseID string) (bool, error) {
 	resp1, err := s.Courses.IsMember(ctx, s.Redis, req1)
 	if err != nil {
 		return false, err
+	}
+
+	if resp1.IsMember {
+		return resp1.IsMember, nil
 	}
 
 	req2 := courses.IsTeacherRequest{
@@ -142,7 +150,7 @@ func (s *Server) IsMember(ctx context.Context, courseID string) (bool, error) {
 		return false, err
 	}
 
-	return resp1.IsMember || resp2.IsTeacher, nil
+	return resp2.IsTeacher, nil
 }
 
 func (s *Server) IsSuperUser(next http.HandlerFunc) http.HandlerFunc {

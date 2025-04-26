@@ -774,15 +774,6 @@
         "produces": ["application/json"],
         "tags": ["Courses"],
         "summary": "Получение списка курсов",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
-            "description": "ID пользователя",
-            "name": "user_id",
-            "in": "query"
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -828,16 +819,6 @@
         "produces": ["application/json"],
         "tags": ["Courses"],
         "summary": "Получение курсов студента",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
-            "description": "ID студента",
-            "name": "user_id",
-            "in": "query",
-            "required": true
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -883,16 +864,6 @@
         "produces": ["application/json"],
         "tags": ["Courses"],
         "summary": "Получение курсов преподавателя",
-        "parameters": [
-          {
-            "type": "string",
-            "example": "\"a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a\"",
-            "description": "ID преподавателя",
-            "name": "user_id",
-            "in": "query",
-            "required": true
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1325,7 +1296,7 @@
             "example": "\"5a430d16-851d-45a9-b55b-15838785adea\"",
             "description": "ID задачи",
             "name": "task_id",
-            "in": "path",
+            "in": "query",
             "required": true
           }
         ],
@@ -1651,14 +1622,6 @@
             "name": "course_id",
             "in": "query",
             "required": true
-          },
-          {
-            "type": "string",
-            "example": "44e7f029-82cc-46f5-83e8-34b7d056ce32",
-            "description": "Идентификатор пользователя",
-            "name": "user_id",
-            "in": "query",
-            "required": true
           }
         ],
         "responses": {
@@ -1708,25 +1671,17 @@
             "BearerAuth": []
           }
         ],
-        "description": "Возвращает список задач курса",
+        "description": "Возвращает список задач курса для учителя",
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "tags": ["Tasks"],
-        "summary": "Получение списка задач",
+        "summary": "Получение списка задач для учителя",
         "parameters": [
           {
             "type": "string",
             "example": "44e7f029-82cc-46f5-83e8-34b7d056ce32",
             "description": "Идентификатор курса",
             "name": "course_id",
-            "in": "query",
-            "required": true
-          },
-          {
-            "type": "string",
-            "example": "44e7f029-82cc-46f5-83e8-34b7d056ce32",
-            "description": "Идентификатор пользователя",
-            "name": "user_id",
             "in": "query",
             "required": true
           }
@@ -1953,7 +1908,7 @@
           "x-order": "0",
           "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
         },
-        "user_id": {
+        "teacher_id": {
           "description": "ID преподавателя (владельца курса)",
           "type": "string",
           "x-order": "1",
@@ -2049,12 +2004,6 @@
       "description": "Параметры для создания нового курса",
       "type": "object",
       "properties": {
-        "user_id": {
-          "description": "ID преподавателя",
-          "type": "string",
-          "x-order": "0",
-          "example": "d277084b-e1f6-4670-825b-53951d20b5d3"
-        },
         "title": {
           "description": "Название курса",
           "type": "string",
@@ -2491,17 +2440,17 @@
       "description": "Используется для health-check и проверки доступности сервера",
       "type": "object",
       "properties": {
-        "code": {
-          "description": "Статус код ответа сервера",
-          "type": "integer",
-          "x-orders": "1",
-          "example": 200
-        },
         "message": {
           "description": "Сообщение-ответ сервера",
           "type": "string",
-          "x-order": "0",
+          "x-order": "1",
           "example": "Pong!"
+        },
+        "code": {
+          "description": "Статус код ответа сервера",
+          "type": "integer",
+          "x-orders": "0",
+          "example": 200
         }
       }
     },

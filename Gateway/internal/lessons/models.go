@@ -57,7 +57,7 @@ func NewCreateLessonResponse(resp *pb.CreateLessonResponse) CreateLessonResponse
 // @Description Требует ID курса и ID занятия для получения данных
 type GetLessonRequest struct {
     // ID занятия
-    LessonID string `json:"lesson_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
+    LessonID string `schema:"lesson_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name GetLessonRequest
 
 func NewGetLessonRequest(req GetLessonRequest) *pb.GetLessonRequest {
@@ -89,7 +89,7 @@ func NewGetLessonResponse(resp *pb.GetLessonResponse) GetLessonResponse {
 // @Description Возвращает все занятия в указанном курсе
 type GetLessonsRequest struct {
     // ID курса
-    CourseID string `json:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
+    CourseID string `schema:"course_id" example:"d277084b-e1f6-4670-825b-53951d20b5d3" extensions:"x-order=0"`
 } // @name GetLessonsRequest
 
 func NewGetLessonsRequest(req GetLessonsRequest) *pb.GetLessonsRequest {

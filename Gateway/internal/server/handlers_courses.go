@@ -4,6 +4,7 @@ import (
 	"Classroom/Gateway/internal/courses"
 	"Classroom/Gateway/internal/redis"
 	"Classroom/Gateway/pkg/logger"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -28,6 +29,8 @@ import (
 // @Router /courses/create [post]
 func (s *Server) CreateCourseHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[courses.CreateCourseRequest](r.Context())
+	claims, _ := GetClaims(r.Context())
+	body.UserID = claims.UserID
 
 	resp, err := s.Courses.CreateCourse(r.Context(), body)
 	if err != nil {
@@ -43,7 +46,11 @@ func (s *Server) CreateCourseHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			InternalError(w)
 		}
+		return
 	}
+
+	err = redis.Put(s.Redis, r.Context(), "Courses.IsTeacher", fmt.Sprintf("%s:%s", resp.Course.TeacherID, resp.Course.CourseID), courses.IsTeacherResponse{IsTeacher: true}, 24 * time.Hour)
+	logger.Debug(r.Context(), "Courses.IsTeacher cached", slog.Any("error", err))
 
 	WriteJSON(w, resp, http.StatusCreated)
 }
@@ -65,6 +72,9 @@ func (s *Server) CreateCourseHandler(w http.ResponseWriter, r *http.Request) {
 // @Router /courses/course [get]
 func (s *Server) GetCourseHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[courses.GetCourseRequest](r.Context())
+	claims, _ := GetClaims(r.Context())
+	body.UserID = claims.UserID
+	logger.Debug(r.Context(), "debug", slog.Any("user_id", body.UserID))
 
 	isMember, err := s.IsMember(r.Context(), body.CourseID)
 	if err != nil {
@@ -90,7 +100,7 @@ func (s *Server) GetCourseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := s.Courses.GetCourse(r.Context(), s.Redis, body)
+	resp, err := s.Courses.GetCourse(r.Context(), body)
 	if err != nil {
 		logger.Error(r.Context(), "Handler courses.GetCourse error", slog.Any("error", err))
 
@@ -109,9 +119,6 @@ func (s *Server) GetCourseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = redis.Put(s.Redis, r.Context(), "Courses.GetCourse", body.CourseID, resp, 24 * time.Hour)
-	logger.Debug(r.Context(), "Courses.GetCourse cached", slog.Any("error", err))
-
 	WriteJSON(w, resp, http.StatusOK)
 }
 
@@ -121,7 +128,6 @@ func (s *Server) GetCourseHandler(w http.ResponseWriter, r *http.Request) {
 // @Tags Courses
 // @Produce json
 // @Security BearerAuth
-// @Param user_id query string false "ID пользователя" example("a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a")
 // @Success 200 {object} courses.GetCoursesResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 401 {object} ErrorResponse "Требуется авторизация"
@@ -130,6 +136,8 @@ func (s *Server) GetCourseHandler(w http.ResponseWriter, r *http.Request) {
 // @Router /courses/courses [get]
 func (s *Server) GetCoursesHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[courses.GetCoursesRequest](r.Context())
+	claims, _ := GetClaims(r.Context())
+	body.UserID = claims.UserID	
 
 	resp, err := s.Courses.GetCourses(r.Context(), body)
 	if err != nil {
@@ -145,6 +153,7 @@ func (s *Server) GetCoursesHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			InternalError(w)
 		}
+		return
 	}
 
 	WriteJSON(w, resp, http.StatusOK)
@@ -156,7 +165,6 @@ func (s *Server) GetCoursesHandler(w http.ResponseWriter, r *http.Request) {
 // @Tags Courses
 // @Produce json
 // @Security BearerAuth
-// @Param user_id query string true "ID студента" example("a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a")
 // @Success 200 {object} courses.GetCoursesResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 401 {object} ErrorResponse "Требуется авторизация"
@@ -165,6 +173,8 @@ func (s *Server) GetCoursesHandler(w http.ResponseWriter, r *http.Request) {
 // @Router /courses/student-courses [get]
 func (s *Server) GetCoursesByStudentHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[courses.GetCoursesByStudentRequest](r.Context())
+	claims, _ := GetClaims(r.Context())
+	body.StudentId = claims.UserID
 
 	resp, err := s.Courses.GetCoursesByStudent(r.Context(), body)
 	if err != nil {
@@ -180,6 +190,7 @@ func (s *Server) GetCoursesByStudentHandler(w http.ResponseWriter, r *http.Reque
 		} else {
 			InternalError(w)
 		}
+		return
 	}
 
 	WriteJSON(w, resp, http.StatusOK)
@@ -191,7 +202,6 @@ func (s *Server) GetCoursesByStudentHandler(w http.ResponseWriter, r *http.Reque
 // @Tags Courses
 // @Produce json
 // @Security BearerAuth
-// @Param user_id query string true "ID преподавателя" example("a3d8e9b0-5c1f-4e9d-8c1a-2b3c4d5e6f7a")
 // @Success 200 {object} courses.GetCoursesResponse
 // @Failure 400 {object} ErrorResponse "Некорректные данные"
 // @Failure 401 {object} ErrorResponse "Требуется авторизация"
@@ -200,6 +210,8 @@ func (s *Server) GetCoursesByStudentHandler(w http.ResponseWriter, r *http.Reque
 // @Router /courses/teacher-courses [get]
 func (s *Server) GetCoursesByTeacherHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[courses.GetCoursesByTeacherRequest](r.Context())
+	claims, _ := GetClaims(r.Context())
+	body.TeacherID = claims.UserID
 
 	resp, err := s.Courses.GetCoursesByTeacher(r.Context(), body)
 	if err != nil {
@@ -215,6 +227,7 @@ func (s *Server) GetCoursesByTeacherHandler(w http.ResponseWriter, r *http.Reque
 		} else {
 			InternalError(w)
 		}
+		return
 	}
 
 	WriteJSON(w, resp, http.StatusOK)
@@ -282,9 +295,6 @@ func (s *Server) UpdateCourseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = redis.Delete(s.Redis, r.Context(), "Courses.GetCourse", resp.Course.CourseID)
-	logger.Debug(r.Context(), "Courses.GetCourse uncached", slog.Any("error", err))
-
 	WriteJSON(w, resp, http.StatusOK)
 }
 
@@ -306,7 +316,6 @@ func (s *Server) UpdateCourseHandler(w http.ResponseWriter, r *http.Request) {
 // @Router /courses/course/delete [delete]
 func (s *Server) DeleteCourseHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[courses.DeleteCourseRequest](r.Context())
-	claims, _ := GetClaims(r.Context())
 
 	isTeacher, err := s.IsTeacher(r.Context(), body.CourseID)
 	if err != nil {
@@ -351,11 +360,8 @@ func (s *Server) DeleteCourseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = redis.Delete(s.Redis, r.Context(), "Courses.GetCourse", resp.Course.CourseID)
-	logger.Debug(r.Context(), "Courses.GetCourse uncached", slog.Any("error", err))
-
-	err = redis.Delete(s.Redis, r.Context(), "Courses.IsTeacher", body.CourseID + ":" + claims.UserID)
-	logger.Debug(r.Context(), "Courses.GetCourse uncached", slog.Any("error", err))
+	err = redis.Delete(s.Redis, r.Context(), "Courses.IsTeacher", fmt.Sprintf("%s:%s", resp.Course.TeacherID, resp.Course.CourseID))
+	logger.Debug(r.Context(), "Courses.IsTeacher uncached", slog.Any("error", err))
 
 	WriteJSON(w, resp, http.StatusOK)
 }
@@ -422,8 +428,8 @@ func (s *Server) EnrollUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = redis.Delete(s.Redis, r.Context(), "Courses.IsMember", body.CourseID + ":" + body.UserID)
-	logger.Debug(r.Context(), "Courses.IsMember uncached", slog.Any("error", err))
+	err = redis.Put(s.Redis, r.Context(), "Courses.IsMember", fmt.Sprintf("%s:%s", body.UserID, body.CourseID), courses.IsMemberResponse{IsMember: true}, 24 * time.Hour)
+	logger.Debug(r.Context(), "Courses.IsMember cached", slog.Any("error", err))
 
 	WriteJSON(w, resp, http.StatusOK)
 }
@@ -490,7 +496,7 @@ func (s *Server) ExpelUserHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = redis.Delete(s.Redis, r.Context(), "Courses.IsMember", body.CourseID + ":" + body.UserID)
+	err = redis.Delete(s.Redis, r.Context(), "Courses.IsMember", fmt.Sprintf("%s:%s", body.UserID, body.CourseID))
 	logger.Debug(r.Context(), "Course.IsMember uncached", slog.Any("error", err))
 
 	WriteJSON(w, resp, http.StatusOK)

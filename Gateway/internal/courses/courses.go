@@ -54,7 +54,7 @@ func NewCoursesServiceClient(ctx context.Context, config *config.Config) (*Cours
 }
 
 func (s *CoursesServiceClient) CreateCourse(ctx context.Context, req CreateCourseRequest) (CreateCourseResponse, error) {
-	logger.Debug(ctx, "Registering user", slog.Any("request", req))
+	logger.Debug(ctx, "Creating course", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
@@ -67,16 +67,10 @@ func (s *CoursesServiceClient) CreateCourse(ctx context.Context, req CreateCours
 	return NewCreateCourseResponse(resp), nil
 }
 
-func (s *CoursesServiceClient) GetCourse(ctx context.Context, rc *redis.Client, req GetCourseRequest) (GetCourseResponse, error) {
+func (s *CoursesServiceClient) GetCourse(ctx context.Context, req GetCourseRequest) (GetCourseResponse, error) {
 	logger.Debug(ctx, "Getting course", slog.Any("request", req))
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
-
-	resp, err := rds.Get[GetCourseResponse](rc, ctx, "Courses.GetCourse", req.CourseID)
-	if err == nil {
-		return resp, nil
-	}
-	logger.Debug(ctx, "Response was not cached", slog.Any("error", err))
 
 	pbresp, err := s.Client.GetCourse(ctx, NewGetCourseRequest(req))
 	if err != nil {
@@ -190,8 +184,9 @@ func (s *CoursesServiceClient) IsTeacher(ctx context.Context, rc *redis.Client, 
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := rds.Get[IsTeacherResponse](rc, ctx, "Courses.IsTeacher", req.CourseID + ":" + req.UserID)
+	resp, err := rds.Get[IsTeacherResponse](rc, ctx, "Courses.IsTeacher", fmt.Sprintf("%s:%s", req.UserID, req.CourseID))
 	if err == nil {
+		logger.Debug(ctx, "Response was cached")
 		return resp, nil
 	}
 	logger.Debug(ctx, "Response was not cached", slog.Any("error", err))
@@ -202,7 +197,7 @@ func (s *CoursesServiceClient) IsTeacher(ctx context.Context, rc *redis.Client, 
 	}
 
 	resp = NewIsTeacherResponse(pbresp)
-	rds.Put(rc, ctx, "Courses.IsTeacher", req.UserID, resp, 24 * time.Hour)
+	rds.Put(rc, ctx, "Courses.IsTeacher", fmt.Sprintf("%s:%s", req.UserID, req.CourseID), resp, 24 * time.Hour)
 
 	logger.Debug(ctx, "Courses.IsTeacher succeed")
 	return resp, nil
@@ -213,8 +208,9 @@ func (s *CoursesServiceClient) IsMember(ctx context.Context, rc *redis.Client, r
 	ctx, cancel := context.WithTimeout(ctx, s.DefaultTimeout)
 	defer cancel()
 
-	resp, err := rds.Get[IsMemberResponse](rc, ctx, "Courses.IsMember", req.UserID)
+	resp, err := rds.Get[IsMemberResponse](rc, ctx, "Courses.IsMember", fmt.Sprintf("%s:%s", req.UserID, req.CourseID))
 	if err == nil {
+		logger.Debug(ctx, "Response was cached")
 		return resp, nil
 	}
 	logger.Debug(ctx, "Response was not cached", slog.Any("error", err))
@@ -225,7 +221,7 @@ func (s *CoursesServiceClient) IsMember(ctx context.Context, rc *redis.Client, r
 	}
 
 	resp = NewIsMemberResponse(pbresp)
-	rds.Put(rc, ctx, "Courses.IsMember", req.UserID, resp, 24 * time.Hour)
+	rds.Put(rc, ctx, "Courses.IsMember", fmt.Sprintf("%s:%s", req.UserID, req.CourseID), resp, 24 * time.Hour)
 
 	logger.Debug(ctx, "Courses.IsMember succeed")
 	return resp, nil

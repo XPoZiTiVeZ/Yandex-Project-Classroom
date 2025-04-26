@@ -6,7 +6,6 @@ import (
 	"Classroom/Gateway/pkg/logger"
 	"log/slog"
 	"net/http"
-	"time"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -93,7 +92,7 @@ func (s *Server) CreateLessonHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) GetLessonHandler(w http.ResponseWriter, r *http.Request) {
 	body := GetBody[lessons.GetLessonRequest](r.Context())
 
-	resp, err := s.Lessons.GetLesson(r.Context(), s.Redis, body)
+	resp, err := s.Lessons.GetLesson(r.Context(), body)
 
 	isMember, err := s.IsTeacher(r.Context(), resp.Lesson.CourseID)
 	if err != nil {
@@ -118,9 +117,6 @@ func (s *Server) GetLessonHandler(w http.ResponseWriter, r *http.Request) {
 		Forbidden(w)
 		return
 	}
-
-	err = redis.Put(s.Redis, r.Context(), "Lessons.GetLesson", resp.Lesson.LessonID, resp, 24*time.Hour)
-	logger.Debug(r.Context(), "Lessons.GetLesson cached", slog.Any("error", err))
 
 	WriteJSON(w, resp, http.StatusOK)
 }
@@ -207,7 +203,7 @@ func (s *Server) UpdateLessonHandler(w http.ResponseWriter, r *http.Request) {
 	body1 := lessons.GetLessonRequest{
 		LessonID: body.LessonID,
 	}
-	resp1, err := s.Lessons.GetLesson(r.Context(), s.Redis, body1)
+	resp1, err := s.Lessons.GetLesson(r.Context(), body1)
 	if err != nil {
 		logger.Error(r.Context(), "Handler lessons.GetLesson error", slog.Any("error", err))
 
@@ -296,7 +292,7 @@ func (s *Server) DeleteLessonHandler(w http.ResponseWriter, r *http.Request) {
 	body1 := lessons.GetLessonRequest{
 		LessonID: body.LessonID,
 	}
-	resp1, err := s.Lessons.GetLesson(r.Context(), s.Redis, body1)
+	resp1, err := s.Lessons.GetLesson(r.Context(), body1)
 	if err != nil {
 		logger.Error(r.Context(), "Handler lessons.GetLesson error", slog.Any("error", err))
 
